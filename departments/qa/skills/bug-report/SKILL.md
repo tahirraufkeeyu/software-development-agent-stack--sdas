@@ -1,6 +1,7 @@
 ---
 name: bug-report
 description: Use when a defect needs to be filed in a structured, reproducible format. Produces a bug report with an observed-behavior title, environment, numbered steps to reproduce, expected vs. actual, frequency, severity, priority, attachments, related tickets, and workaround. Enforces reproducibility before filing.
+safety: writes-local
 ---
 
 ## When to use

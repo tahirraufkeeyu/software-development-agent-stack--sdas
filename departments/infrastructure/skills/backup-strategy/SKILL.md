@@ -1,6 +1,7 @@
 ---
 name: backup-strategy
 description: Use when a user wants to design or audit a backup posture across databases, object storage, and Kubernetes state; targets 3-2-1 (3 copies, 2 media, 1 offsite); sets RPO/RTO per workload tier; schedules Velero for K8s state and logical + physical backups for databases; enforces monthly restore tests. Produces a backup inventory, schedules, and a restore-test calendar.
+safety: writes-shared
 ---
 
 ## When to use

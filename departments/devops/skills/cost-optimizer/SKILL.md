@@ -1,6 +1,7 @@
 ---
 name: cost-optimizer
 description: Use when quarterly cloud bills need review or a cost-cut mandate lands. Ingests AWS Cost Explorer exports, Azure Cost Management data, or GCP Billing exports and returns a ranked list of idle resources, over-provisioned instances, unused reservations, and data-transfer waste with estimated monthly savings.
+safety: safe
 ---
 
 ## When to use

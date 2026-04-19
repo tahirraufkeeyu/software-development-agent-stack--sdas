@@ -1,6 +1,7 @@
 ---
 name: e2e-test-generator
 description: Use when a user story, acceptance criteria, or Jira ticket needs to be turned into a runnable Playwright or Cypress end-to-end test. Generates page-object-model specs with data-testid selectors, explicit waits, network mocking for edge cases, screenshot-on-failure, and inline accessibility assertions.
+safety: writes-local
 ---
 
 ## When to use

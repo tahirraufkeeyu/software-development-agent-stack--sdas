@@ -1,6 +1,7 @@
 ---
 name: network-diagnostics
 description: Use when a user reports connectivity failures, "can't reach X", DNS issues, TLS handshake errors, timeouts, or suspected firewall/NetworkPolicy problems. Walks a layered flow from DNS to TCP to TLS to application, audits K8s NetworkPolicy, cloud firewall / NSG rules, MTU, and emits a structured diagnosis with the exact failing layer and fix.
+safety: safe
 ---
 
 ## When to use

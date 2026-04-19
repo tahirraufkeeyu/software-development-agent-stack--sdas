@@ -1,6 +1,7 @@
 ---
 name: test-data-generator
 description: Use when realistic, seeded test data is needed from a JSON Schema, OpenAPI component schema, or database schema (PostgreSQL / MySQL / SQLite DDL). Generates reproducible records that honor constraints (unique, min/max, enum, foreign keys, formats) using faker libraries, and emits SQL inserts, JSON, or CSV. Supports a seed for deterministic runs.
+safety: writes-local
 ---
 
 ## When to use

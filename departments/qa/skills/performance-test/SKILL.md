@@ -1,6 +1,7 @@
 ---
 name: performance-test
 description: Use when a page, release candidate, or route needs a Core Web Vitals and Lighthouse audit with prioritized fix recommendations. Runs Lighthouse via Chrome DevTools MCP, captures a performance trace, analyzes long tasks and render-blocking resources, and produces actionable guidance per metric (LCP, INP, CLS, TTFB, FCP).
+safety: safe
 ---
 
 ## When to use
