@@ -24,6 +24,14 @@ Benefits:
 | `test-data-generator` | Generate realistic, seeded test data from JSON Schema or DB schema as SQL/JSON/CSV. | Low |
 | `bug-report` | Produce a structured, reproducible bug report with enforced fields. | Low |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [full-regression](skills/full-regression/SKILL.md) | test-data-generator, api-test-generator, e2e-test-generator, performance-test, accessibility-audit, bug-report | Pre-release QA sweep across API, E2E, performance, and accessibility with go/no-go recommendation. |
+
 ## Quick install
 
 ```bash

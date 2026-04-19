@@ -21,6 +21,15 @@ Create a new skill at `departments/<dept>/skills/<skill-name>/SKILL.md`:
 name: skill-name
 description: Use when <specific trigger>. <What the skill does in one sentence>.
 safety: safe | writes-local | writes-shared | destructive
+# Optional artifact fields — fill in when the skill reads or writes a
+# named artifact another skill in this kit also knows about. See the
+# "Artifacts and chaining" section below.
+produces: path/to/output.ext
+consumes:
+  - path/to/input-a.ext
+  - path/to/input-b.ext
+chains:
+  - other-skill-name
 ---
 
 # <Human-readable title>
@@ -73,6 +82,27 @@ Rules:
 - If the skill's procedure has multiple phases with different risk levels, pick the highest.
 - Skills that only **generate** code or config (rather than applying it) are usually `writes-local`, not `destructive`. The apply step is a separate human action.
 - The field is a promise to callers — if you later add a destructive action to the procedure, bump the level in the same PR.
+
+### Artifacts and chaining
+
+Most skills in this kit stand alone. But a few — especially the *workflow orchestrators* under each department — call a sequence of other skills and pass data between them. Three optional frontmatter fields let this composition be machine-readable:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `produces` | single path | The primary artifact the skill writes. Relative to the project root. Example: `security/findings/secrets.json`. |
+| `consumes` | list of paths | Artifacts the skill expects to already exist. An orchestrator reads these to verify the upstream skill ran. |
+| `chains` | list of skill names | Skill names this skill invokes in order. Mostly used by workflow orchestrators. |
+
+Conventions for artifact paths:
+
+- **Root-relative** — use `security/findings/secrets.json`, not `~/security/findings/secrets.json` or absolute paths.
+- **Stable names** — the filename encodes what it is, not when it ran. Timestamps go in the file content, not the path.
+- **Per-department folder** — `security/`, `qa/`, `devops/` etc. Orchestrators assume this layout.
+- **Kebab-case filenames** — `pentest-report.md`, not `PentestReport.md`.
+
+When adding a skill that produces an artifact another skill consumes, add the `produces:` field even if no orchestrator yet chains it. Future orchestrators pick it up automatically.
+
+For orchestrators (`chains:` is set), the body of `SKILL.md` should include a `## Chained skills` section enumerating the skills it calls and the order. This keeps the human-readable version in sync with the machine-readable list.
 
 ## Reference material
 

@@ -15,6 +15,14 @@ Software engineering teams spend most of their cognitive budget on a handful of 
 | [documentation](skills/documentation/SKILL.md) | Generate README, API docs, ADR, or changelog from code and git history. | Medium |
 | [project-bootstrap](skills/project-bootstrap/SKILL.md) | Scaffold a new TypeScript, Python, Go, or Rust project with linting, formatter, CI, and license. | Medium |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [ship-feature](skills/ship-feature/SKILL.md) | test-writer, code-review, commit-message | Pre-commit gate: generate tests, review the diff, draft the commit message — with a halt on high-severity review findings. |
+
 ## Quick install
 
 From the repository root:

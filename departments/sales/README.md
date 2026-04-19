@@ -15,6 +15,14 @@ These skills are designed to be chained. The output of `lead-research` is the in
 | `rfp-responder` | RFP requirement tree, gap analysis, section-by-section compliant response | High |
 | `meeting-prep` | Pre-meeting brief with attendee research, agenda, talking points, objections | Medium |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [outbound-sequence](skills/outbound-sequence/SKILL.md) | lead-research, competitive-analysis, email-outreach, meeting-prep | Complete personalised outbound package for a named account — research brief, battlecard, 3-touch sequence, meeting prep — in one reviewable bundle. |
+
 ## Quick Install
 
 ```bash

@@ -25,6 +25,14 @@ referenced templates that parse as valid YAML/JSON.
 | ssl-certificate-manager   | Audit every cert in the estate, renew via cert-manager (HTTP-01 / DNS-01), enforce ≤30d warn / ≤7d critical alerts, rotate zero-downtime. | Medium     |
 | backup-strategy           | 3-2-1 backup design across databases, object storage, and Kubernetes state (Velero); RPO/RTO tiering; monthly restore verification.      | High       |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [infra-triage](skills/infra-triage/SKILL.md) | cluster-health, network-diagnostics, ssl-certificate-manager, incident-response | Structured first-response triage for ambiguous platform incidents, branching conditionally on evidence. |
+
 ## Quick install
 
 ```

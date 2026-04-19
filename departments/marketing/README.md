@@ -15,6 +15,14 @@ These skills are opinionated. They enforce brand voice, platform-native formatti
 | competitor-monitor | Weekly digest of competitor content, positioning, pricing, and product moves, with recommended response for each signal. | Medium |
 | analytics-report | Weekly marketing analytics rollup across GA4, Mixpanel, and HubSpot with change-hypothesis-action framing and noise filtering. | High |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [marketing-weekly](skills/marketing-weekly/SKILL.md) | competitor-monitor, content-writer, seo-optimizer, social-media, email-campaign, analytics-report | Mon-Fri marketing cycle: competitor digest, long-form piece, SEO, social, newsletter, and the Friday analytics report. |
+
 ## Quick install
 
 ```
