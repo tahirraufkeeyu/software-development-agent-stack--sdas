@@ -1,6 +1,7 @@
 ---
 name: content-writer
 description: Use when a marketer gives you a content brief (topic, audience, goal, length) and needs a publish-ready blog post, case study, or whitepaper. Produces a structured draft with hook, thesis, scannable body, CTA, and meta description in the brand voice defined in references/brand-voice-guide.md.
+safety: writes-local
 ---
 
 ## When to use

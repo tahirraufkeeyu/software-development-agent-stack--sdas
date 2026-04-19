@@ -1,6 +1,7 @@
 ---
 name: incident-report
 description: Use when an incident has been resolved and a blameless postmortem is needed. Reconstructs the timeline from Slack `#incident-*` channels, logs, and PagerDuty, then drafts a structured postmortem with 5-whys root cause analysis and owner-assigned action items.
+safety: writes-local
 ---
 
 ## When to use

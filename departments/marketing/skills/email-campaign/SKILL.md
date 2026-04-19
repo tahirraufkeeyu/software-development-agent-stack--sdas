@@ -1,6 +1,7 @@
 ---
 name: email-campaign
 description: Use when a marketer needs a full email sequence drafted (nurture, onboarding, re-engagement, or promotional) with subject line variants, mobile-first body copy, a single CTA per email, and CAN-SPAM/GDPR compliance baked in. Pulls from references/email-templates.md for proven sequence structures.
+safety: writes-local
 ---
 
 ## When to use

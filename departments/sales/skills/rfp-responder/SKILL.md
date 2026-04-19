@@ -1,6 +1,7 @@
 ---
 name: rfp-responder
 description: Use when a rep receives a formal RFP, RFI, or security questionnaire. Parses the document into a requirement tree, maps each item to our capabilities, flags must-have gaps early, and drafts compliant section-by-section responses using the customer's language and cited evidence.
+safety: writes-local
 ---
 
 ## When to use

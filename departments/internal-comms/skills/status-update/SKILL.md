@@ -1,6 +1,7 @@
 ---
 name: status-update
 description: Use when a team needs a weekly (or ad-hoc) written status update covering shipped work, in-flight work, next steps, risks, and asks. Pulls from git history, PRs, and the project board, then drafts a ~300-word update in plain language with no status-theater.
+safety: writes-local
 ---
 
 ## When to use

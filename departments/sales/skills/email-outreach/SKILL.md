@@ -1,6 +1,7 @@
 ---
 name: email-outreach
 description: Use when a rep needs a personalized outbound email sequence grounded in a research brief. Produces a 3-step cold or 4-step warm sequence with subject lines under 45 characters, bodies under 120 words, one clear CTA per email, and no filler phrases.
+safety: writes-local
 ---
 
 ## When to use

@@ -1,6 +1,7 @@
 ---
 name: analytics-report
 description: Use when the marketing team needs a weekly analytics rollup across GA4, Mixpanel, HubSpot, and social/email platforms. Produces a one-page digest with week-over-week changes, hypotheses for the changes, recommended next actions, and an explicit signal-vs-noise call on each metric.
+safety: writes-local
 ---
 
 ## When to use

@@ -1,6 +1,7 @@
 ---
 name: changelog
 description: Use when preparing user-facing release notes from git history and PR metadata. Generates a Keep-a-Changelog-format document grouped by semantic version, translating commit jargon into user impact and filtering out internal-only changes.
+safety: writes-local
 ---
 
 ## When to use
