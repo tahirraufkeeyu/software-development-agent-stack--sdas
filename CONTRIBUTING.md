@@ -1,4 +1,4 @@
-# Contributing to agent-skills-starter-kit
+# Contributing to Software Development Agent Stack (SDAS)
 
 Thanks for considering a contribution. This kit aims to be the highest-signal collection of department-specific Claude Code skills — every new skill should encode real-world practice from practitioners doing the work.
 

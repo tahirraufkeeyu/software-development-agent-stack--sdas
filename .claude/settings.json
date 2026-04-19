@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)",
+      "Bash(pytest:*)",
+      "Bash(cargo test:*)",
+      "Bash(go test:*)",
+      "Read",
+      "Grep",
+      "Glob"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(rm:*)",
+      "Bash(docker push:*)",
+      "Bash(kubectl apply:*)",
+      "Bash(terraform apply:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)"
+    ]
+  },
+  "env": {
+    "SKILLS_VERSION": "1.0.0"
+  }
+}
