@@ -1,6 +1,7 @@
 ---
 name: log-aggregation
 description: Use when a user wants to centralise Kubernetes logs, install Loki + Promtail or ELK (Elasticsearch + Logstash/Fluent Bit + Kibana), configure retention, wire log shipping from pods, or tune label/index hygiene. Picks the lightweight (Loki) or heavyweight (ELK) stack based on scale and budget, installs, validates ingestion, and produces a LogQL or KQL query cheat sheet.
+safety: writes-shared
 ---
 
 ## When to use

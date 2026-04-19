@@ -1,6 +1,7 @@
 ---
 name: competitive-analysis
 description: Use when a rep needs a battlecard against a named competitor for a live deal or quarterly enablement. Maps competitor positioning, ICP, pricing, differentiators, weaknesses, win/loss patterns, and public review sentiment into a one-page battlecard.
+safety: safe
 ---
 
 ## When to use

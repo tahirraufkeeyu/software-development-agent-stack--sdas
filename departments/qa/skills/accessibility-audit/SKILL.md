@@ -1,6 +1,7 @@
 ---
 name: accessibility-audit
 description: Use when a page or flow needs a WCAG 2.1 AA conformance audit. Runs axe-core against the live DOM via Chrome DevTools MCP, inspects the accessibility tree, verifies keyboard navigation and focus order, checks color contrast, ARIA roles, landmarks, headings, form labels, skip links, and alt text — and reports every violation with a code-level fix suggestion.
+safety: safe
 ---
 
 ## When to use

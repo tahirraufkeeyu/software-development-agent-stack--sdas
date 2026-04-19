@@ -1,6 +1,7 @@
 ---
 name: seo-optimizer
 description: Use when a page or post needs keyword research, intent classification, and on-page SEO review before publish. Produces a keyword map (seed to related queries with intent), on-page recommendations (title, meta, headings, links, alt text, schema), and a Core Web Vitals checklist.
+safety: writes-local
 ---
 
 ## When to use

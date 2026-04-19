@@ -1,6 +1,7 @@
 ---
 name: documentation
 description: Use when the user asks for a README, API docs, an ADR, a changelog, a runbook, or any structured technical write-up. Generates the requested artifact from the codebase and git history, following widely-adopted conventions (Keep a Changelog, MADR ADRs, OpenAPI-driven API docs).
+safety: writes-local
 ---
 
 ## When to use

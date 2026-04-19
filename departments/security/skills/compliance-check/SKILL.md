@@ -1,6 +1,7 @@
 ---
 name: compliance-check
 description: Use when the user asks for a "SOC 2 gap analysis", "ISO 27001 readiness check", or evidence collection for an upcoming audit. Maps SOC 2 Trust Service Criteria (CC1-CC9) and ISO 27001 Annex A controls against collected evidence, identifies gaps, and produces a remediation ticket list with owner/priority.
+safety: writes-local
 ---
 
 ## When to use

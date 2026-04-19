@@ -1,6 +1,7 @@
 ---
 name: security-audit
 description: Use when the user asks for a full security audit, pre-release security gate, or "scan this repo / service end-to-end". Orchestrates DAST (ZAP, Nuclei, Wapiti), SAST (Semgrep, SonarQube), and SCA (OSV-Scanner, npm audit, pip-audit, govulncheck, cargo-audit), deduplicates findings, classifies by severity, and emits a combined markdown report.
+safety: writes-local
 ---
 
 ## When to use

@@ -1,6 +1,7 @@
 ---
 name: helm-charts
 description: Use when a Kubernetes application needs a new Helm chart or a substantial revision to an existing one. Scaffolds Chart.yaml, values.yaml with sensible defaults, and templates for Deployment, Service, Ingress, ConfigMap, and HPA, then validates with helm lint and helm diff against the live cluster.
+safety: writes-local
 ---
 
 ## When to use

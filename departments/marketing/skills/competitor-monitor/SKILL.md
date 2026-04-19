@@ -1,6 +1,7 @@
 ---
 name: competitor-monitor
 description: Use when the marketing team needs a weekly competitive intelligence digest covering competitor content, positioning shifts, pricing changes, and product launches. Produces a dated digest with new content summaries, positioning deltas, pricing deltas, product moves, and a recommended response for each signal.
+safety: writes-local
 ---
 
 ## When to use

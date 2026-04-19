@@ -1,6 +1,7 @@
 ---
 name: lead-research
 description: Use when a rep needs a pre-outreach account brief on a named company. Produces a one-page dossier covering firmographics, tech stack, trigger events, hiring signals, known pain points, and three concrete outreach angles tied to triggers.
+safety: safe
 ---
 
 ## When to use

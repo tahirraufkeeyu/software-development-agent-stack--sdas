@@ -1,6 +1,7 @@
 ---
 name: api-test-generator
 description: Use when an OpenAPI 3.x specification (or URL to one) needs to be turned into a runnable API test suite. Generates Schemathesis property-based tests, REST-assured (Java) suites, or supertest (Node) specs covering positive, negative, auth, and rate-limit flows — and validates every response against the declared schema.
+safety: writes-local
 ---
 
 ## When to use

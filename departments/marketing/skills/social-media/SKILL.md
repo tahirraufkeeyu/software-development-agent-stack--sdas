@@ -1,6 +1,7 @@
 ---
 name: social-media
 description: Use when a marketer needs to atomize a pillar piece (blog post, launch, case study) into platform-native social posts for LinkedIn, X/Twitter, and the newsletter. Produces posts that match each platform's shape, with posting-time guidance and zero hashtag spam.
+safety: writes-local
 ---
 
 ## When to use

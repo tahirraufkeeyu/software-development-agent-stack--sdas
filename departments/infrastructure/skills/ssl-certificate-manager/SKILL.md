@@ -1,6 +1,7 @@
 ---
 name: ssl-certificate-manager
 description: Use when a user wants to audit TLS certificates across a Kubernetes estate, migrate to cert-manager with Let's Encrypt (HTTP-01 or DNS-01), set up expiry alerts (≤30d warning / ≤7d critical), or rotate certs without downtime. Runs a cert inventory, issues / renews via cert-manager, and validates the ingress still serves the new chain.
+safety: writes-shared
 ---
 
 ## When to use

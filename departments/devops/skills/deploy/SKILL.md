@@ -1,6 +1,7 @@
 ---
 name: deploy
 description: Use when rolling out a new version of a service to staging or production. Runs tests, builds and pushes a container, performs a blue/green or canary rollout with health gates, and rolls back automatically on SLO breach.
+safety: destructive
 ---
 
 ## When to use

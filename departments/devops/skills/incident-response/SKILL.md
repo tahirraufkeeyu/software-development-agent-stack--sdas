@@ -1,6 +1,7 @@
 ---
 name: incident-response
 description: Use when an alert fires, a customer reports an outage, or a deploy goes sideways. Guides triage across logs (kubectl, CloudWatch, Loki), identifies the failing component, confirms blast radius, drives Slack status updates, and produces a blameless postmortem.
+safety: writes-shared
 ---
 
 ## When to use

@@ -1,6 +1,7 @@
 ---
 name: meeting-prep
 description: Use when a rep has a customer meeting booked and needs a pre-meeting brief. Produces a one-page dossier with company context, attendee LinkedIn profiles and recent activity, role-based priorities, a draft agenda, talking points tied to research, anticipated objections, and a defined success metric.
+safety: writes-local
 ---
 
 ## When to use

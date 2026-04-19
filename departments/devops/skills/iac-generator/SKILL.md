@@ -1,6 +1,7 @@
 ---
 name: iac-generator
 description: Use when provisioning or modifying cloud infrastructure as code. Generates Terraform (HCL), Bicep, or Pulumi code for common resources (AKS/EKS, RDS, S3, VNet/VPC, IAM) with remote state, encryption, and least-privilege defaults.
+safety: writes-local
 ---
 
 ## When to use
