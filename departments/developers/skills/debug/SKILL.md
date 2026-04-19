@@ -1,6 +1,7 @@
 ---
 name: debug
 description: Use when the user reports a bug, a failing test, an unexpected output, a production incident, or a behaviour that diverges from expectation. Runs a structured session — reproduce, isolate, hypothesise, verify, fix, and add a regression test — and never ships a "fix that coincidentally works".
+safety: writes-local
 ---
 
 ## When to use

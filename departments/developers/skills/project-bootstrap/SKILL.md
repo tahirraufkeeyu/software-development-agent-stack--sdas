@@ -1,6 +1,7 @@
 ---
 name: project-bootstrap
 description: Use when the user asks to scaffold a new project, start a repo from scratch, or set up a greenfield service in TypeScript/Node, Python/FastAPI, Go, or Rust. Produces a working layout with linting, formatting, tests, pre-commit hooks, GitHub Actions CI, a Dockerfile, a .gitignore, a README skeleton, and a license file.
+safety: writes-local
 ---
 
 ## When to use

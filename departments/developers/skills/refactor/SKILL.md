@@ -1,6 +1,7 @@
 ---
 name: refactor
 description: Use when the user asks to clean up, simplify, rename, extract, inline, or restructure code without changing behaviour. Performs Fowler-style refactorings in small steps, running the test suite after every step; never proceeds when tests fail.
+safety: writes-local
 ---
 
 ## When to use

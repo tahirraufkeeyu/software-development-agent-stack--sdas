@@ -1,6 +1,7 @@
 ---
 name: dependency-audit
 description: Use when the user asks to "audit dependencies", "check for CVEs", or before a release. Runs CVE scanning across every detected package manager (npm/yarn/pnpm, pip/poetry, Go modules, Cargo, Maven/Gradle), produces CVSS-scored findings with fix-version recommendations and explicit flags for transitive dependencies.
+safety: safe
 ---
 
 ## When to use

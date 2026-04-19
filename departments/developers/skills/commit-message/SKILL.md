@@ -1,6 +1,7 @@
 ---
 name: commit-message
 description: Use when the user asks to write a commit message, draft a commit, or finalise a commit for a staged diff. Produces a Conventional Commits subject, optional body explaining the why, and BREAKING CHANGE footer when the diff changes a public contract.
+safety: safe
 ---
 
 ## When to use

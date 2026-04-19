@@ -1,6 +1,7 @@
 ---
 name: test-writer
 description: Use when the user asks to "write tests for", "add unit tests", "cover this function", or needs a regression test for a bug. Reads existing tests to infer the repo's conventions (framework, file layout, naming, setup/teardown, fixtures), then generates AAA-style tests for a target file or function, including deterministic edge cases.
+safety: writes-local
 ---
 
 ## When to use

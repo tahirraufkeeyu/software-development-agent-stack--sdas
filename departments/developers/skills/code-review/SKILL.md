@@ -1,6 +1,7 @@
 ---
 name: code-review
 description: Use when a user asks for a review of a diff, pull request, patch, or staged changes. Produces a structured review covering security, correctness, performance, style, and tests with severity-labelled findings and concrete fix suggestions tied to file and line.
+safety: safe
 ---
 
 ## When to use
