@@ -24,6 +24,14 @@ Platform engineers sit between application teams and cloud infrastructure. The w
 | `incident-response` | Triage, communicate, mitigate, and draft a blameless postmortem. | High |
 | `cost-optimizer` | Analyze billing exports, flag idle/over-provisioned resources, quantify savings. | Medium |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [release-to-prod](skills/release-to-prod/SKILL.md) | pipeline-builder, deploy, incident-response, changelog | Canary rollout to production with SLO-driven auto-rollback and a user-facing changelog per release. |
+
 ## Quick install
 
 ```bash

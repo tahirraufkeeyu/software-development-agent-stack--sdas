@@ -22,6 +22,14 @@ with a deterministic procedure, known inputs/outputs, and tool dependencies.
 | container-scan     | Trivy image scan, secret-in-layer detection, distroless/non-root checks, Dockerfile best-practice validation.           | Medium     |
 | compliance-check   | SOC 2 TSC (CC1-CC9) and ISO 27001 Annex A evidence collection, gap analysis, remediation ticket list.                   | High       |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [full-security-audit](skills/full-security-audit/SKILL.md) | secret-scanner, dependency-audit, security-audit, container-scan, pentest-report | Complete release-gate sweep: secrets, CVEs, SAST/DAST/SCA, container images, and a consolidated pentest report. |
+
 ## Quick install
 
 ```

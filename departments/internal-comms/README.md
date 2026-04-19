@@ -24,6 +24,14 @@ These skills are designed to:
 | `onboarding-guide` | Day 1 / Week 1 / Month 1 onboarding doc generated from repo metadata | Medium |
 | `announcement` | Drafts for product launches, milestones, and policy changes in configurable tone | Low |
 
+## Workflow orchestrator
+
+This department ships one **workflow orchestrator** skill that chains the task skills above into an end-to-end flow. Orchestrators have a richer frontmatter (`chains`, `produces`, `consumes`) and are invoked the same way as any other skill.
+
+| Orchestrator | Chains | One-line purpose |
+| --- | --- | --- |
+| [comms-weekly](skills/comms-weekly/SKILL.md) | meeting-notes, status-update, announcement | Weekly comms bundle: leadership-sync notes, all-hands status update, and a conditional company-wide announcement. |
+
 ## Quick install
 
 ```
