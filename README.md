@@ -9,18 +9,19 @@ You don't need to be an AI expert to use this. If you can copy and paste a comma
 ## Table of contents
 
 1. [What is this?](#what-is-this)
-2. [What is a "skill"?](#what-is-a-skill)
-3. [Who is this for?](#who-is-this-for)
-4. [What you need before you start](#what-you-need-before-you-start)
-5. [Install in 2 minutes](#install-in-2-minutes)
-6. [What install.sh actually does](#what-installsh-actually-does)
-7. [How to use a skill](#how-to-use-a-skill)
-8. [The 8 departments and 50 skills](#the-8-departments-and-50-skills)
-9. [Customising skills for your team](#customising-skills-for-your-team)
-10. [Works with Cursor, Gemini CLI, Codex CLI too](#works-with-cursor-gemini-cli-codex-cli-too)
-11. [FAQ](#faq)
-12. [Contributing](#contributing)
-13. [License](#license)
+2. [At a glance](#at-a-glance)
+3. [What is a "skill"?](#what-is-a-skill)
+4. [Who is this for?](#who-is-this-for)
+5. [What you need before you start](#what-you-need-before-you-start)
+6. [Install in 2 minutes](#install-in-2-minutes)
+7. [What install.sh actually does](#what-installsh-actually-does)
+8. [How to use a skill](#how-to-use-a-skill)
+9. [The 8 departments and 50 skills](#the-8-departments-and-50-skills)
+10. [Customising skills for your team](#customising-skills-for-your-team)
+11. [Works with Cursor, Gemini CLI, Codex CLI too](#works-with-cursor-gemini-cli-codex-cli-too)
+12. [FAQ](#faq)
+13. [Contributing](#contributing)
+14. [License](#license)
 
 ---
 
@@ -42,6 +43,28 @@ We've written **50 of these skills** across 8 departments:
 - 📨 **Internal comms** — write weekly status updates, incident postmortems, meeting notes, changelogs, onboarding guides, announcements
 
 Every skill is a plain Markdown file you can read, edit, and share.
+
+---
+
+## At a glance
+
+A one-table summary of what this repo is and isn't, for readers who want the essence before reading further.
+
+| Dimension | Details |
+|---|---|
+| **Target user** | A whole company adopting AI agents across multiple departments — not just engineering. |
+| **Scope** | Engineering + Security + DevOps + Infrastructure + QA + Sales + Marketing + Internal Comms. |
+| **Org axis** | Organised by **department**, not by role inside a single team. Each department has its own README, skills, and recommended workflow. |
+| **Skill count** | 50 skills across 8 departments. |
+| **Skill format** | `SKILL.md` files with YAML frontmatter (`name`, `description`). Claude auto-triggers the right skill by matching the `description` against your natural-language request — you don't have to memorise commands. |
+| **Workflow** | Loose library. Pick the skill you need, run it, done. Each department README documents a recommended multi-skill workflow but nothing is enforced — skills don't depend on each other. |
+| **Install** | One command: `./install.sh all` copies Markdown files into `~/.claude/skills/`. Nothing else — no daemons, no runtime, no background processes. |
+| **Tooling** | Pure Markdown + a few helper shell scripts (security scans). No Node/Bun/Python runtime required. No custom browser. No server. No telemetry. |
+| **Model & tool support** | Format-agnostic. First-class fit for Claude Code (auto-discovery from `~/.claude/skills/`). Also usable in Cursor, Gemini CLI, Codex CLI, ChatGPT, or any LLM interface that can read a Markdown file. |
+| **Safety model** | Relies on Claude Code's built-in permission system (`allow` / `ask` / `deny` in `.claude/settings.json`). No custom "careful mode" or freeze commands; skills themselves encode boundaries in their `Constraints` section. |
+| **Philosophy** | *Codified expertise* — hand the LLM your team's recipe card and let it auto-trigger. Every skill documents when to use it, the procedure a senior practitioner would follow, concrete examples, and what **not** to do. |
+| **Who it's for** | Teams that want consistent output across many job functions — not solo builders shipping their own code, and not general-purpose prompt collections. |
+| **Distribution** | MIT licensed. Clone, fork, customise, share. Skills are meant to be edited — the kit is a starting point for your team's own library. |
 
 ---
 
