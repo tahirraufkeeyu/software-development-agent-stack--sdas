@@ -1,4 +1,4 @@
-# agent-skills-starter-kit
+# Software Development Agent Stack (SDAS)
 
 **A ready-made library of 50 "skills" that teach Claude how to do real work for your team — code review, security audits, sales research, weekly status updates, and more.**
 
@@ -116,8 +116,8 @@ Open a terminal and run:
 
 ```bash
 # 1. Download this repo
-git clone https://github.com/<your-org>/agent-skills-starter-kit.git
-cd agent-skills-starter-kit
+git clone https://github.com/<your-org>/SoftwareDevelopmentAgentStack.git
+cd SoftwareDevelopmentAgentStack
 
 # 2. Install all skills
 ./install.sh all
@@ -145,7 +145,7 @@ Not everyone needs the security audit skills. Install just what your team uses:
 
 ### If you don't have `git`
 
-You can also [download the ZIP file](https://github.com/<your-org>/agent-skills-starter-kit/archive/refs/heads/main.zip), unzip it, and then run `./install.sh all` from the unzipped folder.
+You can also [download the ZIP file](https://github.com/<your-org>/SoftwareDevelopmentAgentStack/archive/refs/heads/main.zip), unzip it, and then run `./install.sh all` from the unzipped folder.
 
 ---
 
