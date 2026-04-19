@@ -1,23 +1,36 @@
 #!/usr/bin/env bash
-# install.sh — install skills from this starter kit into ~/.claude/skills
+# install.sh — install skills from this starter kit into an AI-tool skills dir
 #
 # Usage:
-#   ./install.sh <department>       # install one department (e.g. developers)
-#   ./install.sh all                # install every department
-#   ./install.sh --list             # list available departments
-#   ./install.sh --dry-run <dept>   # show what would be copied without doing it
-#   ./install.sh --update           # pull latest repo version + re-sync installed skills
+#   ./install.sh <department>                 # install one department
+#   ./install.sh all                          # install every department
+#   ./install.sh --list                       # list available departments
+#   ./install.sh --dry-run <dept>             # preview without copying
+#   ./install.sh --update                     # pull latest + re-sync installed skills
+#   ./install.sh --host <tool> <dept>         # target a different AI tool (see below)
+#
+# Supported --host values (default: claude):
+#   claude   → \$HOME/.claude/skills          (Claude Code)
+#   cursor   → \$PWD/.cursor/rules            (Cursor, project-local)
+#   codex    → \$PWD/.codex/skills            (OpenAI Codex CLI, project-local)
+#   gemini   → \$HOME/.gemini/skills          (Gemini CLI)
+#
+# Override any default target with an env var:
+#   CLAUDE_SKILLS_DIR, CURSOR_RULES_DIR, CODEX_SKILLS_DIR, GEMINI_SKILLS_DIR
 #
 # Exit codes:
 #   0  success
-#   1  invalid usage or unknown department
+#   1  invalid usage or unknown department / host
 #   2  target directory conflict the user declined to resolve
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPT_ROOT="${REPO_ROOT}/departments"
-TARGET_DIR="${CLAUDE_SKILLS_DIR:-${HOME}/.claude/skills}"
+
+# HOST picks the target AI tool; TARGET_DIR is derived from it.
+HOST="${SDAS_HOST:-claude}"
+TARGET_DIR=""   # resolved after flag parsing, see resolve_target_dir()
 
 # --- helpers ----------------------------------------------------------------
 
@@ -46,10 +59,32 @@ confirm() {
 }
 
 usage() {
-    sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,25p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     echo
     echo "Available departments:"
     list_departments | sed 's/^/  - /'
+}
+
+resolve_target_dir() {
+    # Set TARGET_DIR based on HOST. Called after flag parsing so --host wins.
+    case "${HOST}" in
+        claude)
+            TARGET_DIR="${CLAUDE_SKILLS_DIR:-${HOME}/.claude/skills}"
+            ;;
+        cursor)
+            TARGET_DIR="${CURSOR_RULES_DIR:-$(pwd)/.cursor/rules}"
+            ;;
+        codex)
+            TARGET_DIR="${CODEX_SKILLS_DIR:-$(pwd)/.codex/skills}"
+            ;;
+        gemini)
+            TARGET_DIR="${GEMINI_SKILLS_DIR:-${HOME}/.gemini/skills}"
+            ;;
+        *)
+            color red "Unknown --host '${HOST}'. Supported: claude, cursor, codex, gemini."
+            exit 1
+            ;;
+    esac
 }
 
 # --- install ----------------------------------------------------------------
@@ -167,11 +202,33 @@ main() {
         exit 1
     fi
 
+    # Flag parsing — order-independent, consumes --dry-run and --host <value>.
     local dry_run=0
-    if [[ "$1" == "--dry-run" ]]; then
-        dry_run=1
-        shift
-    fi
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=1
+                shift
+                ;;
+            --host)
+                if [[ -z "${2:-}" ]]; then
+                    color red "--host requires a value (claude, cursor, codex, gemini)"
+                    exit 1
+                fi
+                HOST="$2"
+                shift 2
+                ;;
+            --host=*)
+                HOST="${1#--host=}"
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    resolve_target_dir
 
     case "${1:-}" in
         ""|--help|-h)
@@ -181,12 +238,12 @@ main() {
             list_departments
             ;;
         --update)
-            color bold "Updating skills in ${TARGET_DIR}"
+            color bold "Updating skills in ${TARGET_DIR} (host: ${HOST})"
             update_installed "${dry_run}"
             color green "Done."
             ;;
         all)
-            color bold "Installing all departments into ${TARGET_DIR}"
+            color bold "Installing all departments into ${TARGET_DIR} (host: ${HOST})"
             while IFS= read -r dept; do
                 color bold ""
                 color bold "▸ ${dept}"
@@ -201,7 +258,7 @@ main() {
                 color yellow "Run './install.sh --list' to see available departments."
                 exit 1
             fi
-            color bold "Installing '${1}' into ${TARGET_DIR}"
+            color bold "Installing '${1}' into ${TARGET_DIR} (host: ${HOST})"
             install_department "$1" "${dry_run}"
             color green "Done."
             ;;
