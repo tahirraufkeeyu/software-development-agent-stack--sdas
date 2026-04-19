@@ -6,6 +6,7 @@
 #   ./install.sh all                # install every department
 #   ./install.sh --list             # list available departments
 #   ./install.sh --dry-run <dept>   # show what would be copied without doing it
+#   ./install.sh --update           # pull latest repo version + re-sync installed skills
 #
 # Exit codes:
 #   0  success
@@ -45,7 +46,7 @@ confirm() {
 }
 
 usage() {
-    sed -n '2,10p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     echo
     echo "Available departments:"
     list_departments | sed 's/^/  - /'
@@ -94,6 +95,70 @@ install_department() {
     color bold "  ${dept}: ${installed} installed, ${skipped} skipped"
 }
 
+# --- update -----------------------------------------------------------------
+# Pull the latest repo contents (if possible) and re-sync every skill already
+# present in TARGET_DIR. No prompts — "update" implies "I want the latest".
+
+update_installed() {
+    local dry_run="${1:-0}"
+
+    # Attempt a git pull if this is a clean git checkout on a tracking branch.
+    if [[ -d "${REPO_ROOT}/.git" ]]; then
+        if ! git -C "${REPO_ROOT}" diff-index --quiet HEAD -- 2>/dev/null; then
+            color yellow "  ! repo has uncommitted changes — skipping git pull"
+        elif ! git -C "${REPO_ROOT}" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
+            color yellow "  ! no upstream branch configured — skipping git pull"
+        else
+            color blue "  → pulling latest from origin…"
+            if git -C "${REPO_ROOT}" pull --ff-only --quiet 2>/dev/null; then
+                color green "  ✓ repo up to date"
+            else
+                color yellow "  ! git pull failed (offline, auth, or non-ff) — continuing with local version"
+            fi
+        fi
+    else
+        color yellow "  ! not a git checkout — skipping pull"
+    fi
+
+    if [[ ! -d "${TARGET_DIR}" ]]; then
+        color yellow "  nothing installed at ${TARGET_DIR}"
+        return 0
+    fi
+
+    local updated=0
+    local missing=0
+
+    while IFS= read -r -d '' installed_dir; do
+        local skill_name
+        skill_name="$(basename "${installed_dir}")"
+
+        # Find this skill in departments/*/skills/<name>/
+        local source_dir=""
+        while IFS= read -r -d '' candidate; do
+            source_dir="${candidate}"
+            break
+        done < <(find "${DEPT_ROOT}" -mindepth 3 -maxdepth 3 -type d -name "${skill_name}" -print0 2>/dev/null)
+
+        if [[ -z "${source_dir}" ]]; then
+            color yellow "  ? ${skill_name} installed but not shipped by this repo — leaving untouched"
+            missing=$((missing + 1))
+            continue
+        fi
+
+        if [[ "${dry_run}" == "1" ]]; then
+            color blue "  [dry-run] would update ${skill_name}"
+        else
+            rm -rf "${installed_dir}"
+            cp -R "${source_dir}" "${installed_dir}"
+            color green "  ✓ updated ${skill_name}"
+        fi
+        updated=$((updated + 1))
+    done < <(find "${TARGET_DIR}" -mindepth 1 -maxdepth 1 -type d -print0)
+
+    color bold ""
+    color bold "  ${updated} skills re-synced, ${missing} left untouched (not part of this kit)"
+}
+
 # --- main -------------------------------------------------------------------
 
 main() {
@@ -114,6 +179,11 @@ main() {
             ;;
         --list)
             list_departments
+            ;;
+        --update)
+            color bold "Updating skills in ${TARGET_DIR}"
+            update_installed "${dry_run}"
+            color green "Done."
             ;;
         all)
             color bold "Installing all departments into ${TARGET_DIR}"
