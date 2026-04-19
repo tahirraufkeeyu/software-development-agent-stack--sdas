@@ -1,0 +1,135 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: baseline-alerts
+  namespace: monitoring
+  labels:
+    release: kps
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: resource-saturation
+      interval: 30s
+      rules:
+        - alert: HighCPU
+          expr: |
+            (
+              sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!="",container!="POD"}[5m]))
+              /
+              sum by (namespace, pod) (kube_pod_container_resource_limits{resource="cpu"})
+            ) > 0.80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU on {{ $labels.namespace }}/{{ $labels.pod }}"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has used more than 80% of its CPU limit for 5 minutes (current: {{ $value | humanizePercentage }})."
+            runbook_url: "https://runbooks.example.com/HighCPU"
+
+        - alert: HighMemory
+          expr: |
+            (
+              sum by (namespace, pod) (container_memory_working_set_bytes{container!="",container!="POD"})
+              /
+              sum by (namespace, pod) (kube_pod_container_resource_limits{resource="memory"})
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory on {{ $labels.namespace }}/{{ $labels.pod }}"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is using more than 85% of its memory limit ({{ $value | humanizePercentage }}). OOMKill risk."
+            runbook_url: "https://runbooks.example.com/HighMemory"
+
+        - alert: NodeDiskPressure
+          expr: kube_node_status_condition{condition="DiskPressure", status="true"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.node }} under disk pressure"
+            description: "Node {{ $labels.node }} has reported DiskPressure for 5 minutes. New pods cannot be scheduled; existing pods may be evicted."
+            runbook_url: "https://runbooks.example.com/NodeDiskPressure"
+
+    - name: workload-health
+      interval: 30s
+      rules:
+        - alert: PodCrashLooping
+          expr: |
+            increase(kube_pod_container_status_restarts_total[15m]) > 3
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+            runbook_url: "https://runbooks.example.com/PodCrashLooping"
+
+        - alert: PodNotReady
+          expr: |
+            sum by (namespace, pod) (
+              kube_pod_status_phase{phase=~"Pending|Unknown|Failed"}
+            ) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} not Ready"
+            description: "Pod has been in a non-Ready phase for more than 15 minutes."
+            runbook_url: "https://runbooks.example.com/PodNotReady"
+
+    - name: http-slos
+      interval: 30s
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            (
+              sum by (namespace, service) (rate(http_requests_total{status=~"5.."}[5m]))
+              /
+              clamp_min(sum by (namespace, service) (rate(http_requests_total[5m])), 1)
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High 5xx error rate on {{ $labels.namespace }}/{{ $labels.service }}"
+            description: "Service is serving more than 5% 5xx responses over the last 5 minutes (current: {{ $value | humanizePercentage }})."
+            runbook_url: "https://runbooks.example.com/HighErrorRate"
+
+        - alert: P99LatencyHigh
+          expr: |
+            histogram_quantile(0.99,
+              sum by (namespace, service, le) (rate(http_request_duration_seconds_bucket[5m]))
+            ) > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "p99 latency > 1s on {{ $labels.namespace }}/{{ $labels.service }}"
+            description: "99th-percentile request latency has exceeded 1s for 10 minutes (current: {{ $value }}s)."
+            runbook_url: "https://runbooks.example.com/P99LatencyHigh"
+
+    - name: tls
+      interval: 5m
+      rules:
+        - alert: CertExpiringSoon
+          expr: (probe_ssl_earliest_cert_expiry - time()) / 86400 < 7
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "TLS cert for {{ $labels.instance }} expires in < 7 days"
+            description: "Certificate served by {{ $labels.instance }} expires in {{ $value | printf \"%.1f\" }} days. Renew immediately."
+            runbook_url: "https://runbooks.example.com/CertExpiringSoon"
+
+        - alert: CertExpiringWarn
+          expr: (probe_ssl_earliest_cert_expiry - time()) / 86400 < 30
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "TLS cert for {{ $labels.instance }} expires in < 30 days"
+            description: "Certificate served by {{ $labels.instance }} expires in {{ $value | printf \"%.1f\" }} days. Schedule renewal."
+            runbook_url: "https://runbooks.example.com/CertExpiringWarn"
