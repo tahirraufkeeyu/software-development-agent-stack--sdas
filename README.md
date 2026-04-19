@@ -57,7 +57,7 @@ A one-table summary of what this repo is and isn't, for readers who want the ess
 | **Org axis** | Organised by **department**, not by role inside a single team. Each department has its own README, skills, and recommended workflow. |
 | **Skill count** | 50 skills across 8 departments. |
 | **Skill format** | `SKILL.md` files with YAML frontmatter (`name`, `description`). Claude auto-triggers the right skill by matching the `description` against your natural-language request — you don't have to memorise commands. |
-| **Workflow** | Loose library. Pick the skill you need, run it, done. Each department README documents a recommended multi-skill workflow but nothing is enforced — skills don't depend on each other. |
+| **Workflow** | Loose library plus one *workflow orchestrator* skill per department (e.g. `full-security-audit`, `release-to-prod`). Orchestrators chain the underlying skills and pass artifacts between them via `produces:` / `consumes:` frontmatter fields. Individual skills still work standalone. |
 | **Install** | One command: `./install.sh all` copies Markdown files into `~/.claude/skills/`. Nothing else — no daemons, no runtime, no background processes. |
 | **Tooling** | Pure Markdown + a few helper shell scripts (security scans). No Node/Bun/Python runtime required. No custom browser. No server. No telemetry. |
 | **Model & tool support** | Format-agnostic. First-class fit for Claude Code (auto-discovery from `~/.claude/skills/`). Also usable in Cursor, Gemini CLI, Codex CLI, ChatGPT, or any LLM interface that can read a Markdown file. |
