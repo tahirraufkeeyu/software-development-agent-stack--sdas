@@ -1,6 +1,7 @@
 ---
 name: announcement
 description: Use when drafting an internal or external announcement — product launches, milestones, or policy changes. Produces a tone-appropriate (formal or casual) draft with hook, substance, reason, and call-to-action, suitable for Slack, email, or an internal blog post.
+safety: writes-local
 ---
 
 ## When to use

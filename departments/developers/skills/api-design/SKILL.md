@@ -1,6 +1,7 @@
 ---
 name: api-design
 description: Use when the user is designing a new HTTP or GraphQL endpoint, reviewing an API for consistency, or asking how to version, paginate, or error from a public interface. Produces a resource model, an endpoint table, and an OpenAPI 3.1 spec fragment (or a GraphQL SDL fragment) that follows REST best practice.
+safety: writes-local
 ---
 
 ## When to use

@@ -1,6 +1,7 @@
 ---
 name: pipeline-builder
 description: Use when a repository needs a new CI/CD pipeline or a major revision to an existing one. Generates GitHub Actions, Azure DevOps, or GitLab CI YAML tailored to the project stack (Node, Python, Go, container) with matrix builds, caching, artifact publishing, and environment-gated deploys.
+safety: writes-local
 ---
 
 ## When to use

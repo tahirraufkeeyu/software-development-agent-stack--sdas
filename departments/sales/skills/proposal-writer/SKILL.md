@@ -1,6 +1,7 @@
 ---
 name: proposal-writer
 description: Use when a rep needs to generate a tailored customer proposal after discovery. Produces a full proposal document mapping their stated requirements to our solution, with scope, deliverables, phased timeline, pricing, assumptions, case studies, team bios, and next steps.
+safety: writes-local
 ---
 
 ## When to use

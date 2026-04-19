@@ -58,10 +58,10 @@ A one-table summary of what this repo is and isn't, for readers who want the ess
 | **Skill count** | 58 skills across 8 departments — 50 task skills plus 8 workflow orchestrators (one per department). |
 | **Skill format** | `SKILL.md` files with YAML frontmatter (`name`, `description`). Claude auto-triggers the right skill by matching the `description` against your natural-language request — you don't have to memorise commands. |
 | **Workflow** | Loose library plus one *workflow orchestrator* skill per department (e.g. `full-security-audit`, `release-to-prod`). Orchestrators chain the underlying skills and pass artifacts between them via `produces:` / `consumes:` frontmatter fields. Individual skills still work standalone. |
-| **Install** | One command: `./install.sh all` copies Markdown files into `~/.claude/skills/`. Nothing else — no daemons, no runtime, no background processes. |
+| **Install** | One command: `./install.sh all` copies Markdown files into `~/.claude/skills/`. `--update` re-syncs later; `--host cursor\|codex\|gemini` targets other AI tools. No daemons, no runtime, no background processes. |
 | **Tooling** | Pure Markdown + a few helper shell scripts (security scans). No Node/Bun/Python runtime required. No custom browser. No server. No telemetry. |
 | **Model & tool support** | Format-agnostic. First-class fit for Claude Code (auto-discovery from `~/.claude/skills/`). Also usable in Cursor, Gemini CLI, Codex CLI, ChatGPT, or any LLM interface that can read a Markdown file. |
-| **Safety model** | Relies on Claude Code's built-in permission system (`allow` / `ask` / `deny` in `.claude/settings.json`). No custom "careful mode" or freeze commands; skills themselves encode boundaries in their `Constraints` section. |
+| **Safety model** | Every skill declares a `safety:` level in its frontmatter — `safe`, `writes-local`, `writes-shared`, or `destructive` — so tools reading the file can prompt before risky actions. Also relies on Claude Code's permission system (`allow` / `ask` / `deny` in `.claude/settings.json`). Skills encode boundaries in their `Constraints` section. |
 | **Philosophy** | *Codified expertise* — hand the LLM your team's recipe card and let it auto-trigger. Every skill documents when to use it, the procedure a senior practitioner would follow, concrete examples, and what **not** to do. |
 | **Who it's for** | Teams that want consistent output across many job functions — not solo builders shipping their own code, and not general-purpose prompt collections. |
 | **Distribution** | MIT licensed. Clone, fork, customise, share. Skills are meant to be edited — the kit is a starting point for your team's own library. |
@@ -165,6 +165,38 @@ Not everyone needs the security audit skills. Install just what your team uses:
 ./install.sh --dry-run all    # preview without actually installing
 ./install.sh --help           # show usage
 ```
+
+### Keep skills up to date
+
+Once you've installed, pulling in the latest upstream changes is one command:
+
+```bash
+./install.sh --update         # git-pull the repo + re-sync every installed skill
+./install.sh --dry-run --update   # preview the re-sync without changing anything
+```
+
+`--update` only touches skills this kit ships. If you've added your own skills alongside, or installed skills from another source, they're left untouched. If the repo has uncommitted local changes the script skips the `git pull` so your edits are preserved.
+
+### Install into Cursor, Codex, or Gemini
+
+The installer also targets other AI tools. Use `--host` to pick one:
+
+```bash
+./install.sh all                             # default: ~/.claude/skills/ (Claude Code)
+./install.sh --host cursor all               # writes to ./.cursor/rules/ (project-local)
+./install.sh --host codex all                # writes to ./.codex/skills/ (project-local)
+./install.sh --host gemini all               # writes to ~/.gemini/skills/
+```
+
+All other flags compose with `--host`:
+
+```bash
+./install.sh --host cursor sales             # just sales skills, into Cursor
+./install.sh --host cursor --update          # keep the Cursor install in sync
+./install.sh --host cursor --dry-run all     # preview the Cursor install
+```
+
+Override the default target directory per host with an env var: `CLAUDE_SKILLS_DIR`, `CURSOR_RULES_DIR`, `CODEX_SKILLS_DIR`, or `GEMINI_SKILLS_DIR`. Useful for monorepos where the `.cursor/rules/` folder lives somewhere other than the current directory.
 
 ### If you don't have `git`
 

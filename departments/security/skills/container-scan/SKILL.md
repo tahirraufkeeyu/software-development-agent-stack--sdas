@@ -1,6 +1,7 @@
 ---
 name: container-scan
 description: Use when the user asks to "scan this container", before a registry push, or as a release gate for a Docker/OCI image. Runs Trivy image + filesystem + secret scans, verifies distroless/non-root user, checks Dockerfile best practices, and blocks on Critical/High CVEs.
+safety: safe
 ---
 
 ## When to use

@@ -20,6 +20,7 @@ Create a new skill at `departments/<dept>/skills/<skill-name>/SKILL.md`:
 ---
 name: skill-name
 description: Use when <specific trigger>. <What the skill does in one sentence>.
+safety: safe | writes-local | writes-shared | destructive
 # Optional artifact fields — fill in when the skill reads or writes a
 # named artifact another skill in this kit also knows about. See the
 # "Artifacts and chaining" section below.
@@ -64,6 +65,23 @@ chains:
 ## Quality checks
 - <how to verify the output>
 ```
+
+### The `safety` field
+
+Every skill declares a safety level so tools reading the frontmatter (Claude Code plugins, IDE integrations, the installer, future dashboards) can decide whether to prompt for confirmation before running. Pick the level that matches the **most invasive** action the skill's `Procedure` section may perform:
+
+| Level | Meaning | Typical examples |
+|---|---|---|
+| `safe` | Read-only. No filesystem writes, no network side effects, no external state change. | `code-review`, `secret-scanner`, `cluster-health`, `lead-research` |
+| `writes-local` | Creates or edits files in the user's working tree only. No git push, no external side effects. | `test-writer`, `refactor`, `pipeline-builder`, `content-writer` |
+| `writes-shared` | Reaches shared state that other people can observe or that the org depends on — but reversibly. Includes cluster config changes, cert rotations, opening PRs, sending drafts to review. | `monitoring-setup`, `ssl-certificate-manager`, `incident-response` |
+| `destructive` | Irreversible or high-blast-radius: production deploys, data deletions, force pushes, sent messages to customers, provisioned paid cloud resources. | `deploy`, some `iac-generator` applies, live-fire comms |
+
+Rules:
+- Default to the **higher** level when unsure — better to over-warn than miss a destructive step.
+- If the skill's procedure has multiple phases with different risk levels, pick the highest.
+- Skills that only **generate** code or config (rather than applying it) are usually `writes-local`, not `destructive`. The apply step is a separate human action.
+- The field is a promise to callers — if you later add a destructive action to the procedure, bump the level in the same PR.
 
 ### Artifacts and chaining
 

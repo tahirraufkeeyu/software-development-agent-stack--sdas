@@ -1,6 +1,7 @@
 ---
 name: cluster-health
 description: Use when a user wants a Kubernetes cluster health check, says "is the cluster healthy", "something is off with the cluster", inherits an unfamiliar cluster, or is triaging an ongoing incident. Walks node conditions, control-plane components, resource pressure, critical DaemonSets, pod lifecycle states, and recent events, then produces a severity-ranked issue list.
+safety: safe
 ---
 
 ## When to use

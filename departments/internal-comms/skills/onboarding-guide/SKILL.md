@@ -1,6 +1,7 @@
 ---
 name: onboarding-guide
 description: Use when a new hire or transfer is joining a team and needs a structured onboarding document. Generates a Day 1 / Week 1 / Month 1 guide from repository README, CODEOWNERS, CI config, wiki pages, and team directory — including access checklist, reading list, first-PR target, glossary, and runbook index.
+safety: writes-local
 ---
 
 ## When to use

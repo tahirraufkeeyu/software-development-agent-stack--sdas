@@ -1,6 +1,7 @@
 ---
 name: meeting-notes
 description: Use when given a meeting transcript (Otter, Granola, Zoom, Google Meet, or manually typed) and need structured notes. Extracts decisions, action items with owner and deadline, open questions, and key points — omits small talk and verbatim transcription.
+safety: writes-local
 ---
 
 ## When to use

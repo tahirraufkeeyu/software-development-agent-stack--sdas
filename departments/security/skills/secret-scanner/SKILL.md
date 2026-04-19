@@ -1,6 +1,7 @@
 ---
 name: secret-scanner
 description: Use when the user asks to "scan for secrets", "check for leaked credentials", onboarding a new repo, or before open-sourcing. Performs deep git history scan with Gitleaks and TruffleHog, diffs against an allowlist, triages false positives, and guides credential-rotation-first remediation via git filter-repo or BFG.
+safety: safe
 ---
 
 ## When to use

@@ -1,6 +1,7 @@
 ---
 name: monitoring-setup
 description: Use when a user wants to provision Kubernetes observability, install Prometheus/Grafana/Alertmanager, wire ServiceMonitors, import Golden Signal dashboards, or configure alert routing to Slack/PagerDuty. Installs kube-prometheus-stack via Helm, applies ServiceMonitors, loads dashboards for latency/traffic/errors/saturation, and commits Alertmanager routes.
+safety: writes-shared
 ---
 
 ## When to use
