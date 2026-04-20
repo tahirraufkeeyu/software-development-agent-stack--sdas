@@ -21,6 +21,13 @@ Create a new skill at `departments/<dept>/skills/<skill-name>/SKILL.md`:
 name: skill-name
 description: Use when <specific trigger>. <What the skill does in one sentence>.
 safety: safe | writes-local | writes-shared | destructive
+# Optional: declare the tech stacks this skill supports. Omit for
+# fully stack-agnostic skills (code-review, commit-message, most of
+# sales/marketing/internal-comms). See "Supported stacks and the
+# detection-first pattern" below.
+supported-stacks:
+  - <stack-identifier-1>
+  - <stack-identifier-2>
 # Optional artifact fields — fill in when the skill reads or writes a
 # named artifact another skill in this kit also knows about. See the
 # "Artifacts and chaining" section below.
@@ -48,8 +55,13 @@ chains:
 - <CLI or MCP server>
 
 ## Procedure
-1. <step>
-2. <step>
+1. **Detect the stack first.** Run these read-only commands and record findings:
+   - <`cat <file> 2>/dev/null`>
+   - <`ls <dir> 2>/dev/null`>
+   - <additional detection commands>
+   Confirm the detected stack is in `supported-stacks`. If not, stop and report.
+2. <next step of the actual procedure>
+3. <...>
 
 ## Examples
 
@@ -82,6 +94,91 @@ Rules:
 - If the skill's procedure has multiple phases with different risk levels, pick the highest.
 - Skills that only **generate** code or config (rather than applying it) are usually `writes-local`, not `destructive`. The apply step is a separate human action.
 - The field is a promise to callers — if you later add a destructive action to the procedure, bump the level in the same PR.
+
+### Supported stacks and the detection-first pattern
+
+Many skills only make sense for a specific technology stack. `monitoring-setup` assumes Prometheus + Grafana on Kubernetes. `pipeline-builder` emits GitHub Actions, Azure DevOps, or GitLab CI YAML. `deploy` assumes a canary-capable orchestrator. Pretending these skills are stack-agnostic produces silent wrong output for anyone on a different stack.
+
+The kit's approach is **discovery-first, opinionated once detected**:
+
+1. **Declare the supported stacks in frontmatter.** Every stack-specific skill lists what it supports so callers can see coverage at a glance.
+2. **Open the `Procedure` with detection.** Step 1 is always "run these read-only commands and determine which supported stack applies."
+3. **Fail loud on unsupported stacks.** A `Constraints` line forbids producing output for a stack outside the declared list.
+
+#### The `supported-stacks` field
+
+Use kebab-case stack identifiers. For multi-component stacks, join with `+`. Examples used in this kit:
+
+| Identifier | Meaning |
+|---|---|
+| `prometheus+grafana+k8s` | kube-prometheus-stack Helm chart on a Kubernetes cluster |
+| `loki+promtail+k8s` | Grafana Loki with Promtail shippers on Kubernetes |
+| `elk+k8s` | Elasticsearch + Logstash + Kibana (or ECK) on Kubernetes |
+| `cert-manager+k8s` | cert-manager with Let's Encrypt on Kubernetes |
+| `kubernetes` | Any recent Kubernetes cluster (no version-specific behaviour) |
+| `helm+k8s` | Helm 3 for Kubernetes deployments |
+| `terraform` | Terraform with any cloud provider |
+| `bicep+azure` | Bicep on Azure Resource Manager |
+| `pulumi` | Pulumi with any language backend |
+| `github-actions` | GitHub Actions CI/CD |
+| `azure-devops` | Azure DevOps Pipelines |
+| `gitlab-ci` | GitLab CI/CD |
+| `docker` | Docker / OCI images, any build tool |
+| `openapi-3.x` | OpenAPI 3.0 / 3.1 specification |
+| `playwright` / `cypress` | E2E browser testing frameworks |
+| `chrome-devtools` | Chrome DevTools MCP (for performance + accessibility audits) |
+
+When a skill supports more than one stack, list each on its own line:
+
+```yaml
+supported-stacks:
+  - loki+promtail+k8s
+  - elk+k8s
+```
+
+Omit the field entirely for stack-agnostic skills (`code-review`, `commit-message`, `debug`, most sales / marketing / internal-comms skills).
+
+#### The detection-first Procedure pattern
+
+Every stack-specific skill's `Procedure` opens with a detection step that uses read-only commands. The goal is evidence-based inference before any action. Template:
+
+```markdown
+## Procedure
+
+1. **Detect the stack.** Run these checks in order; stop at the first conclusive match:
+   - `kubectl get crd prometheuses.monitoring.coreos.com 2>/dev/null` — Prometheus Operator present?
+   - `helm list -A 2>/dev/null | grep -E 'kube-prometheus-stack|prometheus'` — installed via Helm?
+   - `ls monitoring/ observability/ 2>/dev/null` — existing dashboards / rules?
+   - `grep -l 'datadog' package.json requirements.txt go.mod 2>/dev/null` — Datadog agent instrumented?
+
+   Record the detected stack. Confirm it matches one of `supported-stacks`.
+   If no supported stack is detected, STOP and report to the user with the
+   evidence gathered and the supported stacks — do not produce output for
+   an unsupported stack.
+
+2. <next step of the procedure assumes the detected stack>
+3. <...>
+```
+
+Three rules for good detection steps:
+
+- **Read-only only.** Detection must not modify anything. No `helm install`, no `kubectl apply`, no `git commit`. If a command might write, don't use it here.
+- **Fast.** A handful of `ls` / `cat` / `grep` / lightweight CLI reads. Avoid anything that blocks for more than a couple of seconds.
+- **Specific.** Don't ask Claude to "figure out the stack." Give it concrete commands and what each one proves.
+
+#### Fail-loud on unsupported stacks
+
+Add this line (or equivalent) to every stack-specific skill's `Constraints`:
+
+> Do not produce output for a stack outside `supported-stacks`. If detection shows an unsupported stack (e.g. Datadog when this skill only supports Prometheus), stop and report the detected stack and the supported list. Suggest the user request a dedicated skill for their stack rather than forcing this one.
+
+Silent wrong output is the worst failure mode for a skill — the user walks away with config that looks right but targets the wrong system. The fail-loud rule makes that failure mode impossible.
+
+#### When to split vs branch
+
+Inside one skill, **two or three branches** are fine if each branch stays clear and specific. `log-aggregation` reasonably handles both `loki+promtail+k8s` and `elk+k8s` in one skill because the detection cleanly routes to one branch or the other.
+
+When a domain has **four or more realistic stacks** (observability: Prometheus, Datadog, New Relic, CloudWatch, Honeycomb; CI/CD: GitHub Actions, GitLab, Azure DevOps, CircleCI, Jenkins), split into dedicated skills and add a lightweight router skill on top that only does detection and hand-off. Don't try to cover five stacks in one 400-line `Procedure`.
 
 ### Artifacts and chaining
 
