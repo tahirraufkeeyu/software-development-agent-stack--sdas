@@ -1,6 +1,6 @@
 # Software Development Agent Stack (SDAS)
 
-**A ready-made library of 58 "skills" that teach Claude how to do real work for your team — code review, security audits, sales research, weekly status updates, and more. Includes a workflow orchestrator per department that chains the underlying skills into end-to-end flows.**
+**A ready-made library of 64 "skills" that teach Claude how to do real work for your team — code review, security audits, sales research, weekly status updates, and more. Includes a workflow orchestrator per department that chains the underlying skills into end-to-end flows, plus paired remediation skills in Security so findings get closed, not just reported.**
 
 You don't need to be an AI expert to use this. If you can copy and paste a command, you can install it. If you can send a message in a chat app, you can use the skills.
 
@@ -16,7 +16,7 @@ You don't need to be an AI expert to use this. If you can copy and paste a comma
 6. [Install in 2 minutes](#install-in-2-minutes)
 7. [What install.sh actually does](#what-installsh-actually-does)
 8. [How to use a skill](#how-to-use-a-skill)
-9. [The 8 departments and 58 skills](#the-8-departments-and-58-skills)
+9. [The 8 departments and 64 skills](#the-8-departments-and-64-skills)
 10. [Customising skills for your team](#customising-skills-for-your-team)
 11. [Works with Cursor, Gemini CLI, Codex CLI too](#works-with-cursor-gemini-cli-codex-cli-too)
 12. [FAQ](#faq)
@@ -31,7 +31,7 @@ This is a folder of text files that teach Claude (Anthropic's AI assistant) how 
 
 For example, you can install the **code-review** skill, then say to Claude "review this pull request" — and instead of giving you a generic AI answer, Claude will follow a structured checklist (security issues, performance problems, style issues, test gaps) and give you a review that looks like one a senior engineer would write.
 
-We've written **58 of these skills** across 8 departments (50 task skills plus 8 workflow orchestrators, one per department):
+We've written **64 of these skills** across 8 departments (55 task skills, 9 workflow orchestrators; the Security department ships both scan/report skills and paired remediation skills plus a second orchestrator):
 
 - 👩‍💻 **Developers** — review code, write tests, refactor safely, generate commit messages, debug, design APIs, write docs, bootstrap new projects
 - 🔒 **Security** — run audits, scan for leaked secrets, check dependencies for known vulnerabilities, write pentest reports, scan containers, check SOC2 compliance
@@ -55,7 +55,7 @@ A one-table summary of what this repo is and isn't, for readers who want the ess
 | **Target user** | A whole company adopting AI agents across multiple departments — not just engineering. |
 | **Scope** | Engineering + Security + DevOps + Infrastructure + QA + Sales + Marketing + Internal Comms. |
 | **Org axis** | Organised by **department**, not by role inside a single team. Each department has its own README, skills, and recommended workflow. |
-| **Skill count** | 58 skills across 8 departments — 50 task skills plus 8 workflow orchestrators (one per department). |
+| **Skill count** | 64 skills across 8 departments — 55 task skills plus 9 workflow orchestrators. Security ships scan/report and paired remediation halves (secrets, dependencies, code, containers, compliance) with two orchestrators for the scan pass and the close-out pass. |
 | **Skill format** | `SKILL.md` files with YAML frontmatter (`name`, `description`). Claude auto-triggers the right skill by matching the `description` against your natural-language request — you don't have to memorise commands. |
 | **Workflow** | Loose library plus one *workflow orchestrator* skill per department (e.g. `full-security-audit`, `release-to-prod`). Orchestrators chain the underlying skills and pass artifacts between them via `produces:` / `consumes:` frontmatter fields. Individual skills still work standalone. |
 | **Install** | One command: `./install.sh all` copies Markdown files into `~/.claude/skills/`. `--update` re-syncs later; `--host cursor\|codex\|gemini` targets other AI tools. No daemons, no runtime, no background processes. |
@@ -146,7 +146,7 @@ cd SoftwareDevelopmentAgentStack
 ./install.sh all
 ```
 
-That's it. The next time you run `claude`, all 58 skills are available.
+That's it. The next time you run `claude`, all 64 skills are available.
 
 ### Install only some departments
 
@@ -338,12 +338,12 @@ You:      Use the pentest-report skill to format my scan results into a report.
 
 ---
 
-## The 8 departments and 58 skills
+## The 8 departments and 64 skills
 
-| Department | Skills | Orchestrator | One-line description |
+| Department | Skills | Orchestrator(s) | One-line description |
 |---|---|---|---|
 | [developers](departments/developers/README.md) | 8 | `ship-feature` | Code review, tests, refactoring, debug, commits, API design, docs, scaffolding |
-| [security](departments/security/README.md) | 6 | `full-security-audit` | Full audit, secret scanning, CVE check, pentest report, container scan, SOC2 |
+| [security](departments/security/README.md) | 11 | `full-security-audit`, `full-security-remediation` | Scan half: audit, secret scan, CVE check, pentest report, container scan, SOC2. Remediation half: rotate secrets, upgrade deps, fix SAST/DAST, rebuild containers, close compliance gaps. |
 | [devops](departments/devops/README.md) | 6 | `release-to-prod` | Deploy, CI/CD YAML, Terraform, Helm, incidents, cost optimisation |
 | [infrastructure](departments/infrastructure/README.md) | 6 | `infra-triage` | Monitoring, logs, SSL certs, network, backups, cluster health |
 | [qa](departments/qa/README.md) | 6 | `full-regression` | E2E tests, API tests, perf, accessibility, test data, bug reports |
@@ -351,7 +351,7 @@ You:      Use the pentest-report skill to format my scan results into a report.
 | [marketing](departments/marketing/README.md) | 6 | `marketing-weekly` | Content, social, SEO, email, competitor tracking, analytics |
 | [internal-comms](departments/internal-comms/README.md) | 6 | `comms-weekly` | Status updates, postmortems, meeting notes, changelogs, onboarding, announcements |
 
-The **Skills** column counts task skills. Each department also ships one **Orchestrator** — a workflow skill that chains the task skills into an end-to-end flow (pre-commit gate, release audit, weekly cycle, …). **Click any department above** to see the full skill list, install instructions, and recommended workflows.
+The **Skills** column counts task skills. Every department ships at least one **Orchestrator** — a workflow skill that chains the task skills into an end-to-end flow (pre-commit gate, release audit, weekly cycle, …). Security ships two: one for the scan pass and one for the scan-and-close-out pass. **Click any department above** to see the full skill list, install instructions, and recommended workflows.
 
 ---
 
