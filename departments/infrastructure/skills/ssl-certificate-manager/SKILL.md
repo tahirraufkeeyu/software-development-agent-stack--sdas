@@ -2,6 +2,8 @@
 name: ssl-certificate-manager
 description: Use when a user wants to audit TLS certificates across a Kubernetes estate, migrate to cert-manager with Let's Encrypt (HTTP-01 or DNS-01), set up expiry alerts (≤30d warning / ≤7d critical), or rotate certs without downtime. Runs a cert inventory, issues / renews via cert-manager, and validates the ingress still serves the new chain.
 safety: writes-shared
+supported-stacks:
+  - cert-manager+k8s
 ---
 
 ## When to use
@@ -40,7 +42,16 @@ Do not use this skill for code-signing certs, SSH keys, or client certs unrelate
 
 ## Procedure
 
-1. Inventory. Build the full cert list.
+1. **Detect the stack.** Run these read-only commands and record findings:
+   - `kubectl config current-context` — confirm a Kubernetes cluster is addressable. No cluster → stop; this skill requires `kubernetes`.
+   - `kubectl get crd certificates.cert-manager.io 2>/dev/null` — cert-manager installed?
+   - `helm list -A 2>/dev/null | grep -Ei 'cert-manager|jetstack'` — cert-manager via Helm?
+   - `kubectl get ingressclass 2>/dev/null` — what ingress controller is in use (nginx, traefik, istio, contour)?
+   - `kubectl get secrets -A --field-selector type=kubernetes.io/tls -o name 2>/dev/null | head` — existing TLS secrets (manual uploads vs managed)?
+   - `ls aws-load-balancer-controller/ 2>/dev/null` or `kubectl get crd targetgroupbindings.elbv2.k8s.aws 2>/dev/null` — AWS ALB/ACM in the mix instead?
+
+   Confirm the detected stack is `cert-manager+k8s`. If the cluster uses AWS ACM directly via ALB, GCP managed certs via GKE ingress, Azure Key Vault certs, or a commercial CA workflow (Sectigo / DigiCert via manual CSR), STOP and report the detected stack to the user — those are different issuance/rotation surfaces and cert-manager config here would be misleading.
+2. Inventory. Build the full cert list.
    ```
    # cert-manager-managed certs
    kubectl get certificates -A -o json | jq -r '
@@ -65,7 +76,7 @@ Do not use this skill for code-signing certs, SSH keys, or client certs unrelate
    ```
    Compare to the live edge. Mismatches (ingress serving a stale cert) usually mean the ingress controller needs a reload.
 
-2. Install cert-manager if missing:
+3. Install cert-manager if missing:
    ```
    helm repo add jetstack https://charts.jetstack.io
    helm repo update
@@ -75,7 +86,7 @@ Do not use this skill for code-signing certs, SSH keys, or client certs unrelate
    ```
    Validate: `kubectl -n cert-manager get pods`, `cmctl check api`.
 
-3. Create ClusterIssuers. Start with staging to avoid the Let's Encrypt rate limit while iterating.
+4. Create ClusterIssuers. Start with staging to avoid the Let's Encrypt rate limit while iterating.
    ```yaml
    apiVersion: cert-manager.io/v1
    kind: ClusterIssuer
@@ -113,7 +124,7 @@ Do not use this skill for code-signing certs, SSH keys, or client certs unrelate
    ```
    HTTP-01 requires the ingress to be reachable from the public internet on :80. DNS-01 requires IRSA / Workload Identity binding to a DNS-write IAM role; never use static long-lived AWS keys.
 
-4. Issue certs. For each hostname group:
+5. Issue certs. For each hostname group:
    ```yaml
    apiVersion: cert-manager.io/v1
    kind: Certificate
@@ -144,9 +155,9 @@ Do not use this skill for code-signing certs, SSH keys, or client certs unrelate
    cmctl status certificate -n app api-example-com
    ```
 
-5. For wildcards (`*.example.com`): HTTP-01 cannot issue wildcards; DNS-01 only. Use the `dns01` solver above and confirm the `_acme-challenge.example.com` TXT record is being created and deleted by cert-manager (check with `dig +short TXT _acme-challenge.example.com`).
+6. For wildcards (`*.example.com`): HTTP-01 cannot issue wildcards; DNS-01 only. Use the `dns01` solver above and confirm the `_acme-challenge.example.com` TXT record is being created and deleted by cert-manager (check with `dig +short TXT _acme-challenge.example.com`).
 
-6. Alerts. Apply the rules from `monitoring-setup/references/alertmanager-rules-template.yaml` (the `tls` group). Add a blackbox-exporter probe per hostname:
+7. Alerts. Apply the rules from `monitoring-setup/references/alertmanager-rules-template.yaml` (the `tls` group). Add a blackbox-exporter probe per hostname:
    ```yaml
    apiVersion: monitoring.coreos.com/v1
    kind: Probe
@@ -166,7 +177,7 @@ Do not use this skill for code-signing certs, SSH keys, or client certs unrelate
            - https://app.example.com
    ```
 
-7. Zero-downtime rotation. To force a renew:
+8. Zero-downtime rotation. To force a renew:
    ```
    cmctl renew -n app api-example-com
    ```
@@ -177,7 +188,7 @@ Do not use this skill for code-signing certs, SSH keys, or client certs unrelate
    ```
    Confirm `notAfter` advanced. If an ingress is pinned to a mounted file (e.g. Envoy with `path:` instead of `sds:`), rotation requires a pod restart — flag this during the inventory.
 
-8. Roll-back. Keep the prior secret for 7 days. cert-manager retains the previous issuance in `status.previousIssuedCertificate` when `rotationPolicy: Always` is set. To pin the old cert temporarily, revert the Ingress `secretName` to the previous secret.
+9. Roll-back. Keep the prior secret for 7 days. cert-manager retains the previous issuance in `status.previousIssuedCertificate` when `rotationPolicy: Always` is set. To pin the old cert temporarily, revert the Ingress `secretName` to the previous secret.
 
 ## Examples
 
@@ -203,6 +214,7 @@ Alerts active: CertExpiringWarn (<30d), CertExpiringSoon (<7d)
 
 ## Constraints
 
+- Do not produce output for a stack outside `supported-stacks`. If detection shows AWS ACM+ALB, GCP managed certs, Azure Key Vault certs, or a commercial-CA manual-CSR workflow as the issuance surface, STOP and report the detected stack. cert-manager YAML in those environments either does nothing or competes with the real issuance path.
 - Never use ACME HTTP-01 for a wildcard cert; the protocol does not support it. DNS-01 only.
 - Never commit DNS-provider long-lived credentials. Always use IRSA (EKS), Workload Identity (GKE), or Managed Identity (AKS) for the DNS-01 solver.
 - Never issue directly against `letsencrypt-prod` while iterating; stage first. The Let's Encrypt rate limit is 50 certs per registered domain per week.

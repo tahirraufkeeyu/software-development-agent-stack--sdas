@@ -2,6 +2,8 @@
 name: cluster-health
 description: Use when a user wants a Kubernetes cluster health check, says "is the cluster healthy", "something is off with the cluster", inherits an unfamiliar cluster, or is triaging an ongoing incident. Walks node conditions, control-plane components, resource pressure, critical DaemonSets, pod lifecycle states, and recent events, then produces a severity-ranked issue list.
 safety: safe
+supported-stacks:
+  - kubernetes
 ---
 
 ## When to use
@@ -42,16 +44,22 @@ A report with these sections:
 
 ## Procedure
 
-1. Capture cluster basics:
+1. **Detect the stack.** Before running any diagnostic commands, confirm the target is a Kubernetes cluster this skill can read:
+   - `kubectl config current-context` — must return a context. Empty output → stop; this skill requires `kubernetes`.
+   - `kubectl auth can-i get nodes` — must return `yes`. If `no`, the current kubeconfig lacks the permissions required for a cluster-wide health check; stop and ask the user for a kubeconfig with at least read access across the cluster.
+   - `kubectl version --short 2>&1 | head -3` — record client and server versions; warn on deprecated (<1.27) server versions.
+
+   If the user wanted to health-check a Nomad cluster, an ECS cluster, a VM fleet (Ansible-managed), or serverless functions, this skill does not apply — report that and recommend a dedicated skill for the platform they're on.
+
+2. Capture cluster basics:
    ```
-   kubectl version --short
    kubectl cluster-info
    kubectl get nodes -o wide
    kubectl get --raw='/readyz?verbose' | head -40
    ```
-   Note the server version and any deprecation warnings.
+   Note any deprecation warnings.
 
-2. Node conditions:
+3. Node conditions:
    ```
    kubectl get nodes -o json | jq -r '
      .items[] | [
@@ -65,7 +73,7 @@ A report with these sections:
    ```
    Any `MemoryPressure=True`, `DiskPressure=True`, `PIDPressure=True`, or `Ready=False` for more than a few minutes is a `high` finding.
 
-3. Resource utilisation:
+4. Resource utilisation:
    ```
    kubectl top nodes
    kubectl top pods -A --sort-by=cpu | head -30
@@ -80,7 +88,7 @@ A report with these sections:
    ```
    Cluster-wide CPU requests > 85% of allocatable is a `high` finding: the next deploy will Pending.
 
-4. Control-plane checks (managed cluster: skip etcd, but keep the health endpoints):
+5. Control-plane checks (managed cluster: skip etcd, but keep the health endpoints):
    ```
    kubectl get --raw='/healthz'
    kubectl get --raw='/livez?verbose' | tail
@@ -91,7 +99,7 @@ A report with these sections:
    ```
    A non-Available APIService or a ValidatingWebhook pointing at a down service will break `kubectl apply` silently. That is `blocker`.
 
-5. Critical DaemonSets:
+6. Critical DaemonSets:
    ```
    kubectl get ds -A -o json | jq -r '
      .items[] | select(.status.numberReady < .status.desiredNumberScheduled) |
@@ -100,7 +108,7 @@ A report with these sections:
    ```
    Any DS below desired is at minimum `high`; for CNI/CSI/kube-proxy it is `blocker`.
 
-6. Pod lifecycle:
+7. Pod lifecycle:
    ```
    kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o wide
    kubectl get pods -A -o json | jq -r '
@@ -119,14 +127,14 @@ A report with these sections:
    - `CreateContainerConfigError`: `high` — usually a missing Secret or ConfigMap.
    - `Terminating` for > 10 min: `medium` — finalizer stuck; inspect `metadata.finalizers`.
 
-7. PersistentVolume check:
+8. PersistentVolume check:
    ```
    kubectl get pv -o wide
    kubectl get pvc -A | grep -v Bound
    ```
    Any PVC `Pending` for more than 10 min is `high` if it blocks a Tier 1 pod.
 
-8. Events in the last hour:
+9. Events in the last hour:
    ```
    kubectl get events -A --sort-by=.lastTimestamp \
      | awk -v cutoff="$(date -u -d '1 hour ago' +%FT%T 2>/dev/null || date -u -v-1H +%FT%T)" \
@@ -136,13 +144,13 @@ A report with these sections:
    ```
    The `uniq -c` output shows the dominant warning reasons (`FailedScheduling`, `BackOff`, `Unhealthy`, `FailedMount`). Each deserves a finding.
 
-9. Version / deprecation:
+10. Version / deprecation:
    ```
    kubectl get --raw /metrics | grep apiserver_requested_deprecated_apis | grep -v '0$' | head
    ```
    Any non-zero counter means something is still calling a deprecated API and will break on upgrade. `medium`.
 
-10. Produce the report using the ladder:
+11. Produce the report using the ladder:
     - `blocker` → fix before any other change. API server non-ready, etcd unhealthy, >1 control-plane node down, CNI DS failing.
     - `high` → fix today. Node under DiskPressure, DS below desired on any namespace, CrashLoopBackOff in Tier 1 namespace, > 85% CPU requests cluster-wide.
     - `medium` → fix this week. CrashLoopBackOff in Tier 2/3, deprecated APIs, Pending pods in non-Tier 1.
@@ -190,6 +198,7 @@ This is a `blocker` finding: the cluster is unmanageable until resolved. It is a
 
 ## Constraints
 
+- Do not produce output for a stack outside `supported-stacks`. If detection (step 1) shows no Kubernetes context, insufficient RBAC, or a non-K8s platform (Nomad, ECS, VM fleet, serverless), STOP and report. Guessing at a health check on the wrong platform yields confident-sounding but worthless output.
 - Never mutate the cluster during a health check without user confirmation. The output is read-only advice.
 - Never run `kubectl drain` or `kubectl delete node` as part of diagnosis.
 - Never conclude "healthy" while any `blocker` or `high` finding is open.

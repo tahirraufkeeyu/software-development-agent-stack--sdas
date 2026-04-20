@@ -2,6 +2,8 @@
 name: monitoring-setup
 description: Use when a user wants to provision Kubernetes observability, install Prometheus/Grafana/Alertmanager, wire ServiceMonitors, import Golden Signal dashboards, or configure alert routing to Slack/PagerDuty. Installs kube-prometheus-stack via Helm, applies ServiceMonitors, loads dashboards for latency/traffic/errors/saturation, and commits Alertmanager routes.
 safety: writes-shared
+supported-stacks:
+  - prometheus+grafana+k8s
 ---
 
 ## When to use
@@ -40,14 +42,22 @@ Do not use this skill for log aggregation (use `log-aggregation`), for tracing (
 
 ## Procedure
 
-1. Preflight. Run `kubectl get nodes`, `kubectl version --short`, and confirm the cluster has at least 4 vCPU and 8 GiB of free capacity. Check that no other Prometheus Operator is installed: `kubectl get crd | grep monitoring.coreos.com`. If it is, either reuse it or uninstall the old operator first.
-2. Add the Helm repo and create the namespace:
+1. **Detect the stack.** Run these read-only commands and record findings:
+   - `kubectl config current-context` — confirm a Kubernetes cluster is addressable. No cluster → stop; this skill requires `kubernetes`.
+   - `kubectl get crd prometheuses.monitoring.coreos.com -o name 2>/dev/null` — Prometheus Operator already present?
+   - `helm list -A 2>/dev/null | grep -Ei 'kube-prometheus-stack|prometheus-operator'` — managed by Helm?
+   - `grep -l 'datadog\|newrelic\|dd-trace\|opentelemetry' package.json requirements.txt go.mod Cargo.toml pom.xml 2>/dev/null | head` — a competing APM already instrumented?
+   - `ls monitoring/ observability/ .github/monitoring/ 2>/dev/null` — existing dashboards/rules in the repo?
+
+   Conclude which stack applies. This skill supports only `prometheus+grafana+k8s`. If detection shows Datadog, New Relic, CloudWatch, Honeycomb, or any non-Prometheus backend as the primary, STOP and report the detected stack to the user; recommend a dedicated skill for that stack instead of forcing Prometheus config onto a mismatched environment.
+2. Preflight. Run `kubectl get nodes`, `kubectl version --short`, and confirm the cluster has at least 4 vCPU and 8 GiB of free capacity. If another Prometheus Operator is already installed (detected in step 1), either reuse it or uninstall the old operator first — do not install a second one.
+3. Add the Helm repo and create the namespace:
    ```
    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
    helm repo update
    kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
    ```
-3. Render a values file `kps-values.yaml` that pins retention, storage, scrape interval, and routing. Key stanzas:
+4. Render a values file `kps-values.yaml` that pins retention, storage, scrape interval, and routing. Key stanzas:
    ```yaml
    prometheus:
      prometheusSpec:
@@ -108,20 +118,20 @@ Do not use this skill for log aggregation (use `log-aggregation`), for tracing (
                send_resolved: true
    ```
    Replace the three placeholder tokens with real secrets from a sealed-secret, External Secrets Operator, or `kubectl create secret`.
-4. Install or upgrade:
+5. Install or upgrade:
    ```
    helm upgrade --install kps prometheus-community/kube-prometheus-stack \
      --namespace monitoring --version 55.5.0 -f kps-values.yaml --wait --timeout 15m
    ```
-5. Validate the install:
+6. Validate the install:
    ```
    kubectl -n monitoring get pods
    kubectl -n monitoring get servicemonitors
    kubectl -n monitoring port-forward svc/kps-kube-prometheus-stack-prometheus 9090:9090 &
    curl -s localhost:9090/api/v1/targets | jq '.data.activeTargets | length'
    ```
-6. Apply baseline alerts. Copy [references/alertmanager-rules-template.yaml](references/alertmanager-rules-template.yaml), substitute the namespace label if required, validate with `promtool check rules` (after extracting the `spec.groups` with `yq`), then `kubectl apply -f`.
-7. Write ServiceMonitors for each input service. Template:
+7. Apply baseline alerts. Copy [references/alertmanager-rules-template.yaml](references/alertmanager-rules-template.yaml), substitute the namespace label if required, validate with `promtool check rules` (after extracting the `spec.groups` with `yq`), then `kubectl apply -f`.
+8. Write ServiceMonitors for each input service. Template:
    ```yaml
    apiVersion: monitoring.coreos.com/v1
    kind: ServiceMonitor
@@ -143,14 +153,14 @@ Do not use this skill for log aggregation (use `log-aggregation`), for tracing (
          scrapeTimeout: 10s
    ```
    Confirm `up{job="<app>-sm"} == 1` in Prometheus.
-8. Import dashboards. From Grafana UI or via ConfigMap with label `grafana_dashboard: "1"`, apply [references/grafana-dashboard-templates.json](references/grafana-dashboard-templates.json). Also import community dashboards: `1860` (node-exporter), `13332` (kube-state-metrics), `7249` (kubelet), `15661` (Kubernetes overview).
-9. Fire a synthetic alert end-to-end:
-   ```
-   kubectl -n monitoring run stress --image=polinux/stress --restart=Never -- \
-     stress --cpu 4 --timeout 600s
-   ```
-   Watch `#alerts-warn` for the `HighCPU` notification. Remove the pod afterward.
-10. Document. Emit a short report listing the Helm release name, chart version, active targets count, firing alerts count, dashboards imported, and the Alertmanager receivers configured. Store the values file and secrets source in the ops repo.
+9. Import dashboards. From Grafana UI or via ConfigMap with label `grafana_dashboard: "1"`, apply [references/grafana-dashboard-templates.json](references/grafana-dashboard-templates.json). Also import community dashboards: `1860` (node-exporter), `13332` (kube-state-metrics), `7249` (kubelet), `15661` (Kubernetes overview).
+10. Fire a synthetic alert end-to-end:
+    ```
+    kubectl -n monitoring run stress --image=polinux/stress --restart=Never -- \
+      stress --cpu 4 --timeout 600s
+    ```
+    Watch `#alerts-warn` for the `HighCPU` notification. Remove the pod afterward.
+11. Document. Emit a short report listing the Helm release name, chart version, active targets count, firing alerts count, dashboards imported, and the Alertmanager receivers configured. Store the values file and secrets source in the ops repo.
 
 ## Examples
 
@@ -186,6 +196,7 @@ The cluster has a prior `prometheus-operator` install from 2019 and no default S
 
 ## Constraints
 
+- Do not produce output for a stack outside `supported-stacks`. If step 1 detection shows the primary metrics backend is Datadog, New Relic, CloudWatch, Honeycomb, or any non-Prometheus system, STOP and report the detected stack to the user. Recommend a dedicated skill for that stack rather than producing Prometheus config that will not integrate.
 - Never commit real Slack webhooks or PagerDuty keys to git. Use sealed-secrets, External Secrets, or `kubectl create secret` referenced from the Helm values.
 - Never set Grafana admin password to a default in production. Generate with `openssl rand -base64 24`.
 - Never set `scrapeInterval` below `15s` without a documented reason; it 2x's storage cost.

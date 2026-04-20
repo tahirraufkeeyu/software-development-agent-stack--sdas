@@ -2,6 +2,9 @@
 name: log-aggregation
 description: Use when a user wants to centralise Kubernetes logs, install Loki + Promtail or ELK (Elasticsearch + Logstash/Fluent Bit + Kibana), configure retention, wire log shipping from pods, or tune label/index hygiene. Picks the lightweight (Loki) or heavyweight (ELK) stack based on scale and budget, installs, validates ingestion, and produces a LogQL or KQL query cheat sheet.
 safety: writes-shared
+supported-stacks:
+  - loki+promtail+k8s
+  - elk+k8s
 ---
 
 ## When to use
@@ -39,6 +42,20 @@ Do not use this skill for metrics (see `monitoring-setup`), distributed tracing 
 - Kubernetes MCP, filesystem MCP.
 
 ## Procedure
+
+### Detect the stack
+
+Run these read-only commands before anything else and record findings:
+
+- `kubectl config current-context` — confirm a Kubernetes cluster is addressable. No cluster → stop; this skill requires `kubernetes`.
+- `kubectl get ns logging observability elastic-system 2>/dev/null` — existing logging namespaces?
+- `helm list -A 2>/dev/null | grep -Ei 'loki|promtail|grafana-agent'` — Loki stack already installed?
+- `kubectl get crd elasticsearches.elasticsearch.k8s.elastic.co 2>/dev/null` — ECK operator installed?
+- `helm list -A 2>/dev/null | grep -Ei 'elasticsearch|kibana|filebeat|fluent'` — ELK components via Helm?
+- `kubectl get daemonset -A 2>/dev/null | grep -Ei 'fluent-bit|fluentd|vector|datadog|splunk|nri-metadata'` — a different log shipper in place?
+- `grep -l 'datadog\|splunk\|sumologic\|logzio' helm/ values.yaml 2>/dev/null` — a competing SaaS already wired?
+
+Conclude which of the two supported stacks applies (or neither). This skill supports only `loki+promtail+k8s` and `elk+k8s`. If Datadog Logs, Splunk, Sumo Logic, Logz.io, or a non-supported shipper (Vector to S3 directly, Fluentd to a custom sink) is the primary, STOP and report the detected stack; do not layer a second log pipeline on top of an existing one — the cost/complexity rarely justifies it without an explicit cut-over plan.
 
 ### Choosing the stack
 
@@ -230,6 +247,7 @@ Never hot-migrate indices across major ES versions; always dual-write and cut.
 
 ## Constraints
 
+- Do not produce output for a stack outside `supported-stacks`. If detection shows Datadog Logs, Splunk, Sumo Logic, Logz.io, or a non-supported shipper as the primary, STOP and report the detected stack to the user. Do not layer a second log pipeline on top of an existing one without an explicit cut-over plan from the user.
 - Never ship logs without retention configured; storage growth is unbounded and incidents become archaeology.
 - Never promote trace IDs, user IDs, request IDs, or any per-request value to a Loki label or an ES index dimension.
 - Never run ES with `heap >= 32 GiB`; compressed oops cutoff kills performance. Keep heap at 50% of pod memory, capped at 31 GiB.
