@@ -2,6 +2,9 @@
 name: deploy
 description: Use when rolling out a new version of a service to staging or production. Runs tests, builds and pushes a container, performs a blue/green or canary rollout with health gates, and rolls back automatically on SLO breach.
 safety: destructive
+supported-stacks:
+  - helm+k8s
+  - kubernetes
 ---
 
 ## When to use
@@ -45,6 +48,23 @@ Do not use for local `kubectl apply` against a dev cluster or for one-off hotfix
 - Optional: Argo Rollouts (`kubectl argo rollouts`) if the project uses it.
 
 ## Procedure
+
+### 0. Detect the stack
+
+Before pre-flight, confirm this skill is the right tool for the target:
+
+```bash
+kubectl config current-context                                    # must return a context
+kubectl auth can-i create deployments -n "$NAMESPACE" 2>/dev/null  # must be yes
+helm version --short 2>/dev/null                                  # Helm 3.x
+ls argocd/ fluxcd/ kustomize/ 2>/dev/null | head                  # GitOps layer in play?
+grep -l 'serverless\|sam\|fargate' serverless.yml template.yaml 2>/dev/null | head  # non-K8s?
+```
+
+This skill supports `helm+k8s` and `kubernetes` canary / blue-green rollouts. If detection shows:
+- an ArgoCD / Flux GitOps workflow already in place — stop and recommend a Git-commit-driven promotion instead of imperative helm upgrade
+- AWS Lambda, Fargate-only, Google Cloud Run, Azure Container Apps, or any serverless platform — this skill does not apply; report and suggest a platform-specific deploy skill
+- no Kubernetes context at all — stop
 
 ### 1. Pre-flight
 
@@ -226,6 +246,7 @@ Expected flow: build+sign image, staging deploy + smoke, request approval, promo
 
 ## Constraints
 
+- Do not produce output for a stack outside `supported-stacks`. If detection shows an ArgoCD/Flux GitOps path, a serverless platform (Lambda / Fargate-only / Cloud Run / Container Apps), or no Kubernetes at all, STOP and report. This skill's canary/blue-green logic assumes Kubernetes primitives; forcing it onto another platform produces unusable output.
 - Never deploy untagged `latest`; always pin by image digest.
 - Never skip the staging step for prod deploys, even for config-only changes.
 - Never roll forward to fix a failing deploy during business hours; roll back first, then diagnose.

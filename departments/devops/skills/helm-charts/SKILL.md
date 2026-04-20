@@ -2,6 +2,8 @@
 name: helm-charts
 description: Use when a Kubernetes application needs a new Helm chart or a substantial revision to an existing one. Scaffolds Chart.yaml, values.yaml with sensible defaults, and templates for Deployment, Service, Ingress, ConfigMap, and HPA, then validates with helm lint and helm diff against the live cluster.
 safety: writes-local
+supported-stacks:
+  - helm+k8s
 ---
 
 ## When to use
@@ -41,6 +43,21 @@ Do not use this skill when the answer is Kustomize + overlays (simpler for small
 - Optional: `helm diff` plugin for live diffing.
 
 ## Procedure
+
+### 0. Detect the stack
+
+Confirm Helm + Kubernetes is the packaging system the user wants before scaffolding:
+
+```bash
+helm version --short 2>/dev/null                      # Helm 3.x installed?
+kubectl config current-context 2>/dev/null            # K8s cluster reachable?
+ls charts/ helm/ 2>/dev/null                          # existing Helm charts?
+ls kustomize/ overlays/ 2>/dev/null                   # Kustomize instead?
+ls terraform/ main.tf 2>/dev/null | head              # Terraform-managed K8s resources?
+find . -maxdepth 2 -name 'Chart.yaml' 2>/dev/null     # existing chart in this repo?
+```
+
+This skill supports only `helm+k8s`. If detection shows the repo uses **Kustomize** (no Chart.yaml, an overlays/ tree), **Terraform with the Kubernetes provider** writing K8s resources directly, **CDK8s**, or a raw-YAML workflow, STOP and report. Producing a Helm chart alongside a competing packaging system creates two sources of truth and is a common regret.
 
 ### 1. Scaffold
 
@@ -358,6 +375,7 @@ Input: `chart_name=checkout-worker`, `port=`, `ingress_host=`, `enable_hpa=false
 
 ## Constraints
 
+- Do not produce output for a stack outside `supported-stacks`. If detection shows Kustomize, Terraform kubernetes-provider, CDK8s, or raw-YAML as the incumbent packaging system, STOP and report. A Helm chart in parallel produces two sources of truth and drift nobody can reconcile.
 - Never template a secret value directly; reference an existing `Secret` or `ExternalSecret`.
 - Never set `imagePullPolicy: Always` with `tag: latest`; always pin by tag or digest.
 - Never omit `resources.requests` — the scheduler and HPA rely on them.

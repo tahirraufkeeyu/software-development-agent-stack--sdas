@@ -2,6 +2,10 @@
 name: pipeline-builder
 description: Use when a repository needs a new CI/CD pipeline or a major revision to an existing one. Generates GitHub Actions, Azure DevOps, or GitLab CI YAML tailored to the project stack (Node, Python, Go, container) with matrix builds, caching, artifact publishing, and environment-gated deploys.
 safety: writes-local
+supported-stacks:
+  - github-actions
+  - azure-devops
+  - gitlab-ci
 ---
 
 ## When to use
@@ -43,12 +47,31 @@ Do not use for platform-wide shared runner configuration or org-level policy; th
 
 ## Procedure
 
-### 1. Identify stack and conventions
+### 1. Detect the CI system and project stack
 
-Inspect the repo for:
+Two detections happen here: which CI system to emit for, and what language/toolchain the pipeline must build.
+
+First, determine the target CI system. Declared preference in the user's request overrides detection.
+
+```bash
+ls .github/workflows/ 2>/dev/null                     # GitHub Actions in use
+cat azure-pipelines.yml .azure-pipelines.yml 2>/dev/null | head  # Azure DevOps
+cat .gitlab-ci.yml 2>/dev/null | head                 # GitLab CI
+git remote -v 2>/dev/null                             # github.com / dev.azure.com / gitlab.com host hint
+ls .circleci/ Jenkinsfile 2>/dev/null                 # CircleCI / Jenkins as incumbent
+ls .drone.yml .buildkite/ bitbucket-pipelines.yml 2>/dev/null  # other CIs
+```
+
+This skill supports `github-actions`, `azure-devops`, and `gitlab-ci`. If detection shows:
+- an existing pipeline on **CircleCI, Jenkins, Drone, Buildkite, or Bitbucket Pipelines** as the incumbent — STOP and report; emitting a GitHub Actions workflow in parallel splits CI ownership and creates signal confusion
+- the user asks for a CI system in the unsupported list — STOP and recommend a dedicated skill for that CI
+- no CI system is obvious and the user has not specified one — ask which of the three supported is desired; infer from the git remote host if the user is indifferent (github.com → `github-actions`, dev.azure.com → `azure-devops`, gitlab.com → `gitlab-ci`).
+
+Second, identify the project stack:
+
 - Lockfile and package manager (`package-lock.json`, `pnpm-lock.yaml`, `poetry.lock`, `uv.lock`, `go.sum`).
 - `Dockerfile` location(s).
-- Existing `.github/`, `azure-pipelines.yml`, or `.gitlab-ci.yml`.
+- Existing `.github/`, `azure-pipelines.yml`, or `.gitlab-ci.yml` to extend rather than overwrite.
 - Monorepo markers (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `go.work`).
 
 ### 2. Draft the stage graph
@@ -118,6 +141,7 @@ Generates `.gitlab-ci.yml` that `include:`s `ci/python.yml` and uses `rules: cha
 
 ## Constraints
 
+- Do not produce output for a CI system outside `supported-stacks`. If detection shows CircleCI, Jenkins, Drone, Buildkite, or Bitbucket Pipelines as the incumbent, STOP and report. Emitting a second CI on top splits ownership and doubles maintenance without doubling value.
 - Never write secrets to the repo. Use the platform's secret store and reference by name.
 - Never use `${{ github.event.pull_request.head.ref }}` or similar user-controlled input directly in a `run:` step (injection). Pass through `env:` with quoting.
 - Never run `docker login` with `--password` on the command line; use `--password-stdin`.

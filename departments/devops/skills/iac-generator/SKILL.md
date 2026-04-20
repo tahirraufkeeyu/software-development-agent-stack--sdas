@@ -2,6 +2,10 @@
 name: iac-generator
 description: Use when provisioning or modifying cloud infrastructure as code. Generates Terraform (HCL), Bicep, or Pulumi code for common resources (AKS/EKS, RDS, S3, VNet/VPC, IAM) with remote state, encryption, and least-privilege defaults.
 safety: writes-local
+supported-stacks:
+  - terraform
+  - bicep+azure
+  - pulumi
 ---
 
 ## When to use
@@ -45,6 +49,26 @@ Do not use for one-off console experimentation or for rendering architecture dia
 - `jq` for parsing plan outputs.
 
 ## Procedure
+
+### 0. Detect the stack
+
+Infer the IaC flavour from the repo before generating anything:
+
+```bash
+find . -maxdepth 3 -name '*.tf' 2>/dev/null | head           # Terraform
+find . -maxdepth 3 -name '*.bicep' 2>/dev/null | head        # Bicep
+find . -maxdepth 3 -name 'Pulumi.yaml' 2>/dev/null | head    # Pulumi
+find . -maxdepth 3 -name 'cdk.json' 2>/dev/null | head       # AWS CDK
+find . -maxdepth 3 -name 'template.yaml' 2>/dev/null | head  # CloudFormation / SAM
+ls ansible/ playbooks/ 2>/dev/null                           # Ansible
+cat .terraform-version .tool-versions 2>/dev/null            # pinned TF / asdf
+```
+
+Also check whether the user expressed a preference in their request (e.g. "generate Terraform" vs "generate Bicep"). Declared preference overrides detection.
+
+This skill supports `terraform`, `bicep+azure`, and `pulumi`. If detection shows **AWS CDK**, **CloudFormation / SAM**, **Ansible**, **Crossplane**, **Chef/Puppet**, or **Cloud-provider consoles as the source of truth**, STOP and report. Dropping a Terraform module into a CDK repo (or vice versa) creates drift between two state stores and is the single biggest IaC regret teams have.
+
+If no IaC tool is detected and the user hasn't specified one, ask which of the three supported stacks they want. Do not guess.
 
 ### 1. Pick the layout
 
@@ -370,6 +394,7 @@ Generates `infrastructure/bicep/envs/prod/postgres.bicep` with zone-redundant HA
 
 ## Constraints
 
+- Do not produce output for a stack outside `supported-stacks`. If detection shows AWS CDK, CloudFormation/SAM, Ansible, Crossplane, Chef/Puppet, or console-as-source-of-truth, STOP and report. Generating a parallel Terraform module against an existing CDK codebase creates two state stores that will drift and cannot be safely reconciled.
 - Never hard-code credentials. Use `manage_master_user_password`, Key Vault references, or Secrets Manager.
 - Never open a security group/NSG to `0.0.0.0/0` on administrative ports. SSH/RDP require bastion or SSM.
 - Never use `*` in IAM actions or resources for application roles.
