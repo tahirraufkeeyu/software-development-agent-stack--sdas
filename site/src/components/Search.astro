@@ -1,0 +1,225 @@
+---
+/**
+ * Search component — client-side only.
+ *
+ * Loads Pagefind from /_pagefind/ (generated post-build by the pagefind
+ * CLI; see package.json build script). In development the /_pagefind/
+ * directory doesn't exist, so the search input shows a hint that search
+ * only works in production builds.
+ *
+ * Purely static — no server, no API, no analytics hook unless the site
+ * wires one in Phase B.
+ */
+---
+
+<div class="search" id="skillkit-search">
+  <label class="sr-only" for="skillkit-search-input">Search skills</label>
+  <input
+    type="search"
+    id="skillkit-search-input"
+    placeholder="Search skills... (try 'code review' or 'prometheus')"
+    autocomplete="off"
+    spellcheck="false"
+  />
+  <div class="hint subtle" id="skillkit-search-hint">
+    Powered by Pagefind · ctrl+/ to focus
+  </div>
+  <ul class="results" id="skillkit-search-results" role="listbox" hidden></ul>
+</div>
+
+<style>
+  .search {
+    position: relative;
+    max-width: 40rem;
+    margin: 0 0 var(--space-8);
+  }
+  input[type="search"] {
+    width: 100%;
+    font: inherit;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--fg);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  input[type="search"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-elev-2);
+  }
+  input[type="search"]::placeholder {
+    color: var(--fg-subtle);
+  }
+  .hint {
+    margin-top: var(--space-2);
+    font-size: 0.8rem;
+  }
+  .results {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-3) 0 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .results[hidden] {
+    display: none;
+  }
+  .results :global(li) {
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+  }
+  .results :global(a) {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .results :global(.r-title) {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: var(--space-1);
+  }
+  .results :global(.r-meta) {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    margin-bottom: var(--space-1);
+  }
+  .results :global(.r-excerpt) {
+    color: var(--fg-muted);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+  .results :global(.r-excerpt mark) {
+    background: color-mix(in srgb, var(--accent) 25%, transparent);
+    color: var(--fg);
+    padding: 0 0.15em;
+    border-radius: 2px;
+  }
+  .results :global(.r-empty) {
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+</style>
+
+<script>
+  // Pagefind UI is loaded lazily — the index lives at /_pagefind/pagefind.js
+  // after the post-build step. In dev the file doesn't exist at all, and
+  // Vite would otherwise try to statically resolve the import during
+  // dev-server transform (even with @vite-ignore). We dodge both issues
+  // by short-circuiting in dev and computing the URL at runtime in prod.
+  async function boot() {
+    const input = document.getElementById("skillkit-search-input") as HTMLInputElement | null;
+    const results = document.getElementById("skillkit-search-results") as HTMLUListElement | null;
+    const hint = document.getElementById("skillkit-search-hint");
+    if (!input || !results) return;
+
+    // Ctrl+/ or Cmd+K focuses the search box.
+    document.addEventListener("keydown", (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if ((mod && e.key === "/") || (mod && e.key.toLowerCase() === "k")) {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      }
+    });
+
+    // Dev: Pagefind index doesn't exist, so don't try to import it.
+    // import.meta.env.DEV is replaced at compile time with a boolean
+    // literal, so the branch below is dead-code-eliminated in prod builds.
+    if (import.meta.env.DEV) {
+      if (hint) {
+        hint.textContent =
+          "Search is disabled in dev mode — run 'npm run build && npm run preview' to try it.";
+      }
+      return;
+    }
+
+    let pagefind: any = null;
+    try {
+      // Compute the URL at runtime so Vite's static analysis can't try
+      // to resolve /_pagefind/pagefind.js during the dev transform.
+      const pagefindUrl = new URL(
+        "/_pagefind/pagefind.js",
+        window.location.origin,
+      ).href;
+      // @ts-ignore - runtime artefact, no static types
+      pagefind = await import(/* @vite-ignore */ pagefindUrl);
+      await pagefind.options({ excerptLength: 30 });
+    } catch (err) {
+      console.error("[skillkit] pagefind failed to load", err);
+      if (hint) {
+        hint.textContent = "Search is temporarily unavailable.";
+      }
+      return;
+    }
+
+    let currentQuery = "";
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    async function runSearch(q: string) {
+      if (!q || q.length < 2) {
+        results!.hidden = true;
+        results!.innerHTML = "";
+        return;
+      }
+      const r = await pagefind.search(q);
+      if (q !== currentQuery) return; // race
+      results!.hidden = false;
+      if (r.results.length === 0) {
+        results!.innerHTML = `<li class="r-empty">No matches for "${escapeHtml(q)}".</li>`;
+        return;
+      }
+      const top = await Promise.all(r.results.slice(0, 10).map((x: any) => x.data()));
+      results!.innerHTML = top
+        .map((d: any) => {
+          const title = escapeHtml(d.meta?.title ?? d.url);
+          const dept = d.filters?.department?.[0] ?? "";
+          const safety = d.filters?.safety?.[0] ?? "";
+          return `
+            <li>
+              <a href="${d.url}">
+                <div class="r-title">${title}</div>
+                <div class="r-meta">${escapeHtml(dept)}${safety ? ` · ${escapeHtml(safety)}` : ""}</div>
+                <div class="r-excerpt">${d.excerpt}</div>
+              </a>
+            </li>`;
+        })
+        .join("");
+    }
+
+    input.addEventListener("input", () => {
+      const q = input.value.trim();
+      currentQuery = q;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => runSearch(q), 120);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        input.value = "";
+        currentQuery = "";
+        results!.hidden = true;
+        results!.innerHTML = "";
+      }
+    });
+  }
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+</script>

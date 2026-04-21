@@ -1,0 +1,318 @@
+---
+import Base from "@/layouts/Base.astro";
+import Search from "@/components/Search.astro";
+import Terminal from "@/components/Terminal.astro";
+import {
+  getManifest,
+  departmentLabel,
+  departmentPitch,
+} from "@/utils/skills";
+
+const { skills, departments, totals } = getManifest();
+
+const featuredSlugs = [
+  "ship-feature",
+  "full-security-audit",
+  "release-to-prod",
+  "marketing-weekly",
+];
+const featured = featuredSlugs
+  .map((slug) => skills.find((s) => s.slug === slug))
+  .filter((x): x is (typeof skills)[number] => Boolean(x));
+---
+
+<Base title="skillkit.dev">
+  <section class="hero">
+    <p class="eyebrow">Software Development Agent Stack · open source</p>
+    <h1>Claude Code skills for every department — clone and use in 2 minutes.</h1>
+    <p class="lede">
+      A curated library of <strong>{totals.skills}</strong> production-ready skills across
+      <strong>{totals.departments}</strong> departments. Engineering, security, devops, infrastructure,
+      QA, sales, marketing, internal comms. Plus <strong>{totals.orchestrators}</strong>
+      workflow orchestrators that chain skills into end-to-end flows.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/departments">Browse departments</a>
+      <a
+        class="btn btn-secondary"
+        href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas"
+        target="_blank"
+        rel="noopener">View on GitHub ↗</a
+      >
+    </div>
+    <p class="hero-custom muted">
+      Every skill ships a <strong>Customise for your organisation</strong> button — rewrite any
+      skill for your stack via an LLM, fully in your browser. <a href="/settings">Add your
+      OpenRouter key →</a>
+    </p>
+    <p class="stats subtle">
+      {totals.skills} skills
+      · {totals.bySafety.safe} safe
+      · {totals.bySafety["writes-local"]} writes-local
+      · {totals.bySafety["writes-shared"]} writes-shared
+      · {totals.bySafety.destructive} destructive
+    </p>
+  </section>
+
+  <Terminal />
+
+  <section>
+    <h2>Find a skill</h2>
+    <Search />
+  </section>
+
+  <section>
+    <h2>What this is</h2>
+    <p>
+      Most "AI for teams" content stops at "install Claude Code and good luck." The gap is the
+      layer that makes Claude behave like a reliable teammate — one that triggers on the right
+      work, follows the same process your senior people would, and produces output consistent
+      with what your team already ships.
+    </p>
+    <p>
+      Skills are that layer. A skill is a single Markdown file (<code>SKILL.md</code>) that
+      declares when it should run, the exact procedure, concrete examples, constraints, and
+      quality checks. Claude Code auto-triggers the right one based on your natural-language
+      request — no slash commands to memorise.
+    </p>
+    <p>
+      Everything here is MIT licensed. Clone, install, customise, share.
+    </p>
+  </section>
+
+  <section>
+    <h2>Departments</h2>
+    <div class="grid-auto">
+      {
+        departments.map((d) => (
+          <a class="card card-link dept-card" href={`/departments/${d.slug}`}>
+            <div class="dept-head">
+              <h3>{departmentLabel(d.slug)}</h3>
+              <span class="dept-count">{d.skillCount} skills</span>
+            </div>
+            <p class="muted">{departmentPitch(d.slug)}</p>
+            {d.orchestratorCount > 0 ? (
+              <p class="dept-orch">
+                <span class="orch-dot" />
+                {d.orchestratorCount} orchestrator{d.orchestratorCount === 1 ? "" : "s"} — {d.orchestrators.join(", ")}
+              </p>
+            ) : null}
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Featured orchestrators</h2>
+    <p class="muted">
+      End-to-end flows that chain multiple skills. Each department ships at least one.
+    </p>
+    <div class="grid-auto">
+      {
+        featured.map((s) => (
+          <a class="card card-link feat-card" href={`/skills/${s.slug}`}>
+            <h3>{s.name}</h3>
+            <p class="muted" style="font-size:0.95rem;">{s.description}</p>
+            <p class="feat-chains">
+              <span class="subtle">chains: </span>
+              {s.chains.map((c, i) => (
+                <>
+                  <code>{c}</code>
+                  {i < s.chains.length - 1 ? " → " : ""}
+                </>
+              ))}
+            </p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Install</h2>
+    <pre><code>{`# 1. clone the repo
+git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
+cd ~/sdas
+
+# 2. install all skills into ~/.claude/skills/
+./install.sh all
+
+# 3. or just one department
+./install.sh developers
+
+# 4. or target another AI tool
+./install.sh --host cursor all
+./install.sh --host codex all
+./install.sh --host gemini all
+
+# 5. keep in sync later
+./install.sh --update`}</code></pre>
+    <p class="muted">
+      That's it. The next time you run <code>claude</code>, every installed skill is
+      discoverable. Claude picks the right one based on your request — skill selection is
+      description-matched, not command-triggered.
+    </p>
+  </section>
+
+  <section>
+    <h2>See it in action</h2>
+    <p>
+      Two worked walkthroughs in the repo show the kit end-to-end, with the exact user prompt,
+      the skill Claude matched, what Claude did, and files changed:
+    </p>
+    <ul>
+      <li>
+        <a
+          href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/examples/simple-101/how-to.md"
+          target="_blank"
+          rel="noopener">Simple 101 — setup + first skill</a
+        > (15 min). Covers Claude Code, the VS Code extension, GitHub Copilot, and Codex CLI. Ships a
+        FastAPI <code>/hello</code> endpoint.
+      </li>
+      <li>
+        <a
+          href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/examples/developers/how-to.md"
+          target="_blank"
+          rel="noopener">Developers — full end-to-end</a
+        > (45 min). Nine skills on a real public repo (node-express-boilerplate). One shipped
+        feature, one merged PR.
+      </li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding: var(--space-8) 0 var(--space-12);
+    max-width: 48rem;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 0 0 var(--space-4);
+  }
+  .hero h1 {
+    font-size: 2.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--space-4);
+  }
+  @media (min-width: 48rem) {
+    .hero h1 {
+      font-size: 2.75rem;
+    }
+  }
+  .lede {
+    font-size: 1.15rem;
+    color: var(--fg-muted);
+    margin: 0 0 var(--space-6);
+    line-height: 1.55;
+  }
+  .lede strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+  .cta-row {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.6rem 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .btn-primary:hover {
+    background: var(--accent-strong);
+    color: var(--bg);
+  }
+  .btn-secondary {
+    background: transparent;
+    border-color: var(--border-strong);
+    color: var(--fg);
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .stats {
+    font-family: var(--font-mono);
+    margin: 0;
+  }
+  .hero-custom {
+    margin: var(--space-5) 0 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    max-width: 44rem;
+  }
+  .hero-custom strong {
+    color: var(--fg);
+  }
+
+  .dept-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .dept-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .dept-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  .dept-count {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+  }
+  .dept-orch {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .orch-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .feat-card h3 {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+  }
+  .feat-chains {
+    margin: var(--space-3) 0 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  .feat-chains code {
+    font-size: 0.8rem;
+  }
+</style>

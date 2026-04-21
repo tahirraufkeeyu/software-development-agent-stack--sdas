@@ -1,0 +1,535 @@
+---
+import Base from "@/layouts/Base.astro";
+import { MODELS, recommendedModel } from "@/lib/models";
+
+const recommended = recommendedModel();
+---
+
+<Base
+  title="Settings"
+  description="Configure your OpenRouter API key and model for the skill customizer. Everything stays in your browser — no data is sent to our servers."
+>
+  <header class="page-head">
+    <p class="eyebrow">Settings</p>
+    <h1>Customizer settings</h1>
+    <p class="muted">
+      To use the LLM-powered skill customizer you need an OpenRouter API key. OpenRouter
+      routes your requests to Claude, GPT-4o, Gemini, Llama, and others with a single key.
+      All settings below are stored <strong>only in your browser's localStorage</strong>. Nothing
+      is sent to skillkit.dev or anyone else — API calls go directly from your browser to
+      OpenRouter.
+    </p>
+  </header>
+
+  <section class="grid">
+    <div class="col">
+      <h2>API key</h2>
+      <p class="muted">
+        Get a key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener"
+          >openrouter.ai/keys</a
+        >. OpenRouter has a pay-as-you-go credit model — add $5 and you can run hundreds of
+        customizations.
+      </p>
+
+      <div class="field">
+        <label for="apiKey">OpenRouter API key</label>
+        <div class="input-row">
+          <input
+            type="password"
+            id="apiKey"
+            name="apiKey"
+            placeholder="sk-or-v1-…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="togglePeek" type="button" class="btn btn-ghost" aria-label="Show key">
+            <span id="peekLabel">show</span>
+          </button>
+        </div>
+        <p id="apiKeyHint" class="hint"></p>
+      </div>
+
+      <div class="row">
+        <button id="verify" class="btn btn-primary" type="button">Verify key</button>
+        <button id="clear" class="btn btn-ghost" type="button">Clear</button>
+        <span id="verifyStatus" class="status" role="status"></span>
+      </div>
+    </div>
+
+    <div class="col">
+      <h2>Model</h2>
+      <p class="muted">
+        Default is <code>{recommended.label}</code> — best structural fidelity for this task.
+        Switch to a cheaper model for bulk use or when cost matters more than quality.
+      </p>
+
+      <div class="model-list" role="radiogroup" aria-label="Model">
+        {
+          MODELS.map((m) => (
+            <label class="model-option" data-model-id={m.id}>
+              <input
+                type="radio"
+                name="modelId"
+                value={m.id}
+                checked={m.recommended}
+              />
+              <div class="model-body">
+                <div class="model-head">
+                  <span class="model-label">{m.label}</span>
+                  {m.recommended ? <span class="rec">default</span> : null}
+                </div>
+                <div class="model-meta muted">{m.blurb}</div>
+                <div class="model-price subtle">
+                  ${m.inputUsdPerM.toFixed(2)}/M in · ${m.outputUsdPerM.toFixed(2)}/M out
+                  · {(m.contextWindow / 1000).toFixed(0)}k ctx
+                </div>
+              </div>
+            </label>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Environment (optional prefill)</h2>
+    <p class="muted">
+      Fill this in once and the customizer form will prefill with it every time. Leave
+      fields blank and the customizer will ask for them when needed.
+    </p>
+
+    <div class="field">
+      <label for="techStack">Your tech stack (one line)</label>
+      <input
+        type="text"
+        id="techStack"
+        name="techStack"
+        placeholder="EKS on AWS, Python/FastAPI, Postgres, GitHub Actions"
+      />
+    </div>
+
+    <div class="field">
+      <label for="scale">Scale</label>
+      <select id="scale" name="scale">
+        <option value="unspecified">(unspecified)</option>
+        <option value="personal">Personal project</option>
+        <option value="startup">Startup (≤50)</option>
+        <option value="scaleup">Scaleup (50–500)</option>
+        <option value="enterprise">Enterprise (500+)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="constraints">Constraints / quirks (free text)</label>
+      <textarea
+        id="constraints"
+        name="constraints"
+        rows="4"
+        placeholder="SOC2 Type II required; no public cloud beyond AWS; all secrets via HashiCorp Vault; deploy via ArgoCD"
+      ></textarea>
+    </div>
+
+    <div class="row">
+      <button id="saveEnv" class="btn btn-primary" type="button">Save environment</button>
+      <span id="envStatus" class="status" role="status"></span>
+    </div>
+  </section>
+
+  <section class="privacy">
+    <h2>What's stored and where</h2>
+    <ul>
+      <li>
+        Your API key, model choice, and environment prefill are stored in your browser's
+        <code>localStorage</code> under the <code>skillkit.*</code> namespace.
+      </li>
+      <li>
+        Nothing is sent to <code>skillkit.dev</code> at any point. Every customization
+        request goes browser → <code>openrouter.ai</code> directly.
+      </li>
+      <li>
+        OpenRouter receives your prompt (the skill content + your environment) and your API
+        key. That's it. Our servers never see either.
+      </li>
+      <li>
+        You can clear everything with the "Clear" button above, or
+        <button id="nuke" class="link-button" type="button">wipe all local settings</button>.
+      </li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-8);
+    max-width: 52rem;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 0 0 var(--space-2);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-12);
+  }
+  @media (min-width: 56rem) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .col {
+    min-width: 0;
+  }
+
+  .field {
+    margin: var(--space-4) 0;
+  }
+  .field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--fg);
+    margin-bottom: var(--space-2);
+  }
+  .input-row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: stretch;
+  }
+  .input-row input {
+    flex: 1;
+  }
+  input[type="text"],
+  input[type="password"],
+  select,
+  textarea {
+    width: 100%;
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: 0.55rem 0.85rem;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--fg);
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-elev-2);
+  }
+  select {
+    font-family: var(--font-sans);
+  }
+  textarea {
+    resize: vertical;
+    min-height: 5rem;
+    font-family: var(--font-sans);
+  }
+  .hint {
+    margin: var(--space-2) 0 0;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    min-height: 1.25em;
+  }
+  .hint.warn {
+    color: var(--warning);
+  }
+  .hint.err {
+    color: var(--danger);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-top: var(--space-3);
+  }
+  .btn {
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .btn-primary:hover {
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--fg-muted);
+  }
+  .btn-ghost:hover {
+    color: var(--fg);
+  }
+  .status {
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    min-height: 1.25em;
+  }
+  .status.ok {
+    color: var(--success);
+  }
+  .status.err {
+    color: var(--danger);
+  }
+
+  .model-list {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .model-option {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elev-1);
+    cursor: pointer;
+    transition: border-color 120ms ease;
+  }
+  .model-option:hover {
+    border-color: var(--border-strong);
+  }
+  .model-option:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--bg-elev-2);
+  }
+  .model-option input[type="radio"] {
+    margin: 0;
+    align-self: flex-start;
+    margin-top: 0.2em;
+    accent-color: var(--accent);
+  }
+  .model-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .model-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .model-label {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .rec {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  .model-meta {
+    font-size: 0.85rem;
+    margin: var(--space-1) 0 0;
+  }
+  .model-price {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    margin-top: var(--space-1);
+  }
+
+  .privacy {
+    padding: var(--space-6);
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-top: var(--space-8);
+  }
+  .privacy h2 {
+    margin-top: 0;
+  }
+  .privacy ul {
+    padding-left: var(--space-5);
+    font-size: 0.95rem;
+  }
+  .privacy li {
+    margin: var(--space-2) 0;
+  }
+  .link-button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+  }
+  .link-button:hover {
+    color: var(--accent-strong);
+  }
+</style>
+
+<script>
+  import {
+    getSettings,
+    setApiKey,
+    clearApiKey,
+    setModelId,
+    setEnvironment,
+  } from "@/lib/settings";
+  import { DEFAULT_MODEL_ID } from "@/lib/models";
+  import { isLikelyValidKeyShape, verifyApiKey } from "@/lib/openrouter";
+
+  function q<T extends HTMLElement>(sel: string): T | null {
+    return document.querySelector(sel);
+  }
+
+  function init() {
+    const apiKeyInput = q<HTMLInputElement>("#apiKey");
+    const peek = q<HTMLButtonElement>("#togglePeek");
+    const peekLabel = q<HTMLSpanElement>("#peekLabel");
+    const apiKeyHint = q<HTMLParagraphElement>("#apiKeyHint");
+    const verifyBtn = q<HTMLButtonElement>("#verify");
+    const clearBtn = q<HTMLButtonElement>("#clear");
+    const verifyStatus = q<HTMLSpanElement>("#verifyStatus");
+
+    const modelInputs = document.querySelectorAll<HTMLInputElement>(
+      'input[name="modelId"]',
+    );
+
+    const techStackInput = q<HTMLInputElement>("#techStack");
+    const scaleSelect = q<HTMLSelectElement>("#scale");
+    const constraintsInput = q<HTMLTextAreaElement>("#constraints");
+    const saveEnvBtn = q<HTMLButtonElement>("#saveEnv");
+    const envStatus = q<HTMLSpanElement>("#envStatus");
+    const nukeBtn = q<HTMLButtonElement>("#nuke");
+
+    if (!apiKeyInput || !verifyBtn) return; // page integrity
+
+    // Prefill everything from localStorage.
+    const s = getSettings();
+    apiKeyInput.value = s.apiKey;
+    modelInputs.forEach((r) => {
+      r.checked = r.value === (s.modelId || DEFAULT_MODEL_ID);
+    });
+    if (techStackInput) techStackInput.value = s.environment.techStack;
+    if (scaleSelect) scaleSelect.value = s.environment.scale;
+    if (constraintsInput) constraintsInput.value = s.environment.constraints;
+
+    // Show/hide API key
+    peek?.addEventListener("click", () => {
+      const showing = apiKeyInput.type === "text";
+      apiKeyInput.type = showing ? "password" : "text";
+      if (peekLabel) peekLabel.textContent = showing ? "show" : "hide";
+    });
+
+    // Shape hint as user types
+    apiKeyInput.addEventListener("input", () => {
+      if (!apiKeyHint) return;
+      const v = apiKeyInput.value;
+      apiKeyHint.classList.remove("warn", "err");
+      if (!v) {
+        apiKeyHint.textContent = "";
+      } else if (!isLikelyValidKeyShape(v)) {
+        apiKeyHint.textContent = "That looks shorter than a real OpenRouter key.";
+        apiKeyHint.classList.add("warn");
+      } else if (!v.startsWith("sk-or-")) {
+        apiKeyHint.textContent =
+          "OpenRouter keys usually start with `sk-or-`. Verify before using.";
+        apiKeyHint.classList.add("warn");
+      } else {
+        apiKeyHint.textContent = "Looks valid. Click Verify to confirm.";
+      }
+    });
+
+    verifyBtn.addEventListener("click", async () => {
+      if (!verifyStatus) return;
+      const v = apiKeyInput.value.trim();
+      if (!v) {
+        verifyStatus.textContent = "Paste a key first.";
+        verifyStatus.className = "status err";
+        return;
+      }
+      verifyStatus.textContent = "Checking…";
+      verifyStatus.className = "status";
+      verifyBtn.disabled = true;
+
+      const err = await verifyApiKey(v);
+      verifyBtn.disabled = false;
+
+      if (err === null) {
+        setApiKey(v);
+        verifyStatus.textContent = "✓ Key verified and saved.";
+        verifyStatus.className = "status ok";
+      } else {
+        verifyStatus.textContent = `✗ ${err}`;
+        verifyStatus.className = "status err";
+      }
+    });
+
+    clearBtn?.addEventListener("click", () => {
+      apiKeyInput.value = "";
+      clearApiKey();
+      if (apiKeyHint) apiKeyHint.textContent = "";
+      if (verifyStatus) {
+        verifyStatus.textContent = "Key cleared.";
+        verifyStatus.className = "status";
+      }
+    });
+
+    // Model selection — save immediately on change
+    modelInputs.forEach((r) => {
+      r.addEventListener("change", () => {
+        if (r.checked) setModelId(r.value);
+      });
+    });
+
+    // Environment save
+    saveEnvBtn?.addEventListener("click", () => {
+      if (!envStatus) return;
+      setEnvironment({
+        techStack: techStackInput?.value ?? "",
+        scale: (scaleSelect?.value ?? "unspecified") as any,
+        constraints: constraintsInput?.value ?? "",
+      });
+      envStatus.textContent = "✓ Saved.";
+      envStatus.className = "status ok";
+      setTimeout(() => {
+        envStatus.textContent = "";
+      }, 2500);
+    });
+
+    // Wipe everything
+    nukeBtn?.addEventListener("click", () => {
+      if (!confirm("Wipe your API key, model choice, environment, and saved customizations?")) {
+        return;
+      }
+      try {
+        for (const k of Object.keys(localStorage)) {
+          if (k.startsWith("skillkit.")) localStorage.removeItem(k);
+        }
+      } catch {
+        // ignore
+      }
+      window.location.reload();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+</script>

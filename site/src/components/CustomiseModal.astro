@@ -1,0 +1,950 @@
+---
+/**
+ * CustomiseModal.astro — the customizer dialog.
+ *
+ * Mounted once per skill page. Opens when any element with
+ * [data-open-customizer] is clicked (typically the CustomiseButton on
+ * the same page). Uses a native <dialog> for accessibility — Escape
+ * closes, focus trap is automatic, backdrop is built in.
+ *
+ * This commit ships the UI shell with three states (form / generating
+ * / done). The generating + done states' wiring to the LLM and the
+ * diff view land in subsequent commits. The form state is fully
+ * functional — prefills from localStorage and calls a stub submit
+ * handler for now.
+ */
+
+interface Props {
+  skillSlug: string;
+  skillName: string;
+  skillDescription: string;
+  skillSafety: "safe" | "writes-local" | "writes-shared" | "destructive";
+  skillMdPath: string; // repo-relative path to the original SKILL.md
+  department: string;
+}
+
+const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, department } =
+  Astro.props;
+---
+
+<dialog
+  class="customiser"
+  id="customiser"
+  aria-labelledby="customiser-title"
+  data-skill-slug={skillSlug}
+  data-skill-name={skillName}
+  data-skill-description={skillDescription}
+  data-skill-safety={skillSafety}
+  data-skill-md-path={skillMdPath}
+  data-skill-department={department}
+>
+  <div class="c-head">
+    <div>
+      <span class="c-eyebrow">Customise for your organisation</span>
+      <h2 id="customiser-title" class="c-title">
+        <code>{skillName}</code>
+      </h2>
+    </div>
+    <button class="c-close" type="button" aria-label="Close" data-close>×</button>
+  </div>
+
+  <!-- FORM STATE -->
+  <form class="c-body c-state-form" id="c-form" data-state="form">
+    <div class="c-intro">
+      <p>
+        The LLM will rewrite this skill for your environment. Your API key and form inputs
+        stay in your browser — only the skill and your environment go to OpenRouter.
+      </p>
+      <p class="muted" id="c-key-status"></p>
+    </div>
+
+    <div class="field">
+      <label for="c-tech-stack">Your tech stack</label>
+      <input
+        type="text"
+        id="c-tech-stack"
+        placeholder="EKS on AWS, Python/FastAPI, Postgres, GitHub Actions"
+      />
+      <p class="hint">One line. Be specific — cloud, language, framework, orchestrator.</p>
+    </div>
+
+    <div class="field">
+      <label for="c-scale">Scale</label>
+      <select id="c-scale">
+        <option value="unspecified">(unspecified)</option>
+        <option value="personal">Personal project</option>
+        <option value="startup">Startup (≤50)</option>
+        <option value="scaleup">Scaleup (50–500)</option>
+        <option value="enterprise">Enterprise (500+)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="c-constraints">Constraints / quirks</label>
+      <textarea
+        id="c-constraints"
+        rows="3"
+        placeholder="SOC2 Type II; all secrets via Vault; deploy via ArgoCD; no public cloud beyond AWS"
+      ></textarea>
+    </div>
+
+    <div class="field">
+      <label for="c-extra">Anything else?</label>
+      <textarea
+        id="c-extra"
+        rows="3"
+        placeholder="Also add a step for Istio service mesh. Skip the blue-green section — we use canary only."
+      ></textarea>
+      <p class="hint">Free text that steers the rewrite. Leave blank if nothing specific.</p>
+    </div>
+
+    <div class="c-meta-row">
+      <div class="c-cost" id="c-cost">
+        <span class="muted">cost estimate:</span>
+        <code id="c-cost-value">—</code>
+      </div>
+      <div class="c-model muted" id="c-model-summary"></div>
+    </div>
+
+    <div class="c-actions">
+      <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+      <button type="submit" class="btn btn-primary" id="c-submit">
+        Customise with LLM
+      </button>
+    </div>
+  </form>
+
+  <!-- GENERATING STATE -->
+  <div class="c-body c-state-generating" id="c-generating" hidden data-state="generating">
+    <div class="c-gen-head">
+      <div class="spinner" aria-hidden="true"></div>
+      <div>
+        <div class="c-gen-title">Generating…</div>
+        <div class="c-gen-sub muted" id="c-gen-sub">Contacting OpenRouter…</div>
+      </div>
+      <button type="button" class="btn btn-ghost" id="c-cancel">Cancel</button>
+    </div>
+    <pre class="c-stream" id="c-stream" aria-live="polite"></pre>
+  </div>
+
+  <!-- DONE STATE -->
+  <div class="c-body c-state-done" id="c-done" hidden data-state="done">
+    <div id="c-done-head" class="c-done-head"></div>
+    <div class="c-tabs" role="tablist">
+      <button type="button" class="c-tab active" data-view="diff" role="tab" aria-selected="true">
+        Diff
+      </button>
+      <button type="button" class="c-tab" data-view="result" role="tab" aria-selected="false">
+        Final SKILL.md
+      </button>
+      <span class="c-diff-stats" id="c-diff-stats"></span>
+    </div>
+    <div id="c-diff-mount" class="c-diff-mount">
+      <div id="c-diff-view" class="c-diff-view"></div>
+      <pre class="c-result-pre" id="c-result-pre" hidden></pre>
+    </div>
+    <div id="c-action-feedback" class="c-action-feedback" aria-live="polite"></div>
+    <div class="c-actions">
+      <button type="button" class="btn btn-ghost" id="c-back">Edit and re-run</button>
+      <button type="button" class="btn btn-ghost" id="c-save">Save to browser</button>
+      <button type="button" class="btn btn-ghost" id="c-copy">Copy install command</button>
+      <button type="button" class="btn btn-primary" id="c-download">Download zip</button>
+    </div>
+  </div>
+
+  <!-- ERROR STATE (rendered inside form state) -->
+  <div class="c-error" id="c-error" hidden role="alert"></div>
+</dialog>
+
+<style>
+  .customiser {
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    color: var(--fg);
+    width: min(52rem, 100vw - 2rem);
+    max-height: calc(100vh - 4rem);
+    overflow: hidden;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+  }
+  .customiser::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+  }
+
+  .c-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elev-1);
+  }
+  .c-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .c-title {
+    margin: var(--space-1) 0 0;
+    font-size: 1.1rem;
+    font-family: var(--font-mono);
+  }
+  .c-title code {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font-weight: 600;
+  }
+  .c-close {
+    background: transparent;
+    border: 0;
+    color: var(--fg-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.5rem;
+  }
+  .c-close:hover {
+    color: var(--fg);
+  }
+
+  .c-body {
+    padding: var(--space-5) var(--space-6);
+    max-height: calc(100vh - 10rem);
+    overflow-y: auto;
+  }
+  .c-intro {
+    margin-bottom: var(--space-4);
+    font-size: 0.95rem;
+  }
+  .c-intro p {
+    margin: 0 0 var(--space-2);
+  }
+
+  .field {
+    margin: var(--space-4) 0;
+  }
+  .field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: var(--space-2);
+  }
+  .customiser input[type="text"],
+  .customiser select,
+  .customiser textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.55rem 0.85rem;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--fg);
+  }
+  .customiser input:focus,
+  .customiser select:focus,
+  .customiser textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-elev-2);
+  }
+  .customiser textarea {
+    resize: vertical;
+    font-family: var(--font-sans);
+  }
+  .customiser .hint {
+    margin: var(--space-2) 0 0;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+  }
+
+  .c-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--border);
+    margin-top: var(--space-5);
+    font-size: 0.85rem;
+  }
+  .c-cost code {
+    font-size: 0.95em;
+  }
+
+  .c-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    padding-top: var(--space-4);
+    margin-top: var(--space-3);
+    border-top: 1px solid var(--border);
+  }
+  .customiser .btn {
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .customiser .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .customiser .btn-primary:hover {
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+  }
+  .customiser .btn-ghost {
+    color: var(--fg-muted);
+    border-color: var(--border);
+  }
+  .customiser .btn-ghost:hover {
+    color: var(--fg);
+  }
+  .customiser .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Generating state */
+  .c-gen-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+  .c-gen-title {
+    font-weight: 600;
+  }
+  .c-gen-sub {
+    font-size: 0.85rem;
+    margin-top: 0.2em;
+  }
+  .c-gen-head .btn {
+    margin-left: auto;
+  }
+  .spinner {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2px solid var(--border-strong);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .c-stream {
+    margin: var(--space-4) 0 0;
+    padding: var(--space-4);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.55;
+    max-height: 22rem;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Done state */
+  .c-done-head {
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+  .c-diff-mount {
+    min-height: 14rem;
+  }
+  .c-result-pre {
+    margin: 0;
+    padding: var(--space-4);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.55;
+    max-height: 32rem;
+    overflow: auto;
+    white-space: pre;
+  }
+  .c-tabs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-3);
+  }
+  .c-tab {
+    background: transparent;
+    border: 0;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 0.85rem;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+  }
+  .c-tab:hover {
+    color: var(--fg);
+  }
+  .c-tab.active {
+    color: var(--fg);
+    border-bottom-color: var(--accent);
+  }
+  .c-diff-stats {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+  }
+  .c-diff-view {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--code-bg);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.55;
+    max-height: 32rem;
+    overflow: auto;
+  }
+  .c-diff-view :global(.diff-line) {
+    display: flex;
+    gap: 0.4em;
+    padding: 0.05rem var(--space-3);
+    white-space: pre;
+    border-left: 3px solid transparent;
+  }
+  .c-diff-view :global(.diff-sign) {
+    color: var(--fg-subtle);
+    user-select: none;
+    flex-shrink: 0;
+    width: 1ch;
+  }
+  .c-diff-view :global(.diff-add) {
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    border-left-color: var(--success);
+  }
+  .c-diff-view :global(.diff-add .diff-sign) {
+    color: var(--success);
+  }
+  .c-diff-view :global(.diff-del) {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    border-left-color: var(--danger);
+  }
+  .c-diff-view :global(.diff-del .diff-sign) {
+    color: var(--danger);
+  }
+  .c-diff-view :global(.diff-fold) {
+    padding: 0.25rem var(--space-3);
+    font-style: italic;
+    color: var(--fg-subtle);
+    border-top: 1px dashed var(--border);
+    border-bottom: 1px dashed var(--border);
+    background: var(--bg-elev-1);
+  }
+  .c-action-feedback {
+    margin-top: var(--space-3);
+    font-size: 0.85rem;
+    min-height: 1.4em;
+    color: var(--fg-muted);
+  }
+  .c-action-feedback.ok {
+    color: var(--success);
+  }
+  .c-action-feedback.err {
+    color: var(--danger);
+  }
+  .c-error {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--danger) 12%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+    border-radius: var(--radius-md);
+    color: var(--danger);
+    font-size: 0.9rem;
+  }
+  .c-gen-warn {
+    color: var(--warning);
+  }
+
+  /* Focus visibility */
+  .customiser :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  import { getSettings, saveCustomization, newCustomizationId } from "@/lib/settings";
+  import { getModelById, estimateCostUsd, formatCostRange, DEFAULT_MODEL_ID } from "@/lib/models";
+  import { runCompletion, OpenRouterError } from "@/lib/openrouter";
+  import { buildMessages, cleanLlmOutput, quickValidate } from "@/lib/prompts";
+  import { diffLines, summarise, renderUnifiedHtmlCollapsed } from "@/lib/diff";
+  import {
+    downloadSkillBundle,
+    buildInstallOneLiner,
+    copyToClipboard,
+    type ExportInput,
+  } from "@/lib/export";
+
+  /**
+   * Boot the customizer modal. Wires up:
+   *   - open / close triggers
+   *   - form prefill from localStorage
+   *   - cost estimate updates when inputs change
+   *   - state switching (form <-> generating <-> done)
+   *   - submit handler: fetch raw SKILL.md, build messages, stream from
+   *     OpenRouter, append chunks to the generating pane, transition to
+   *     done state with the cleaned output shown in a <pre>
+   *   - cancel button wired to AbortController
+   *   - re-run button returns to form (prefilled) with the extra prompt
+   *     preserved so tweak-and-re-run is one keystroke away
+   */
+  function boot() {
+    const dialog = document.querySelector<HTMLDialogElement>("dialog.customiser");
+    if (!dialog) return;
+
+    const form = dialog.querySelector<HTMLFormElement>("#c-form");
+    const keyStatus = dialog.querySelector<HTMLElement>("#c-key-status");
+    const techInput = dialog.querySelector<HTMLInputElement>("#c-tech-stack");
+    const scaleInput = dialog.querySelector<HTMLSelectElement>("#c-scale");
+    const constraintsInput = dialog.querySelector<HTMLTextAreaElement>("#c-constraints");
+    const extraInput = dialog.querySelector<HTMLTextAreaElement>("#c-extra");
+    const costValue = dialog.querySelector<HTMLElement>("#c-cost-value");
+    const modelSummary = dialog.querySelector<HTMLElement>("#c-model-summary");
+    const submitBtn = dialog.querySelector<HTMLButtonElement>("#c-submit");
+    if (!form) return;
+
+    // Openers
+    document.querySelectorAll<HTMLElement>("[data-open-customizer]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        openDialog();
+      });
+    });
+
+    // Closers
+    dialog.querySelectorAll<HTMLElement>("[data-close]").forEach((el) => {
+      el.addEventListener("click", () => dialog.close());
+    });
+
+    // Close when clicking outside the dialog box (on the backdrop).
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    function openDialog() {
+      prefill();
+      switchState("form");
+      if (typeof dialog!.showModal === "function") {
+        dialog!.showModal();
+      } else {
+        dialog!.setAttribute("open", "");
+      }
+      // Push focus into the first input after paint.
+      setTimeout(() => techInput?.focus(), 0);
+    }
+
+    function prefill() {
+      const s = getSettings();
+      if (techInput) techInput.value = s.environment.techStack;
+      if (scaleInput) scaleInput.value = s.environment.scale;
+      if (constraintsInput) constraintsInput.value = s.environment.constraints;
+      if (extraInput) extraInput.value = "";
+
+      // Key-configured hint
+      if (keyStatus) {
+        if (!s.apiKey) {
+          keyStatus.innerHTML =
+            '⚠ No OpenRouter API key configured. <a href="/settings">Add one in Settings →</a>';
+          keyStatus.style.color = "var(--warning)";
+          if (submitBtn) submitBtn.disabled = true;
+        } else {
+          keyStatus.innerHTML = "";
+          keyStatus.style.color = "";
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      }
+
+      // Model summary + cost
+      const model = getModelById(s.modelId) ?? getModelById("anthropic/claude-3.5-sonnet")!;
+      if (modelSummary) {
+        modelSummary.innerHTML = `model: <code>${model.label}</code> · <a href="/settings">change</a>`;
+      }
+      updateCost(model);
+    }
+
+    function updateCost(model = getModelById(getSettings().modelId)) {
+      if (!costValue || !model) return;
+      const formText = [
+        techInput?.value ?? "",
+        scaleInput?.value ?? "",
+        constraintsInput?.value ?? "",
+        extraInput?.value ?? "",
+      ].join(" ");
+      const skillMdChars = skillMdCharCount();
+      const range = estimateCostUsd(model, {
+        skillMdChars,
+        formChars: formText.length,
+      });
+      costValue.textContent = formatCostRange(range);
+    }
+
+    [techInput, scaleInput, constraintsInput, extraInput].forEach((el) => {
+      el?.addEventListener("input", () => updateCost());
+    });
+
+    /**
+     * The SKILL.md content isn't loaded into this page (the per-skill
+     * Astro page embeds it via the content collection render). Reading
+     * a character count from the server-rendered HTML is a fine
+     * estimate for cost purposes — just count the text in the
+     * .skill-body element.
+     */
+    function skillMdCharCount(): number {
+      const body = document.querySelector<HTMLElement>(".skill-body");
+      if (!body) return 10_000; // fallback
+      return body.innerText.length;
+    }
+
+    function switchState(state: "form" | "generating" | "done") {
+      dialog!.querySelectorAll<HTMLElement>("[data-state]").forEach((el) => {
+        el.hidden = el.dataset.state !== state;
+      });
+    }
+
+    // Live LLM submit
+    const streamEl = dialog.querySelector<HTMLElement>("#c-stream");
+    const genSub = dialog.querySelector<HTMLElement>("#c-gen-sub");
+    const resultPre = dialog.querySelector<HTMLPreElement>("#c-result-pre");
+    const doneHead = dialog.querySelector<HTMLElement>("#c-done-head");
+    const errorBox = dialog.querySelector<HTMLElement>("#c-error");
+    const cancelBtn = dialog.querySelector<HTMLButtonElement>("#c-cancel");
+
+    /** State shared across submit / cancel / re-run handlers. */
+    const ctx: {
+      controller: AbortController | null;
+      rawSkillMd: string;
+      customisedSkillMd: string;
+    } = {
+      controller: null,
+      rawSkillMd: "",
+      customisedSkillMd: "",
+    };
+
+    // Expose the customised skill + metadata for commit 7 (zip download + copy).
+    (window as any).__skillkitCurrent = ctx;
+
+    async function submit(e: Event) {
+      e.preventDefault();
+      const settings = getSettings();
+      if (!settings.apiKey) {
+        window.location.href = "/settings";
+        return;
+      }
+
+      // Reset error UI
+      if (errorBox) {
+        errorBox.hidden = true;
+        errorBox.textContent = "";
+      }
+
+      const skillSlug = dialog!.dataset.skillSlug ?? "";
+      const skillSafety = (dialog!.dataset.skillSafety ?? "safe") as
+        | "safe"
+        | "writes-local"
+        | "writes-shared"
+        | "destructive";
+      const skillDepartment = dialog!.dataset.skillDepartment ?? "";
+
+      // Fetch original SKILL.md (copied into public/raw/skills/ by the
+      // manifest generator on each build).
+      try {
+        if (genSub) genSub.textContent = "Fetching original skill…";
+        switchState("generating");
+        if (streamEl) streamEl.textContent = "";
+
+        const res = await fetch(`/raw/skills/${skillSlug}.md`);
+        if (!res.ok) {
+          throw new Error(`Could not load raw SKILL.md (${res.status}).`);
+        }
+        ctx.rawSkillMd = await res.text();
+      } catch (err) {
+        showError(`Failed to load the skill source: ${err instanceof Error ? err.message : String(err)}`);
+        switchState("form");
+        return;
+      }
+
+      // Build prompt
+      const messages = buildMessages({
+        originalSkillMd: ctx.rawSkillMd,
+        skillSlug,
+        department: skillDepartment,
+        originalSafety: skillSafety,
+        environment: {
+          techStack: techInput?.value ?? "",
+          scale: (scaleInput?.value ?? "unspecified") as any,
+          constraints: constraintsInput?.value ?? "",
+        },
+        extraPrompt: extraInput?.value ?? "",
+      });
+
+      if (genSub) genSub.textContent = "Contacting OpenRouter…";
+
+      // Run the completion
+      ctx.controller = new AbortController();
+      let chunkCount = 0;
+      ctx.customisedSkillMd = "";
+
+      try {
+        await runCompletion({
+          apiKey: settings.apiKey,
+          modelId: settings.modelId || DEFAULT_MODEL_ID,
+          messages,
+          signal: ctx.controller.signal,
+          onChunk: (delta) => {
+            chunkCount++;
+            ctx.customisedSkillMd += delta;
+            if (streamEl) {
+              streamEl.textContent += delta;
+              // Keep scrolled to bottom
+              streamEl.scrollTop = streamEl.scrollHeight;
+            }
+            if (genSub && chunkCount === 1) {
+              genSub.textContent = "Streaming…";
+            }
+          },
+        });
+      } catch (err) {
+        if (err instanceof OpenRouterError && err.kind === "aborted") {
+          // User cancelled — go quietly back to the form state.
+          switchState("form");
+          return;
+        }
+        const msg =
+          err instanceof Error ? err.message : "Unknown error from OpenRouter.";
+        showError(msg);
+        switchState("form");
+        return;
+      } finally {
+        ctx.controller = null;
+      }
+
+      // Cleanup + quick validate
+      const cleaned = cleanLlmOutput(ctx.customisedSkillMd);
+      const { ok, issues } = quickValidate(cleaned);
+      ctx.customisedSkillMd = cleaned;
+
+      // Populate done state with diff + final views
+      renderDoneState(cleaned, ok, issues);
+      switchState("done");
+    }
+
+    function renderDoneState(cleaned: string, ok: boolean, issues: string[]) {
+      const diffView = dialog!.querySelector<HTMLElement>("#c-diff-view");
+      const statsEl = dialog!.querySelector<HTMLElement>("#c-diff-stats");
+      const feedback = dialog!.querySelector<HTMLElement>("#c-action-feedback");
+
+      if (resultPre) resultPre.textContent = cleaned;
+
+      const ops = diffLines(ctx.rawSkillMd, cleaned);
+      const stats = summarise(ops);
+      if (diffView) diffView.innerHTML = renderUnifiedHtmlCollapsed(ops);
+      if (statsEl) {
+        statsEl.textContent = `+${stats.added} / −${stats.removed}`;
+      }
+      if (feedback) {
+        feedback.textContent = "";
+        feedback.className = "c-action-feedback";
+      }
+
+      if (doneHead) {
+        const warnHtml = ok
+          ? ""
+          : `<div class="c-gen-warn">⚠ Output may be malformed: ${issues
+              .map((i) => i.replace(/</g, "&lt;"))
+              .join("; ")}</div>`;
+        doneHead.innerHTML = `
+          <strong>Customisation ready.</strong> Review the diff, then download or copy the
+          install command. Download bundles the SKILL.md with install instructions;
+          Copy produces a one-line bash command you can paste into a terminal.
+          ${warnHtml}
+        `;
+      }
+
+      // Reset tab view to diff
+      dialog!.querySelectorAll<HTMLButtonElement>(".c-tab").forEach((b) => {
+        const active = b.dataset.view === "diff";
+        b.classList.toggle("active", active);
+        b.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      if (diffView) diffView.hidden = false;
+      if (resultPre) resultPre.hidden = true;
+    }
+
+    function currentExportInput(): ExportInput {
+      const settings = getSettings();
+      const model = getModelById(settings.modelId) ?? getModelById(DEFAULT_MODEL_ID)!;
+      return {
+        skillSlug: dialog!.dataset.skillSlug ?? "",
+        skillName: dialog!.dataset.skillName ?? "",
+        skillDepartment: dialog!.dataset.skillDepartment ?? "",
+        sourcePath: dialog!.dataset.skillMdPath ?? "",
+        customisedSkillMd: ctx.customisedSkillMd,
+        originalSkillMd: ctx.rawSkillMd,
+        techStack: techInput?.value ?? "",
+        scale: scaleInput?.value ?? "unspecified",
+        constraints: constraintsInput?.value ?? "",
+        extraPrompt: extraInput?.value ?? "",
+        modelLabel: model.label,
+        modelId: model.id,
+      };
+    }
+
+    function showFeedback(text: string, kind: "ok" | "err" | "" = "") {
+      const el = dialog!.querySelector<HTMLElement>("#c-action-feedback");
+      if (!el) return;
+      el.textContent = text;
+      el.className = kind ? `c-action-feedback ${kind}` : "c-action-feedback";
+      if (kind === "ok") {
+        setTimeout(() => {
+          if (el.textContent === text) {
+            el.textContent = "";
+            el.className = "c-action-feedback";
+          }
+        }, 3500);
+      }
+    }
+
+    function showError(msg: string) {
+      if (!errorBox) return;
+      errorBox.hidden = false;
+      errorBox.textContent = msg;
+    }
+
+    form.addEventListener("submit", submit);
+
+    cancelBtn?.addEventListener("click", () => {
+      ctx.controller?.abort();
+      // The runCompletion catch will handle the state transition.
+    });
+
+    dialog.querySelector<HTMLButtonElement>("#c-back")?.addEventListener("click", () => {
+      switchState("form");
+    });
+
+    // Tab switching inside the done state
+    dialog.querySelectorAll<HTMLButtonElement>(".c-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const view = tab.dataset.view;
+        dialog!.querySelectorAll<HTMLButtonElement>(".c-tab").forEach((b) => {
+          const active = b === tab;
+          b.classList.toggle("active", active);
+          b.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        const diffView = dialog!.querySelector<HTMLElement>("#c-diff-view");
+        if (diffView) diffView.hidden = view !== "diff";
+        if (resultPre) resultPre.hidden = view !== "result";
+      });
+    });
+
+    // Download zip
+    dialog.querySelector<HTMLButtonElement>("#c-download")?.addEventListener("click", async () => {
+      if (!ctx.customisedSkillMd) {
+        showFeedback("Nothing to download yet.", "err");
+        return;
+      }
+      try {
+        showFeedback("Building zip…");
+        await downloadSkillBundle(currentExportInput());
+        showFeedback("✓ Zip downloaded. Unzip into ~/.claude/skills/", "ok");
+      } catch (err) {
+        showFeedback(
+          `Download failed: ${err instanceof Error ? err.message : String(err)}`,
+          "err",
+        );
+      }
+    });
+
+    // Copy install one-liner
+    dialog.querySelector<HTMLButtonElement>("#c-copy")?.addEventListener("click", async () => {
+      if (!ctx.customisedSkillMd) {
+        showFeedback("Nothing to copy yet.", "err");
+        return;
+      }
+      const cmd = buildInstallOneLiner(currentExportInput());
+      const ok = await copyToClipboard(cmd);
+      if (ok) {
+        showFeedback(
+          "✓ Install command copied. Paste into a terminal to install.",
+          "ok",
+        );
+      } else {
+        showFeedback(
+          "Couldn't copy. Use the Download button instead.",
+          "err",
+        );
+      }
+    });
+
+    // Save to browser
+    dialog.querySelector<HTMLButtonElement>("#c-save")?.addEventListener("click", () => {
+      if (!ctx.customisedSkillMd) {
+        showFeedback("Nothing to save yet.", "err");
+        return;
+      }
+      const settings = getSettings();
+      try {
+        saveCustomization({
+          id: newCustomizationId(),
+          skillSlug: dialog!.dataset.skillSlug ?? "",
+          createdAt: new Date().toISOString(),
+          modelId: settings.modelId || DEFAULT_MODEL_ID,
+          environment: {
+            techStack: techInput?.value ?? "",
+            scale: (scaleInput?.value ?? "unspecified") as any,
+            constraints: constraintsInput?.value ?? "",
+          },
+          extraPrompt: extraInput?.value ?? "",
+          customSkillMd: ctx.customisedSkillMd,
+        });
+        showFeedback(
+          "✓ Saved to this browser. You can re-open it from the Settings page.",
+          "ok",
+        );
+      } catch (err) {
+        showFeedback(
+          `Save failed: ${err instanceof Error ? err.message : String(err)}`,
+          "err",
+        );
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+</script>
