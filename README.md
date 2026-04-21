@@ -13,15 +13,16 @@ You don't need to be an AI expert to use this. If you can copy and paste a comma
 3. [What is a "skill"?](#what-is-a-skill)
 4. [Who is this for?](#who-is-this-for)
 5. [What you need before you start](#what-you-need-before-you-start)
-6. [Install in 2 minutes](#install-in-2-minutes)
-7. [What install.sh actually does](#what-installsh-actually-does)
-8. [How to use a skill](#how-to-use-a-skill)
-9. [The 8 departments and 64 skills](#the-8-departments-and-64-skills)
-10. [Customising skills for your team](#customising-skills-for-your-team)
-11. [Works with Cursor, Gemini CLI, Codex CLI too](#works-with-cursor-gemini-cli-codex-cli-too)
-12. [FAQ](#faq)
-13. [Contributing](#contributing)
-14. [License](#license)
+6. [See it in action — examples](#see-it-in-action--examples)
+7. [Install in 2 minutes](#install-in-2-minutes)
+8. [What install.sh actually does](#what-installsh-actually-does)
+9. [How to use a skill](#how-to-use-a-skill)
+10. [The 8 departments and 64 skills](#the-8-departments-and-64-skills)
+11. [Customising skills for your team](#customising-skills-for-your-team)
+12. [Works with Cursor, Gemini CLI, Codex CLI too](#works-with-cursor-gemini-cli-codex-cli-too)
+13. [FAQ](#faq)
+14. [Contributing](#contributing)
+15. [License](#license)
 
 ---
 
@@ -131,6 +132,19 @@ claude
 That's it. You now have Claude in your terminal. Try typing a question like "what's in this folder?" — Claude will answer.
 
 **Don't have a terminal?** On macOS open "Terminal" (Cmd+Space, type "terminal"). On Windows open "PowerShell" (Start menu, type "powershell"). On Linux you already know.
+
+---
+
+## See it in action — examples
+
+The fastest way to understand what this kit actually does is to read a worked example. Every example is an end-to-end walkthrough showing the exact user prompt, which skill auto-triggered, what Claude did, and what files changed.
+
+| Example | What it shows | Level | Read time | Run time |
+|---|---|---|---|---|
+| **[examples/simple-101](examples/simple-101/how-to.md)** | Setup for Claude Code, the VS Code extension, GitHub Copilot, and Codex CLI. Then one skill ships a working `/hello` endpoint. **Start here if you're new.** | Beginner | 5 min | 15 min |
+| **[examples/developers](examples/developers/how-to.md)** | Full end-to-end flow on a real public repo ([node-express-boilerplate](https://github.com/hagopj13/node-express-boilerplate)): 9 skills, one shipped feature, one merged PR. | Intermediate | 15 min | 45 min |
+
+See the [examples/ README](examples/README.md) for the format, conventions, and how to contribute new examples.
 
 ---
 
