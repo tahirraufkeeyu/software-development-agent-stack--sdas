@@ -1,6 +1,6 @@
 ---
 import Base from "@/layouts/Base.astro";
-import { getCollection, render } from "astro:content";
+import { getEntry, render } from "astro:content";
 import {
   getAllSkills,
   getSkillBySlug,
@@ -22,11 +22,12 @@ if (!skill) {
   return Astro.redirect("/404");
 }
 
-// Look up the content-collection entry for the body. Skipped gracefully if
-// the mirror is missing (only happens when the manifest was generated
-// without running the content mirror step, e.g. in tests).
-const mirrorEntries = await getCollection("skills");
-const entry = mirrorEntries.find((e) => e.data.slug === skillSlug);
+// Look up the content-collection entry for the body. `slug` here is the
+// Astro-auto-derived slug, which matches the mirror filename stem (the
+// generator writes <skillSlug>.md under src/content/skills/).
+// If the mirror is missing for any reason, fall through to the
+// "Body unavailable" message without 500ing.
+const entry = await getEntry("skills", skillSlug);
 const Content = entry ? (await render(entry)).Content : null;
 
 const sourceUrl = githubSourceUrl(skill);

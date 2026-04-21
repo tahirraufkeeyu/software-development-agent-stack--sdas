@@ -206,11 +206,16 @@ async function readSkill(
  * Wrap the body with a tiny frontmatter so Astro's content collection can
  * read it. The content collection config (src/content/config.ts) declares
  * the schema.
+ *
+ * NB: we deliberately do NOT write a `slug` field here. `slug` is reserved
+ * by Astro and auto-derived from the filename; writing it breaks schema
+ * validation. The mirror filename is `${entry.slug}.md` (see main()), so
+ * Astro's auto slug equals the skill slug — pages look up entries via
+ * getEntry("skills", <slug>) which works without a manual slug field.
  */
 function buildContentMirror(entry: SkillEntry, body: string): string {
   const frontmatter = [
     "---",
-    `slug: ${JSON.stringify(entry.slug)}`,
     `department: ${JSON.stringify(entry.department)}`,
     `description: ${JSON.stringify(entry.description)}`,
     `safety: ${JSON.stringify(entry.safety)}`,

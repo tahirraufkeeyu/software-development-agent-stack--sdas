@@ -16,8 +16,10 @@ import { defineCollection, z } from "astro:content";
 
 const skills = defineCollection({
   type: "content",
+  // NB: `slug` is a RESERVED field in Astro content collections — it's
+  // auto-derived from the filename and must NOT appear in the schema or
+  // the frontmatter. Use `entry.slug` (auto) or `entry.id` at read time.
   schema: z.object({
-    slug: z.string(),
     department: z.string(),
     description: z.string(),
     safety: z.enum(["safe", "writes-local", "writes-shared", "destructive"]),
