@@ -19,52 +19,116 @@ interface Option {
   risk?: string;
 }
 
-const options: Option[] = [
+interface Section {
+  title: string;
+  note: string;
+  options: Option[];
+}
+
+const sections: Section[] = [
   {
-    id: "01",
-    file: "/logos/01-tile-mono.svg",
-    title: "Tile monogram",
-    positioning:
-      "Clean, neutral, closest to the current brand. 'sk' in a rounded accent square. Works at every size. Safe pick.",
+    title: "Geometric marks",
+    note: "Abstract, type-led. Blend in with dev-tool conventions.",
+    options: [
+      {
+        id: "01",
+        file: "/logos/01-tile-mono.svg",
+        title: "Tile monogram",
+        positioning:
+          "Clean, neutral, closest to the current brand. 'sk' in a rounded accent square. Works at every size. Safe pick.",
+      },
+      {
+        id: "02",
+        file: "/logos/02-stacked-cards.svg",
+        title: "Stacked cards",
+        positioning:
+          "Three fanned cards = 'library of skills'. Literal and legible. Good at 64 px+, gets mushy at 16 px.",
+        risk: "Loses detail at favicon size.",
+      },
+      {
+        id: "03",
+        file: "/logos/03-prompt-caret.svg",
+        title: "Prompt caret",
+        positioning:
+          "'>_' — terminal-native mark. Signals 'tool for people who live in a shell'. Most on-brand with the terminal animation on the landing page.",
+        risk: "Narrow audience read — less obvious to non-devs.",
+      },
+      {
+        id: "04",
+        file: "/logos/04-chain-nodes.svg",
+        title: "Chain of nodes",
+        positioning:
+          "Three connected circles = the chains/orchestrator concept. Abstract, clean, scales well. Plays on 'skills chain into workflows'.",
+      },
+      {
+        id: "05",
+        file: "/logos/05-bracket-pair.svg",
+        title: "Bracket pair",
+        positioning:
+          "'{ · }' — code + encoded unit. Developer-native, Markdown-adjacent. Quiet and technical.",
+        risk: "Similar energy to many existing dev-tool logos.",
+      },
+      {
+        id: "06",
+        file: "/logos/06-dot-grid.svg",
+        title: "Dot grid",
+        positioning:
+          "4×4 matrix with a diagonal of filled dots = the catalog with your customized path through it. Light-themed, quiet, different from everything else in this list.",
+        risk: "Abstract — doesn't read as a specific thing on first glance.",
+      },
+    ],
   },
   {
-    id: "02",
-    file: "/logos/02-stacked-cards.svg",
-    title: "Stacked cards",
-    positioning:
-      "Three fanned cards = 'library of skills'. Literal and legible. Good at 64 px+, gets mushy at 16 px.",
-    risk: "Loses detail at favicon size.",
-  },
-  {
-    id: "03",
-    file: "/logos/03-prompt-caret.svg",
-    title: "Prompt caret",
-    positioning:
-      "'>_' — terminal-native mark. Signals 'tool for people who live in a shell'. Most on-brand with the terminal animation on the landing page.",
-    risk: "Narrow audience read — less obvious to non-devs.",
-  },
-  {
-    id: "04",
-    file: "/logos/04-chain-nodes.svg",
-    title: "Chain of nodes",
-    positioning:
-      "Three connected circles = the chains/orchestrator concept. Abstract, clean, scales well. Plays on 'skills chain into workflows'.",
-  },
-  {
-    id: "05",
-    file: "/logos/05-bracket-pair.svg",
-    title: "Bracket pair",
-    positioning:
-      "'{ · }' — code + encoded unit. Developer-native, Markdown-adjacent. Quiet and technical.",
-    risk: "Similar energy to many existing dev-tool logos.",
-  },
-  {
-    id: "06",
-    file: "/logos/06-dot-grid.svg",
-    title: "Dot grid",
-    positioning:
-      "4×4 matrix with a diagonal of filled dots = the catalog with your customized path through it. Light-themed, quiet, different from everything else in this list.",
-    risk: "Abstract — doesn't read as a specific thing on first glance.",
+    title: "Animal marks",
+    note:
+      "Characterful, warm, memorable. Trades abstraction for personality — the mark is a mascot, not a logo.",
+    options: [
+      {
+        id: "07",
+        file: "/logos/07-capybara.svg",
+        title: "Capybara",
+        positioning:
+          "Calm, unfussy, memorable. Capybaras have become a dev-community meme; this gives the brand warmth without leaning cartoon. Stands out in a sea of abstract marks.",
+      },
+      {
+        id: "08",
+        file: "/logos/08-owl.svg",
+        title: "Owl",
+        positioning:
+          "The wisdom mark. Eyes do the heavy lifting at small sizes — instantly legible. Signals 'knowledge library' clearly.",
+        risk: "Education-adjacent products lean on owls heavily; may feel familiar.",
+      },
+      {
+        id: "09",
+        file: "/logos/09-fox.svg",
+        title: "Fox",
+        positioning:
+          "Clever, adaptable, helpful. Geometric face-forward fox on warm-cream background. Different energy from Firefox's fire-fox-around-globe.",
+      },
+      {
+        id: "10",
+        file: "/logos/10-otter.svg",
+        title: "Otter with tool",
+        positioning:
+          "Otter holding a blue 'tool' (stone). Direct metaphor — otters use the right rock for the right shellfish; skills pick the right tool for the job. Playful, on-theme.",
+        risk: "More detail than the rest; test at 16 px.",
+      },
+      {
+        id: "11",
+        file: "/logos/11-octopus.svg",
+        title: "Octopus",
+        positioning:
+          "Many arms = many skills. Purple octopus on dark tile. Direct metaphor for a library of capabilities deployable independently.",
+        risk: "Strong association with GitHub Octocat; may feel derivative.",
+      },
+      {
+        id: "12",
+        file: "/logos/12-axolotl.svg",
+        title: "Axolotl",
+        positioning:
+          "Nothing else looks like this. Signature gills make it recognisable at any size. Axolotls regenerate — subtle nod to 'customise your skill forever, re-run it anytime'. Most distinctive of the set.",
+      },
+    ],
   },
 ];
 ---
@@ -83,37 +147,45 @@ const options: Option[] = [
     </p>
   </header>
 
-  <div class="grid">
-    {
-      options.map((opt) => (
-        <section class="opt">
-          <div class="opt-head">
-            <span class="opt-num">{opt.id}</span>
-            <h2>{opt.title}</h2>
-          </div>
-          <div class="opt-previews">
-            <div class="opt-size opt-size-lg">
-              <img src={opt.file} alt={opt.title} width="128" height="128" />
-              <span class="opt-label">128</span>
-            </div>
-            <div class="opt-size opt-size-md">
-              <img src={opt.file} alt={opt.title} width="64" height="64" />
-              <span class="opt-label">64</span>
-            </div>
-            <div class="opt-size opt-size-sm">
-              <img src={opt.file} alt={opt.title} width="32" height="32" />
-              <span class="opt-label">32</span>
-            </div>
-          </div>
-          <p class="opt-positioning">{opt.positioning}</p>
-          {opt.risk ? <p class="opt-risk muted">Trade-off: {opt.risk}</p> : null}
-          <p class="opt-file subtle">
-            <code>{opt.file}</code>
-          </p>
-        </section>
-      ))
-    }
-  </div>
+  {
+    sections.map((sec) => (
+      <section class="sec">
+        <div class="sec-head">
+          <h2>{sec.title}</h2>
+          <p class="muted">{sec.note}</p>
+        </div>
+        <div class="grid">
+          {sec.options.map((opt) => (
+            <section class="opt">
+              <div class="opt-head">
+                <span class="opt-num">{opt.id}</span>
+                <h3>{opt.title}</h3>
+              </div>
+              <div class="opt-previews">
+                <div class="opt-size opt-size-lg">
+                  <img src={opt.file} alt={opt.title} width="128" height="128" />
+                  <span class="opt-label">128</span>
+                </div>
+                <div class="opt-size opt-size-md">
+                  <img src={opt.file} alt={opt.title} width="64" height="64" />
+                  <span class="opt-label">64</span>
+                </div>
+                <div class="opt-size opt-size-sm">
+                  <img src={opt.file} alt={opt.title} width="32" height="32" />
+                  <span class="opt-label">32</span>
+                </div>
+              </div>
+              <p class="opt-positioning">{opt.positioning}</p>
+              {opt.risk ? <p class="opt-risk muted">Trade-off: {opt.risk}</p> : null}
+              <p class="opt-file subtle">
+                <code>{opt.file}</code>
+              </p>
+            </section>
+          ))}
+        </div>
+      </section>
+    ))
+  }
 
   <section class="picker-note">
     <h2>How to pick</h2>
@@ -143,6 +215,22 @@ const options: Option[] = [
     color: var(--accent);
     margin: 0 0 var(--space-2);
   }
+  .sec {
+    margin-bottom: var(--space-12);
+  }
+  .sec-head {
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-head h2 {
+    margin: 0 0 var(--space-2);
+    font-size: 1.25rem;
+  }
+  .sec-head p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
   .grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -152,6 +240,10 @@ const options: Option[] = [
     .grid {
       grid-template-columns: 1fr 1fr;
     }
+  }
+  .opt h3 {
+    margin: 0;
+    font-size: 1.05rem;
   }
 
   .opt {
