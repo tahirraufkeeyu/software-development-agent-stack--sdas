@@ -78,8 +78,14 @@ site/
 
 ## Status
 
-- **Phase A (this branch):** catalog + search. What you see here.
-- **Phase B (pending):** customizer form, one-line install, shareable customization URLs.
-- **Phase C (pending):** fork-to-GitHub, team presets.
+- **Phase A:** catalog + search. Landing page, department index, per-skill pages, search.
+- **Phase B1 (current):** LLM-powered customizer. Per-skill "Customise for your organisation"
+  button, OpenRouter-backed rewrite with streaming, unified diff view, zip download, one-line
+  install, save-to-browser. All client-side; user brings their own OpenRouter key from
+  [/settings](./src/pages/settings.astro).
+- **Phase B2 (pending):** per-skill question banks (tailored form fields per skill instead
+  of the universal four), customization history inspector, shareable customization URLs.
+- **Phase C (pending):** fork-to-GitHub integration, team presets, published customization
+  registry.
 
 See the root [README.md](../README.md) for the rest of the kit.

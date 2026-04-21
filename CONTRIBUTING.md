@@ -201,6 +201,27 @@ When adding a skill that produces an artifact another skill consumes, add the `p
 
 For orchestrators (`chains:` is set), the body of `SKILL.md` should include a `## Chained skills` section enumerating the skills it calls and the order. This keeps the human-readable version in sync with the machine-readable list.
 
+### The `skillkit.dev` customizer
+
+Every skill in this kit gets a "Customise for your organisation" button on its `skillkit.dev` page. The customizer lets a user rewrite the SKILL.md for their environment (tech stack, scale, constraints, free-text extras) via an LLM — fully browser-side, no backend.
+
+You don't have to do anything extra for your skill to participate. If the SKILL.md follows the conventions above (valid frontmatter, required H2 sections, detection-first Procedure for stack-specific skills, fail-loud Constraints), the customizer's system prompt already preserves everything important when it rewrites.
+
+A few things to keep in mind as a skill author:
+
+- **Write the examples honestly.** The LLM adapts examples to the user's stack; if your examples are copy-paste-real for the default stack, the rewrite has good material to work from. Handwavy or pseudo-code examples produce handwavy rewrites.
+- **Keep Constraints specific.** The customizer system prompt forbids lowering safety or removing warnings, but vague Constraints don't survive rewrites cleanly. Concrete bans (`Never commit raw API keys — use Secrets Manager or sealed-secrets`) carry through.
+- **Be concrete about the default stack.** If your skill is Prometheus-specific, say so in `supported-stacks` and the Detection step. The customizer knows to add new stacks only when the rewrite actually handles them — vague defaults confuse this.
+- **If a skill legitimately can't be rewritten** (e.g. `secret-scanner` works for git-based flows only and wouldn't meaningfully customize), that's fine — the rewrite will largely mirror the original and that's the correct outcome.
+
+The customizer does NOT:
+
+- Send anything to the skillkit.dev server. All LLM calls are browser → openrouter.ai direct.
+- Modify the kit's SKILL.md files. The customizer returns a new document the user downloads or installs locally — the upstream stays unchanged.
+- Store user API keys or customizations on our servers. Everything is in the user's `localStorage`.
+
+If you're iterating on a skill and want to see how it customizes under common scenarios, run the site locally (`cd site && npm run dev`), open the skill's page, and click Customise. You'll need your own OpenRouter key; the settings page at `/settings` walks you through it.
+
 ## Reference material
 
 Long reference content (checklists, templates, tables of patterns) goes in a `references/` directory beside the skill:

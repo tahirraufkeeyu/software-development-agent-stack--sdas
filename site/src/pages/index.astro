@@ -40,6 +40,11 @@ const featured = featuredSlugs
         rel="noopener">View on GitHub ↗</a
       >
     </div>
+    <p class="hero-custom muted">
+      Every skill ships a <strong>Customise for your organisation</strong> button — rewrite any
+      skill for your stack via an LLM, fully in your browser. <a href="/settings">Add your
+      OpenRouter key →</a>
+    </p>
     <p class="stats subtle">
       {totals.skills} skills
       · {totals.bySafety.safe} safe
@@ -249,6 +254,15 @@ cd ~/sdas
   .stats {
     font-family: var(--font-mono);
     margin: 0;
+  }
+  .hero-custom {
+    margin: var(--space-5) 0 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    max-width: 44rem;
+  }
+  .hero-custom strong {
+    color: var(--fg);
   }
 
   .dept-card {
