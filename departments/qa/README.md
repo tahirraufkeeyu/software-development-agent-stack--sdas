@@ -35,10 +35,12 @@ This department ships one **workflow orchestrator** skill that chains the task s
 ## Quick install
 
 ```bash
-./install.sh qa
+skillskit install qa
 ```
 
-This copies the `qa` department's skills into `.claude/skills/` in the current repository. Re-run the script to refresh.
+This copies the `qa` department's skills into `~/.claude/skills/`. Re-run the command to refresh, or use `skillskit update` to re-sync all installed skills from the latest binary.
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP servers
 

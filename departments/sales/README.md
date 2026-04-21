@@ -26,10 +26,12 @@ This department ships one **workflow orchestrator** skill that chains the task s
 ## Quick Install
 
 ```bash
-./install.sh sales
+skillskit install sales
 ```
 
-This copies the `sales/skills/*` directory into your local `~/.claude/skills/` and registers each `SKILL.md` with the Claude Code harness. Run `claude skills list` to confirm.
+This copies the `sales/skills/*` directory into your local `~/.claude/skills/` and registers each `SKILL.md` with the Claude Code harness. Run `skillskit list` to confirm.
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP Servers
 

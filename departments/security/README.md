@@ -47,14 +47,16 @@ This department ships **two workflow orchestrators**. Orchestrators have a riche
 
 ## Quick install
 
-```
-./install.sh security
+```bash
+skillskit install security
 ```
 
 The installer copies the `skills/` tree into the active Claude Code skills
 directory (`~/.claude/skills/` by default), makes the `*.sh` scripts
 executable, and prints the list of detected external CLIs that still need
 installation.
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP servers
 

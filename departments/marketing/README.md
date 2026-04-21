@@ -25,11 +25,13 @@ This department ships one **workflow orchestrator** skill that chains the task s
 
 ## Quick install
 
-```
-./install.sh marketing
+```bash
+skillskit install marketing
 ```
 
-This copies every skill into your `.claude/skills/` directory and registers references. Run from the starter-kit root.
+This copies every skill into your `~/.claude/skills/` directory and registers references.
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP servers
 

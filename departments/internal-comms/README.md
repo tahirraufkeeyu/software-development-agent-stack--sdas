@@ -34,11 +34,13 @@ This department ships one **workflow orchestrator** skill that chains the task s
 
 ## Quick install
 
-```
-./install.sh internal-comms
+```bash
+skillskit install internal-comms
 ```
 
-This copies the skill directory into `.claude/skills/` for the current project. To install globally, use `./install.sh --global internal-comms`.
+This copies the skill directory into `~/.claude/skills/` so Claude Code picks them up globally. Target a different tool with `skillskit install --host cursor internal-comms` (or `codex`, `gemini`).
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP servers
 

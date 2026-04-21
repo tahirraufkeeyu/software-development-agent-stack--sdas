@@ -35,14 +35,16 @@ This department ships one **workflow orchestrator** skill that chains the task s
 
 ## Quick install
 
-```
-./install.sh infrastructure
+```bash
+skillskit install infrastructure
 ```
 
 The installer copies the `skills/` tree into the active Claude Code skills
 directory (`~/.claude/skills/` by default), makes scripts executable, and
 prints which external CLIs (`kubectl`, `helm`, `velero`, `mtr`, `openssl`,
 `dig`, `jq`, `yq`) are missing on the host.
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP servers
 

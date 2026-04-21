@@ -35,10 +35,12 @@ This department ships one **workflow orchestrator** skill that chains the task s
 ## Quick install
 
 ```bash
-./install.sh devops
+skillskit install devops
 ```
 
-This copies `departments/devops/skills/*` into `~/.claude/skills/` (or your project-local `.claude/skills/` directory). Restart Claude Code so the new SKILL.md files are indexed.
+This copies every skill in this department into `~/.claude/skills/` (or your project-local `.claude/skills/` directory). Restart Claude Code so the new SKILL.md files are indexed.
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP servers
 
