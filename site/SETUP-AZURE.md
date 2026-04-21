@@ -16,8 +16,8 @@ In the [Azure portal](https://portal.azure.com):
 
 1. **Create a resource** → search "Static Web App" → **Create**.
 2. **Subscription**: your subscription.
-3. **Resource group**: create new, name it `rg-skillkit` (or reuse an existing one).
-4. **Name**: `skillkit-site`.
+3. **Resource group**: create new, name it `rg-skillskit` (or reuse an existing one).
+4. **Name**: `skillskit-site`.
 5. **Plan type**: **Free**.
 6. **Region for Azure Functions and staging environments**: pick the region closest to your primary audience (`West Europe` or `East US 2` are safe defaults).
 7. **Deployment details**:
@@ -56,18 +56,18 @@ When Azure created the Static Web App, it added a repo secret like:
 AZURE_STATIC_WEB_APPS_API_TOKEN_<ADJECTIVE>_<NOUN>_<RANDOM>
 ```
 
-Our workflow references `AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLKIT`. Pick one of:
+Our workflow references `AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLSKIT`. Pick one of:
 
 **Option A — rename the secret in GitHub.**
 
 1. Repo → Settings → Secrets and variables → Actions.
 2. Copy the value of the Azure-created secret.
-3. Create a new secret named `AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLKIT` with the copied value.
+3. Create a new secret named `AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLSKIT` with the copied value.
 4. Delete the Azure-created one.
 
 **Option B — edit the workflow.**
 
-Open `.github/workflows/azure-static-web-apps.yml` and update both occurrences of `AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLKIT` to match the Azure-created secret name.
+Open `.github/workflows/azure-static-web-apps.yml` and update both occurrences of `AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLSKIT` to match the Azure-created secret name.
 
 Option A keeps the workflow readable and stable across re-provisioning.
 
@@ -87,27 +87,27 @@ Once the default deploy works:
 
 1. Azure portal → your Static Web App → **Custom domains** → **Add**.
 2. Domain type: **Custom domain on other DNS**.
-3. Enter `skillkit.dev`.
+3. Enter `skillskit.dev`.
 4. Azure shows you:
    - A `TXT` record for validation.
    - A `CNAME` or `ALIAS` target for the actual traffic.
-5. At your DNS provider (Cloudflare Registrar, Namecheap, Azure DNS, etc.) add those records. For apex `skillkit.dev` you may need:
+5. At your DNS provider (Cloudflare Registrar, Namecheap, Azure DNS, etc.) add those records. For apex `skillskit.dev` you may need:
    - `ALIAS`/`ANAME` record at `@` (root) pointing to the Azure target. Cloudflare Registrar supports apex flattening; Namecheap does not for `ALIAS` — use Cloudflare as DNS host even if you bought the domain elsewhere.
 6. Azure re-checks every few minutes. Takes 10–60 minutes for DNS to propagate globally. Once validated, Azure issues a Let's Encrypt cert automatically.
-7. Repeat the process for `www.skillkit.dev` pointing to the same target if you want both hostnames.
+7. Repeat the process for `www.skillskit.dev` pointing to the same target if you want both hostnames.
 
 ### 6. Verify
 
 ```bash
-curl -I https://skillkit.dev
+curl -I https://skillskit.dev
 # expect: 200, content-type: text/html, server includes Azure signature
 ```
 
-The site is now served at `https://skillkit.dev` with automatic HTTPS and global CDN.
+The site is now served at `https://skillskit.dev` with automatic HTTPS and global CDN.
 
 ## What happens on every push
 
-- **Push to `main`** → workflow builds, uploads to Azure, deploys to production URL (`https://skillkit.dev`).
+- **Push to `main`** → workflow builds, uploads to Azure, deploys to production URL (`https://skillskit.dev`).
 - **Pull request** → workflow builds, uploads to Azure, deploys to a unique `https://<pr>.<swa>.azurestaticapps.net` preview URL. Azure comments the URL on the PR.
 - **PR closed** → workflow tears down the preview environment.
 
@@ -119,7 +119,7 @@ Azure Static Web Apps Free tier at our usage pattern:
 
 - 100 GB bandwidth / month — well under even a viral launch.
 - 0.5 GB app storage — the built site is <5 MB.
-- 2 custom domains — `skillkit.dev` + `www.skillkit.dev` fit.
+- 2 custom domains — `skillskit.dev` + `www.skillskit.dev` fit.
 - 10 staging environments — typical PR throughput.
 
 If traffic ever exceeds the Free tier (unlikely for a docs site), upgrade to Standard ($9/month). No code changes required.
@@ -129,7 +129,7 @@ If traffic ever exceeds the Free tier (unlikely for a docs site), upgrade to Sta
 **Workflow fails at "Deploy to Azure Static Web Apps" with `401 Unauthorized`.**
 The secret name in the workflow doesn't match the secret in GitHub. Check step 3 above.
 
-**Workflow passes but `skillkit.dev` shows an Azure 404.**
+**Workflow passes but `skillskit.dev` shows an Azure 404.**
 Custom-domain validation not complete yet. Check the Custom Domains pane in the portal; usually resolves within an hour of DNS propagation.
 
 **Preview URLs aren't posted on PRs.**

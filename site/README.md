@@ -1,6 +1,6 @@
-# skillkit.dev — catalog site
+# skillskit.dev — catalog site
 
-The source code for [skillkit.dev](https://skillkit.dev), the browseable catalog for SDAS skills.
+The source code for [skillskit.dev](https://skillskit.dev), the browseable catalog for SDAS skills.
 
 ## What this is
 
@@ -22,7 +22,7 @@ src/content/skills/<id>.md           ← body copies for rendering (gitignored)
 Astro build → dist/                  ← static HTML/CSS/JS
                 │
                 ▼
-Azure Static Web Apps                ← served at skillkit.dev
+Azure Static Web Apps                ← served at skillskit.dev
 ```
 
 The manifest generator and content mirror run automatically via `predev` / `prebuild` npm scripts — you don't invoke them manually.

@@ -16,7 +16,7 @@ const recommended = recommendedModel();
       To use the LLM-powered skill customizer you need an OpenRouter API key. OpenRouter
       routes your requests to Claude, GPT-4o, Gemini, Llama, and others with a single key.
       All settings below are stored <strong>only in your browser's localStorage</strong>. Nothing
-      is sent to skillkit.dev or anyone else — API calls go directly from your browser to
+      is sent to skillskit.dev or anyone else — API calls go directly from your browser to
       OpenRouter.
     </p>
   </header>
@@ -140,10 +140,10 @@ const recommended = recommendedModel();
     <ul>
       <li>
         Your API key, model choice, and environment prefill are stored in your browser's
-        <code>localStorage</code> under the <code>skillkit.*</code> namespace.
+        <code>localStorage</code> under the <code>skillskit.*</code> namespace.
       </li>
       <li>
-        Nothing is sent to <code>skillkit.dev</code> at any point. Every customization
+        Nothing is sent to <code>skillskit.dev</code> at any point. Every customization
         request goes browser → <code>openrouter.ai</code> directly.
       </li>
       <li>
@@ -518,7 +518,7 @@ const recommended = recommendedModel();
       }
       try {
         for (const k of Object.keys(localStorage)) {
-          if (k.startsWith("skillkit.")) localStorage.removeItem(k);
+          if (k.startsWith("skillskit.")) localStorage.removeItem(k);
         }
       } catch {
         // ignore

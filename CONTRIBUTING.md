@@ -201,9 +201,9 @@ When adding a skill that produces an artifact another skill consumes, add the `p
 
 For orchestrators (`chains:` is set), the body of `SKILL.md` should include a `## Chained skills` section enumerating the skills it calls and the order. This keeps the human-readable version in sync with the machine-readable list.
 
-### The `skillkit.dev` customizer
+### The `skillskit.dev` customizer
 
-Every skill in this kit gets a "Customise for your organisation" button on its `skillkit.dev` page. The customizer lets a user rewrite the SKILL.md for their environment (tech stack, scale, constraints, free-text extras) via an LLM — fully browser-side, no backend.
+Every skill in this kit gets a "Customise for your organisation" button on its `skillskit.dev` page. The customizer lets a user rewrite the SKILL.md for their environment (tech stack, scale, constraints, free-text extras) via an LLM — fully browser-side, no backend.
 
 You don't have to do anything extra for your skill to participate. If the SKILL.md follows the conventions above (valid frontmatter, required H2 sections, detection-first Procedure for stack-specific skills, fail-loud Constraints), the customizer's system prompt already preserves everything important when it rewrites.
 
@@ -216,7 +216,7 @@ A few things to keep in mind as a skill author:
 
 The customizer does NOT:
 
-- Send anything to the skillkit.dev server. All LLM calls are browser → openrouter.ai direct.
+- Send anything to the skillskit.dev server. All LLM calls are browser → openrouter.ai direct.
 - Modify the kit's SKILL.md files. The customizer returns a new document the user downloads or installs locally — the upstream stays unchanged.
 - Store user API keys or customizations on our servers. Everything is in the user's `localStorage`.
 
