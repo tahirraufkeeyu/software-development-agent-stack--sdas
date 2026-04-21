@@ -130,7 +130,9 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
   <!-- DONE STATE -->
   <div class="c-body c-state-done" id="c-done" hidden data-state="done">
     <div id="c-done-head" class="c-done-head"></div>
-    <div id="c-diff-mount" class="c-diff-mount"></div>
+    <div id="c-diff-mount" class="c-diff-mount">
+      <pre class="c-result-pre" id="c-result-pre"></pre>
+    </div>
     <div class="c-actions">
       <button type="button" class="btn btn-ghost" id="c-back">Edit and re-run</button>
       <button type="button" class="btn btn-ghost" id="c-save">Save to browser</button>
@@ -139,7 +141,8 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
     </div>
   </div>
 
-  <!-- ERROR STATE (inline, re-uses the form body) -->
+  <!-- ERROR STATE (rendered inside form state) -->
+  <div class="c-error" id="c-error" hidden role="alert"></div>
 </dialog>
 
 <style>
@@ -360,6 +363,31 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
   .c-diff-mount {
     min-height: 14rem;
   }
+  .c-result-pre {
+    margin: 0;
+    padding: var(--space-4);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.55;
+    max-height: 32rem;
+    overflow: auto;
+    white-space: pre;
+  }
+  .c-error {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--danger) 12%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+    border-radius: var(--radius-md);
+    color: var(--danger);
+    font-size: 0.9rem;
+  }
+  .c-gen-warn {
+    color: var(--warning);
+  }
 
   /* Focus visibility */
   .customiser :focus-visible {
@@ -369,19 +397,23 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
 </style>
 
 <script>
-  import { getSettings } from "@/lib/settings";
-  import { getModelById, estimateCostUsd, formatCostRange } from "@/lib/models";
+  import { getSettings, saveCustomization, newCustomizationId } from "@/lib/settings";
+  import { getModelById, estimateCostUsd, formatCostRange, DEFAULT_MODEL_ID } from "@/lib/models";
+  import { runCompletion, OpenRouterError } from "@/lib/openrouter";
+  import { buildMessages, cleanLlmOutput, quickValidate } from "@/lib/prompts";
 
   /**
-   * Boot the customizer modal. This commit wires up:
+   * Boot the customizer modal. Wires up:
    *   - open / close triggers
    *   - form prefill from localStorage
    *   - cost estimate updates when inputs change
    *   - state switching (form <-> generating <-> done)
-   *   - stub submit handler that just logs for now
-   *
-   * Commit 6 replaces the submit handler with a real OpenRouter call
-   * and the diff view renderer.
+   *   - submit handler: fetch raw SKILL.md, build messages, stream from
+   *     OpenRouter, append chunks to the generating pane, transition to
+   *     done state with the cleaned output shown in a <pre>
+   *   - cancel button wired to AbortController
+   *   - re-run button returns to form (prefilled) with the extra prompt
+   *     preserved so tweak-and-re-run is one keystroke away
    */
   function boot() {
     const dialog = document.querySelector<HTMLDialogElement>("dialog.customiser");
@@ -496,23 +528,157 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
       });
     }
 
-    // Stub submit — real LLM call lands in commit 6.
-    form.addEventListener("submit", (e) => {
+    // Live LLM submit
+    const streamEl = dialog.querySelector<HTMLElement>("#c-stream");
+    const genSub = dialog.querySelector<HTMLElement>("#c-gen-sub");
+    const resultPre = dialog.querySelector<HTMLPreElement>("#c-result-pre");
+    const doneHead = dialog.querySelector<HTMLElement>("#c-done-head");
+    const errorBox = dialog.querySelector<HTMLElement>("#c-error");
+    const cancelBtn = dialog.querySelector<HTMLButtonElement>("#c-cancel");
+
+    /** State shared across submit / cancel / re-run handlers. */
+    const ctx: {
+      controller: AbortController | null;
+      rawSkillMd: string;
+      customisedSkillMd: string;
+    } = {
+      controller: null,
+      rawSkillMd: "",
+      customisedSkillMd: "",
+    };
+
+    // Expose the customised skill + metadata for commit 7 (zip download + copy).
+    (window as any).__skillkitCurrent = ctx;
+
+    async function submit(e: Event) {
       e.preventDefault();
       const settings = getSettings();
       if (!settings.apiKey) {
         window.location.href = "/settings";
         return;
       }
-      // Placeholder — commit 6 replaces this with runCompletion(...)
-      switchState("generating");
-      const stream = dialog!.querySelector<HTMLElement>("#c-stream");
-      if (stream) stream.textContent = "[customizer wiring lands in the next commit]";
-    });
 
-    // Cancel button (generating state) — stub until commit 6 provides an AbortController.
-    dialog.querySelector<HTMLButtonElement>("#c-cancel")?.addEventListener("click", () => {
-      switchState("form");
+      // Reset error UI
+      if (errorBox) {
+        errorBox.hidden = true;
+        errorBox.textContent = "";
+      }
+
+      const skillSlug = dialog!.dataset.skillSlug ?? "";
+      const skillSafety = (dialog!.dataset.skillSafety ?? "safe") as
+        | "safe"
+        | "writes-local"
+        | "writes-shared"
+        | "destructive";
+      const skillDepartment = dialog!.dataset.skillDepartment ?? "";
+
+      // Fetch original SKILL.md (copied into public/raw/skills/ by the
+      // manifest generator on each build).
+      try {
+        if (genSub) genSub.textContent = "Fetching original skill…";
+        switchState("generating");
+        if (streamEl) streamEl.textContent = "";
+
+        const res = await fetch(`/raw/skills/${skillSlug}.md`);
+        if (!res.ok) {
+          throw new Error(`Could not load raw SKILL.md (${res.status}).`);
+        }
+        ctx.rawSkillMd = await res.text();
+      } catch (err) {
+        showError(`Failed to load the skill source: ${err instanceof Error ? err.message : String(err)}`);
+        switchState("form");
+        return;
+      }
+
+      // Build prompt
+      const messages = buildMessages({
+        originalSkillMd: ctx.rawSkillMd,
+        skillSlug,
+        department: skillDepartment,
+        originalSafety: skillSafety,
+        environment: {
+          techStack: techInput?.value ?? "",
+          scale: (scaleInput?.value ?? "unspecified") as any,
+          constraints: constraintsInput?.value ?? "",
+        },
+        extraPrompt: extraInput?.value ?? "",
+      });
+
+      if (genSub) genSub.textContent = "Contacting OpenRouter…";
+
+      // Run the completion
+      ctx.controller = new AbortController();
+      let chunkCount = 0;
+      ctx.customisedSkillMd = "";
+
+      try {
+        await runCompletion({
+          apiKey: settings.apiKey,
+          modelId: settings.modelId || DEFAULT_MODEL_ID,
+          messages,
+          signal: ctx.controller.signal,
+          onChunk: (delta) => {
+            chunkCount++;
+            ctx.customisedSkillMd += delta;
+            if (streamEl) {
+              streamEl.textContent += delta;
+              // Keep scrolled to bottom
+              streamEl.scrollTop = streamEl.scrollHeight;
+            }
+            if (genSub && chunkCount === 1) {
+              genSub.textContent = "Streaming…";
+            }
+          },
+        });
+      } catch (err) {
+        if (err instanceof OpenRouterError && err.kind === "aborted") {
+          // User cancelled — go quietly back to the form state.
+          switchState("form");
+          return;
+        }
+        const msg =
+          err instanceof Error ? err.message : "Unknown error from OpenRouter.";
+        showError(msg);
+        switchState("form");
+        return;
+      } finally {
+        ctx.controller = null;
+      }
+
+      // Cleanup + quick validate
+      const cleaned = cleanLlmOutput(ctx.customisedSkillMd);
+      const { ok, issues } = quickValidate(cleaned);
+      ctx.customisedSkillMd = cleaned;
+
+      // Populate done state
+      if (resultPre) resultPre.textContent = cleaned;
+      if (doneHead) {
+        const warnHtml = ok
+          ? ""
+          : `<div class="c-gen-warn">⚠ Output may be malformed: ${issues
+              .map((i) => i.replace(/</g, "&lt;"))
+              .join("; ")}</div>`;
+        doneHead.innerHTML = `
+          <strong>Customisation ready.</strong> Review below, then download or copy the
+          install command. A full diff view + zip download land in the next commit on this
+          branch.
+          ${warnHtml}
+        `;
+      }
+      switchState("done");
+    }
+
+    function showError(msg: string) {
+      if (!errorBox) return;
+      errorBox.hidden = false;
+      errorBox.textContent = msg;
+    }
+
+    form.addEventListener("submit", submit);
+
+    cancelBtn?.addEventListener("click", () => {
+      ctx.controller?.abort();
+      // The runCompletion catch will handle the state transition.
     });
 
     dialog.querySelector<HTMLButtonElement>("#c-back")?.addEventListener("click", () => {

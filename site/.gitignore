@@ -11,6 +11,9 @@ src/data/skills.json
 # Generated content mirror (prebuild copies SKILL.md bodies here for rendering)
 src/content/skills/
 
+# Generated raw SKILL.md copies (served as static files for the customizer)
+public/raw/skills/
+
 # Logs
 *.log
 npm-debug.log*

@@ -33,6 +33,15 @@ const REPO_ROOT = resolve(SITE_ROOT, "..");
 const DEPT_ROOT = join(REPO_ROOT, "departments");
 const DATA_OUT = join(SITE_ROOT, "src/data/skills.json");
 const CONTENT_OUT = join(SITE_ROOT, "src/content/skills");
+/**
+ * public/raw/skills/<slug>.md — verbatim copy of each SKILL.md,
+ * served as a static asset so the customizer can fetch the original
+ * content at runtime. Unlike the content mirror in src/content/skills
+ * (which has a minimal frontmatter to match the content collection
+ * schema), these are byte-identical to the source SKILL.md in
+ * departments/ — full frontmatter preserved.
+ */
+const RAW_OUT = join(SITE_ROOT, "public/raw/skills");
 
 // ----------------------------------------------------------------------
 // Types (mirrored in site/src/utils/skills.ts for consumers)
@@ -199,6 +208,11 @@ async function readSkill(
   const mirrorBody = buildContentMirror(entry, parsed.content);
   await writeFile(mirrorPath, mirrorBody, "utf8");
 
+  // Also write a byte-identical copy to public/raw/skills/ so the
+  // customizer modal can fetch the original SKILL.md at runtime.
+  const rawPath = join(RAW_OUT, `${entry.slug}.md`);
+  await writeFile(rawPath, raw, "utf8");
+
   return entry;
 }
 
@@ -235,7 +249,9 @@ async function main(): Promise<void> {
 
   // Fresh output dirs — we fully regenerate so stale skills are removed.
   await rm(CONTENT_OUT, { recursive: true, force: true });
+  await rm(RAW_OUT, { recursive: true, force: true });
   await mkdir(CONTENT_OUT, { recursive: true });
+  await mkdir(RAW_OUT, { recursive: true });
   await mkdir(join(SITE_ROOT, "src/data"), { recursive: true });
 
   const departments = await listDepartments();
