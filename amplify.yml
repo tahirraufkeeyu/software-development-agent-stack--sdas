@@ -51,30 +51,31 @@ applications:
         paths:
           - node_modules/**/*
           - ~/.npm/**/*
-
-  # Custom HTTP headers applied to every response. Equivalent to Azure
-  # Static Web Apps' staticwebapp.config.json, just Amplify's syntax.
-  # Security headers + long-cache for static assets, short-cache for HTML.
-  customHeaders:
-    - pattern: '**/*'
-      headers:
-        - key: Strict-Transport-Security
-          value: max-age=31536000; includeSubDomains; preload
-        - key: X-Content-Type-Options
-          value: nosniff
-        - key: Referrer-Policy
-          value: strict-origin-when-cross-origin
-        - key: Permissions-Policy
-          value: 'camera=(), microphone=(), geolocation=()'
-    - pattern: '**/*.html'
-      headers:
-        - key: Cache-Control
-          value: 'public, max-age=0, must-revalidate'
-    - pattern: 'assets/**/*'
-      headers:
-        - key: Cache-Control
-          value: 'public, max-age=31536000, immutable'
-    - pattern: '_pagefind/**/*'
-      headers:
-        - key: Cache-Control
-          value: 'public, max-age=31536000, immutable'
+      # Custom HTTP headers applied to every response. In Amplify's
+      # monorepo schema (under `applications:`), customHeaders sits
+      # inside `frontend:` — same indent as phases / artifacts / cache.
+      # (Top-level customHeaders is only valid for single-app configs.)
+      # Security headers + long-cache for hashed assets, short-cache for HTML.
+      customHeaders:
+        - pattern: '**/*'
+          headers:
+            - key: Strict-Transport-Security
+              value: max-age=31536000; includeSubDomains; preload
+            - key: X-Content-Type-Options
+              value: nosniff
+            - key: Referrer-Policy
+              value: strict-origin-when-cross-origin
+            - key: Permissions-Policy
+              value: 'camera=(), microphone=(), geolocation=()'
+        - pattern: '**/*.html'
+          headers:
+            - key: Cache-Control
+              value: 'public, max-age=0, must-revalidate'
+        - pattern: 'assets/**/*'
+          headers:
+            - key: Cache-Control
+              value: 'public, max-age=31536000, immutable'
+        - pattern: '_pagefind/**/*'
+          headers:
+            - key: Cache-Control
+              value: 'public, max-age=31536000, immutable'
