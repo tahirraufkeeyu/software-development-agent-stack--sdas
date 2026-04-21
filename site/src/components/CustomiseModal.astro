@@ -130,9 +130,20 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
   <!-- DONE STATE -->
   <div class="c-body c-state-done" id="c-done" hidden data-state="done">
     <div id="c-done-head" class="c-done-head"></div>
-    <div id="c-diff-mount" class="c-diff-mount">
-      <pre class="c-result-pre" id="c-result-pre"></pre>
+    <div class="c-tabs" role="tablist">
+      <button type="button" class="c-tab active" data-view="diff" role="tab" aria-selected="true">
+        Diff
+      </button>
+      <button type="button" class="c-tab" data-view="result" role="tab" aria-selected="false">
+        Final SKILL.md
+      </button>
+      <span class="c-diff-stats" id="c-diff-stats"></span>
     </div>
+    <div id="c-diff-mount" class="c-diff-mount">
+      <div id="c-diff-view" class="c-diff-view"></div>
+      <pre class="c-result-pre" id="c-result-pre" hidden></pre>
+    </div>
+    <div id="c-action-feedback" class="c-action-feedback" aria-live="polite"></div>
     <div class="c-actions">
       <button type="button" class="btn btn-ghost" id="c-back">Edit and re-run</button>
       <button type="button" class="btn btn-ghost" id="c-save">Save to browser</button>
@@ -376,6 +387,94 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
     overflow: auto;
     white-space: pre;
   }
+  .c-tabs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-3);
+  }
+  .c-tab {
+    background: transparent;
+    border: 0;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 0.85rem;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+  }
+  .c-tab:hover {
+    color: var(--fg);
+  }
+  .c-tab.active {
+    color: var(--fg);
+    border-bottom-color: var(--accent);
+  }
+  .c-diff-stats {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+  }
+  .c-diff-view {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--code-bg);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.55;
+    max-height: 32rem;
+    overflow: auto;
+  }
+  .c-diff-view :global(.diff-line) {
+    display: flex;
+    gap: 0.4em;
+    padding: 0.05rem var(--space-3);
+    white-space: pre;
+    border-left: 3px solid transparent;
+  }
+  .c-diff-view :global(.diff-sign) {
+    color: var(--fg-subtle);
+    user-select: none;
+    flex-shrink: 0;
+    width: 1ch;
+  }
+  .c-diff-view :global(.diff-add) {
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    border-left-color: var(--success);
+  }
+  .c-diff-view :global(.diff-add .diff-sign) {
+    color: var(--success);
+  }
+  .c-diff-view :global(.diff-del) {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    border-left-color: var(--danger);
+  }
+  .c-diff-view :global(.diff-del .diff-sign) {
+    color: var(--danger);
+  }
+  .c-diff-view :global(.diff-fold) {
+    padding: 0.25rem var(--space-3);
+    font-style: italic;
+    color: var(--fg-subtle);
+    border-top: 1px dashed var(--border);
+    border-bottom: 1px dashed var(--border);
+    background: var(--bg-elev-1);
+  }
+  .c-action-feedback {
+    margin-top: var(--space-3);
+    font-size: 0.85rem;
+    min-height: 1.4em;
+    color: var(--fg-muted);
+  }
+  .c-action-feedback.ok {
+    color: var(--success);
+  }
+  .c-action-feedback.err {
+    color: var(--danger);
+  }
   .c-error {
     margin-top: var(--space-4);
     padding: var(--space-3) var(--space-4);
@@ -401,6 +500,13 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
   import { getModelById, estimateCostUsd, formatCostRange, DEFAULT_MODEL_ID } from "@/lib/models";
   import { runCompletion, OpenRouterError } from "@/lib/openrouter";
   import { buildMessages, cleanLlmOutput, quickValidate } from "@/lib/prompts";
+  import { diffLines, summarise, renderUnifiedHtmlCollapsed } from "@/lib/diff";
+  import {
+    downloadSkillBundle,
+    buildInstallOneLiner,
+    copyToClipboard,
+    type ExportInput,
+  } from "@/lib/export";
 
   /**
    * Boot the customizer modal. Wires up:
@@ -650,8 +756,29 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
       const { ok, issues } = quickValidate(cleaned);
       ctx.customisedSkillMd = cleaned;
 
-      // Populate done state
+      // Populate done state with diff + final views
+      renderDoneState(cleaned, ok, issues);
+      switchState("done");
+    }
+
+    function renderDoneState(cleaned: string, ok: boolean, issues: string[]) {
+      const diffView = dialog!.querySelector<HTMLElement>("#c-diff-view");
+      const statsEl = dialog!.querySelector<HTMLElement>("#c-diff-stats");
+      const feedback = dialog!.querySelector<HTMLElement>("#c-action-feedback");
+
       if (resultPre) resultPre.textContent = cleaned;
+
+      const ops = diffLines(ctx.rawSkillMd, cleaned);
+      const stats = summarise(ops);
+      if (diffView) diffView.innerHTML = renderUnifiedHtmlCollapsed(ops);
+      if (statsEl) {
+        statsEl.textContent = `+${stats.added} / −${stats.removed}`;
+      }
+      if (feedback) {
+        feedback.textContent = "";
+        feedback.className = "c-action-feedback";
+      }
+
       if (doneHead) {
         const warnHtml = ok
           ? ""
@@ -659,13 +786,55 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
               .map((i) => i.replace(/</g, "&lt;"))
               .join("; ")}</div>`;
         doneHead.innerHTML = `
-          <strong>Customisation ready.</strong> Review below, then download or copy the
-          install command. A full diff view + zip download land in the next commit on this
-          branch.
+          <strong>Customisation ready.</strong> Review the diff, then download or copy the
+          install command. Download bundles the SKILL.md with install instructions;
+          Copy produces a one-line bash command you can paste into a terminal.
           ${warnHtml}
         `;
       }
-      switchState("done");
+
+      // Reset tab view to diff
+      dialog!.querySelectorAll<HTMLButtonElement>(".c-tab").forEach((b) => {
+        const active = b.dataset.view === "diff";
+        b.classList.toggle("active", active);
+        b.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      if (diffView) diffView.hidden = false;
+      if (resultPre) resultPre.hidden = true;
+    }
+
+    function currentExportInput(): ExportInput {
+      const settings = getSettings();
+      const model = getModelById(settings.modelId) ?? getModelById(DEFAULT_MODEL_ID)!;
+      return {
+        skillSlug: dialog!.dataset.skillSlug ?? "",
+        skillName: dialog!.dataset.skillName ?? "",
+        skillDepartment: dialog!.dataset.skillDepartment ?? "",
+        sourcePath: dialog!.dataset.skillMdPath ?? "",
+        customisedSkillMd: ctx.customisedSkillMd,
+        originalSkillMd: ctx.rawSkillMd,
+        techStack: techInput?.value ?? "",
+        scale: scaleInput?.value ?? "unspecified",
+        constraints: constraintsInput?.value ?? "",
+        extraPrompt: extraInput?.value ?? "",
+        modelLabel: model.label,
+        modelId: model.id,
+      };
+    }
+
+    function showFeedback(text: string, kind: "ok" | "err" | "" = "") {
+      const el = dialog!.querySelector<HTMLElement>("#c-action-feedback");
+      if (!el) return;
+      el.textContent = text;
+      el.className = kind ? `c-action-feedback ${kind}` : "c-action-feedback";
+      if (kind === "ok") {
+        setTimeout(() => {
+          if (el.textContent === text) {
+            el.textContent = "";
+            el.className = "c-action-feedback";
+          }
+        }, 3500);
+      }
     }
 
     function showError(msg: string) {
@@ -683,6 +852,93 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
 
     dialog.querySelector<HTMLButtonElement>("#c-back")?.addEventListener("click", () => {
       switchState("form");
+    });
+
+    // Tab switching inside the done state
+    dialog.querySelectorAll<HTMLButtonElement>(".c-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const view = tab.dataset.view;
+        dialog!.querySelectorAll<HTMLButtonElement>(".c-tab").forEach((b) => {
+          const active = b === tab;
+          b.classList.toggle("active", active);
+          b.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        const diffView = dialog!.querySelector<HTMLElement>("#c-diff-view");
+        if (diffView) diffView.hidden = view !== "diff";
+        if (resultPre) resultPre.hidden = view !== "result";
+      });
+    });
+
+    // Download zip
+    dialog.querySelector<HTMLButtonElement>("#c-download")?.addEventListener("click", async () => {
+      if (!ctx.customisedSkillMd) {
+        showFeedback("Nothing to download yet.", "err");
+        return;
+      }
+      try {
+        showFeedback("Building zip…");
+        await downloadSkillBundle(currentExportInput());
+        showFeedback("✓ Zip downloaded. Unzip into ~/.claude/skills/", "ok");
+      } catch (err) {
+        showFeedback(
+          `Download failed: ${err instanceof Error ? err.message : String(err)}`,
+          "err",
+        );
+      }
+    });
+
+    // Copy install one-liner
+    dialog.querySelector<HTMLButtonElement>("#c-copy")?.addEventListener("click", async () => {
+      if (!ctx.customisedSkillMd) {
+        showFeedback("Nothing to copy yet.", "err");
+        return;
+      }
+      const cmd = buildInstallOneLiner(currentExportInput());
+      const ok = await copyToClipboard(cmd);
+      if (ok) {
+        showFeedback(
+          "✓ Install command copied. Paste into a terminal to install.",
+          "ok",
+        );
+      } else {
+        showFeedback(
+          "Couldn't copy. Use the Download button instead.",
+          "err",
+        );
+      }
+    });
+
+    // Save to browser
+    dialog.querySelector<HTMLButtonElement>("#c-save")?.addEventListener("click", () => {
+      if (!ctx.customisedSkillMd) {
+        showFeedback("Nothing to save yet.", "err");
+        return;
+      }
+      const settings = getSettings();
+      try {
+        saveCustomization({
+          id: newCustomizationId(),
+          skillSlug: dialog!.dataset.skillSlug ?? "",
+          createdAt: new Date().toISOString(),
+          modelId: settings.modelId || DEFAULT_MODEL_ID,
+          environment: {
+            techStack: techInput?.value ?? "",
+            scale: (scaleInput?.value ?? "unspecified") as any,
+            constraints: constraintsInput?.value ?? "",
+          },
+          extraPrompt: extraInput?.value ?? "",
+          customSkillMd: ctx.customisedSkillMd,
+        });
+        showFeedback(
+          "✓ Saved to this browser. You can re-open it from the Settings page.",
+          "ok",
+        );
+      } catch (err) {
+        showFeedback(
+          `Save failed: ${err instanceof Error ? err.message : String(err)}`,
+          "err",
+        );
+      }
     });
   }
 

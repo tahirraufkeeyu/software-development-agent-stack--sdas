@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "astro": "^5.0.0",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "jszip": "^3.10.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
