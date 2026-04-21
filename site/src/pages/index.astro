@@ -302,6 +302,19 @@ cd ~/sdas
     /* Override per-component wrappers so the grid owns layout. */
     margin: 0 !important;
   }
+  /* Chain height: 100% all the way from the grid cell down to the
+     inner figure so the terminal wrapper <section> doesn't collapse
+     to content height while the customise <figure> stretches to cell
+     height. Without this the two panels end up different heights. */
+  .anim-grid .term-wrap {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .anim-grid .term-wrap > figure.terminal {
+    flex: 1;
+    margin: 0 !important;
+  }
   @media (min-width: 72rem) {
     .anim-grid {
       grid-template-columns: 1fr 1fr;

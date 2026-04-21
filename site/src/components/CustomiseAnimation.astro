@@ -108,24 +108,49 @@ const totalMs = withDelays.reduce(
 </figure>
 
 <style>
+  /* ------------------------------------------------------------------
+   * Light-theme palette (hard-coded) so this panel stays light even
+   * when the surrounding page is dark. Intentional contrast with the
+   * dark Terminal panel on its left. Tokens mirror the site's light-
+   * mode tokens from styles/global.css but don't rely on the
+   * prefers-color-scheme media query — we want this light always.
+   * ------------------------------------------------------------------ */
   .cust-panel {
+    --cp-bg:        #ffffff;
+    --cp-surface:  #f6f7f9;
+    --cp-surface-2: #eef0f3;
+    --cp-fg:        #0b0d10;
+    --cp-muted:     #4a5362;
+    --cp-subtle:    #6b7585;
+    --cp-border:    #e1e5eb;
+    --cp-accent:    #1e6fd1;
+    --cp-accent-strong: #0f4fa0;
+    --cp-success:   #137b2a;
+    --cp-danger:    #a4201f;
+    --cp-warning:   #8a6200;
+
     margin: 0;
-    border: 1px solid var(--border);
+    border: 1px solid var(--cp-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    background: var(--bg-elev-1);
-    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.55);
+    background: var(--cp-bg);
+    color: var(--cp-fg);
+    box-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.25);
     display: flex;
     flex-direction: column;
+    /* Height parity with the Terminal panel on the left — see
+       index.astro .anim-grid for the shared stretch behaviour. */
+    height: 100%;
   }
 
   .cust-chrome {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    background: var(--bg-elev-2);
-    border-bottom: 1px solid var(--border);
+    padding: var(--space-3) var(--space-6);
+    background: var(--cp-surface-2);
+    border-bottom: 1px solid var(--cp-border);
+    flex-shrink: 0;
   }
   .cust-chrome .dot {
     display: inline-block;
@@ -141,15 +166,16 @@ const totalMs = withDelays.reduce(
     margin-right: auto;
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--fg-muted);
+    color: var(--cp-subtle);
   }
 
   .cust-body {
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-5) var(--space-8);
     font-family: var(--font-mono);
     font-size: 0.8rem;
     line-height: 1.6;
-    color: var(--fg);
+    color: var(--cp-fg);
+    background: var(--cp-bg);
     min-height: 22rem;
     max-height: 32rem;
     overflow: hidden;
@@ -166,68 +192,67 @@ const totalMs = withDelays.reduce(
   }
 
   .cust-h {
-    color: var(--accent);
+    color: var(--cp-accent);
     font-weight: 600;
     text-transform: none;
     margin-top: 0.4em;
   }
   .cust-field {
-    color: var(--fg-muted);
+    color: var(--cp-muted);
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-top: 0.3em;
   }
   .cust-value {
-    color: var(--fg);
-    padding: 0.25em 0.6em;
-    border: 1px solid var(--border);
+    color: var(--cp-fg);
+    padding: 0.3em 0.7em;
+    border: 1px solid var(--cp-border);
     border-radius: var(--radius-sm);
-    background: var(--bg);
-    display: inline-block;
+    background: var(--cp-surface);
+    display: block;
     margin-top: 0.2em;
-    width: calc(100% - 0.5em);
     font-size: 0.78rem;
   }
   .cust-button {
     display: inline-block;
     padding: 0.4em 0.9em;
-    background: var(--accent);
-    color: var(--bg);
+    background: var(--cp-accent);
+    color: #ffffff;
     border-radius: var(--radius-sm);
     font-weight: 600;
     font-size: 0.78rem;
   }
   .cust-gen {
-    color: var(--fg-muted);
+    color: var(--cp-muted);
     font-style: italic;
     font-size: 0.75rem;
   }
   .cust-diff-eq {
-    color: var(--fg-muted);
+    color: var(--cp-muted);
     font-size: 0.76rem;
   }
   .cust-diff-add {
-    color: var(--success);
-    background: color-mix(in srgb, var(--success) 10%, transparent);
-    border-left: 2px solid var(--success);
+    color: var(--cp-success);
+    background: rgba(19, 123, 42, 0.08);
+    border-left: 2px solid var(--cp-success);
     padding-left: 0.4em;
     font-size: 0.76rem;
   }
   .cust-diff-del {
-    color: var(--danger);
-    background: color-mix(in srgb, var(--danger) 10%, transparent);
-    border-left: 2px solid var(--danger);
+    color: var(--cp-danger);
+    background: rgba(164, 32, 31, 0.08);
+    border-left: 2px solid var(--cp-danger);
     padding-left: 0.4em;
     font-size: 0.76rem;
   }
   .cust-action {
-    color: var(--fg-muted);
+    color: var(--cp-muted);
     font-size: 0.75rem;
     margin-top: 0.4em;
   }
   .cust-success {
-    color: var(--success);
+    color: var(--cp-success);
     font-weight: 600;
     font-size: 0.78rem;
   }
@@ -249,15 +274,19 @@ const totalMs = withDelays.reduce(
   }
 
   .cust-cap {
-    padding: var(--space-3) var(--space-5);
-    border-top: 1px solid var(--border);
+    padding: var(--space-3) var(--space-6);
+    border-top: 1px solid var(--cp-border);
     font-size: 0.8rem;
-    color: var(--fg-muted);
-    background: var(--bg-elev-1);
+    color: var(--cp-muted);
+    background: var(--cp-surface);
+    flex-shrink: 0;
   }
   .cust-cap a {
-    color: var(--accent);
+    color: var(--cp-accent);
     white-space: nowrap;
+  }
+  .cust-cap a:hover {
+    color: var(--cp-accent-strong);
   }
 
   @media (prefers-reduced-motion: reduce) {
