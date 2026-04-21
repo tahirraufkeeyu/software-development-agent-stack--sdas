@@ -55,7 +55,7 @@ export function buildMessages(input: PromptInput): ChatMessage[] {
 // ---------------------------------------------------------------------------
 
 export function buildSystemPrompt(input: PromptInput): string {
-  return `You are the customization engine for skillkit.dev, a library of Claude Code skills distributed as SKILL.md files. Your job is to take an existing SKILL.md and produce a modified version that is adapted to the user's stated environment and constraints, while preserving the skill's structural integrity.
+  return `You are the customization engine for skillskit.dev, a library of Claude Code skills distributed as SKILL.md files. Your job is to take an existing SKILL.md and produce a modified version that is adapted to the user's stated environment and constraints, while preserving the skill's structural integrity.
 
 SKILL.md structure (invariants you MUST preserve):
 

@@ -1,7 +1,7 @@
 /**
  * settings.ts — localStorage-backed user settings for the customizer.
  *
- * Every key under the `skillkit.` namespace to avoid collisions with
+ * Every key under the `skillskit.` namespace to avoid collisions with
  * other apps the user might run on the same origin during dev
  * (localhost:4321). Nothing is ever sent to a server.
  *
@@ -26,12 +26,12 @@
 import { DEFAULT_MODEL_ID } from "./models";
 
 const KEYS = {
-  apiKey: "skillkit.openrouter.apiKey",
-  modelId: "skillkit.model.id",
-  envTechStack: "skillkit.environment.techStack",
-  envScale: "skillkit.environment.scale",
-  envConstraints: "skillkit.environment.constraints",
-  customizations: "skillkit.customizations",
+  apiKey: "skillskit.openrouter.apiKey",
+  modelId: "skillskit.model.id",
+  envTechStack: "skillskit.environment.techStack",
+  envScale: "skillskit.environment.scale",
+  envConstraints: "skillskit.environment.constraints",
+  customizations: "skillskit.customizations",
 } as const;
 
 export type Scale = "startup" | "scaleup" | "enterprise" | "personal" | "unspecified";

@@ -16,10 +16,10 @@ const {
   canonical,
 } = Astro.props;
 
-const siteName = "skillkit.dev";
+const siteName = "skillskit.dev";
 const displayTitle = title === siteName ? title : `${title} · ${siteName}`;
 const canonicalUrl = canonical
-  ? new URL(canonical, Astro.site ?? "https://skillkit.dev").toString()
+  ? new URL(canonical, Astro.site ?? "https://skillskit.dev").toString()
   : Astro.url.toString();
 ---
 

@@ -2,7 +2,7 @@
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  site: "https://skillkit.dev",
+  site: "https://skillskit.dev",
   trailingSlash: "never",
   build: {
     format: "directory",

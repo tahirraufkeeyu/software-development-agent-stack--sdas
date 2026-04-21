@@ -98,7 +98,7 @@ export async function runCompletion(req: CompletionRequest): Promise<CompletionS
         // rank our site in their app directory and gives users clearer
         // usage reports.
         "HTTP-Referer": siteOrigin(),
-        "X-Title": "skillkit.dev",
+        "X-Title": "skillskit.dev",
       },
       body: JSON.stringify(body),
     });
@@ -265,7 +265,7 @@ function siteOrigin(): string {
   if (typeof window !== "undefined" && window.location?.origin) {
     return window.location.origin;
   }
-  return "https://skillkit.dev";
+  return "https://skillskit.dev";
 }
 
 function isAbort(err: unknown): boolean {
@@ -316,7 +316,7 @@ export async function verifyApiKey(apiKey: string): Promise<string | null> {
       headers: {
         Authorization: `Bearer ${apiKey.trim()}`,
         "HTTP-Referer": siteOrigin(),
-        "X-Title": "skillkit.dev",
+        "X-Title": "skillskit.dev",
       },
     });
     if (res.ok) return null;
