@@ -107,9 +107,11 @@
 </style>
 
 <script>
-  // Pagefind UI is loaded lazily — search index lives at /_pagefind/pagefind.js
-  // after the post-build step. In dev this module doesn't exist, so the
-  // search input becomes a no-op with a clearer hint.
+  // Pagefind UI is loaded lazily — the index lives at /_pagefind/pagefind.js
+  // after the post-build step. In dev the file doesn't exist at all, and
+  // Vite would otherwise try to statically resolve the import during
+  // dev-server transform (even with @vite-ignore). We dodge both issues
+  // by short-circuiting in dev and computing the URL at runtime in prod.
   async function boot() {
     const input = document.getElementById("skillkit-search-input") as HTMLInputElement | null;
     const results = document.getElementById("skillkit-search-results") as HTMLUListElement | null;
@@ -126,15 +128,32 @@
       }
     });
 
-    let pagefind: any = null;
-    try {
-      // @ts-ignore - dynamic import of a runtime-built artefact
-      pagefind = await import(/* @vite-ignore */ "/_pagefind/pagefind.js");
-      await pagefind.options({ excerptLength: 30 });
-    } catch {
+    // Dev: Pagefind index doesn't exist, so don't try to import it.
+    // import.meta.env.DEV is replaced at compile time with a boolean
+    // literal, so the branch below is dead-code-eliminated in prod builds.
+    if (import.meta.env.DEV) {
       if (hint) {
         hint.textContent =
           "Search is disabled in dev mode — run 'npm run build && npm run preview' to try it.";
+      }
+      return;
+    }
+
+    let pagefind: any = null;
+    try {
+      // Compute the URL at runtime so Vite's static analysis can't try
+      // to resolve /_pagefind/pagefind.js during the dev transform.
+      const pagefindUrl = new URL(
+        "/_pagefind/pagefind.js",
+        window.location.origin,
+      ).href;
+      // @ts-ignore - runtime artefact, no static types
+      pagefind = await import(/* @vite-ignore */ pagefindUrl);
+      await pagefind.options({ excerptLength: 30 });
+    } catch (err) {
+      console.error("[skillkit] pagefind failed to load", err);
+      if (hint) {
+        hint.textContent = "Search is temporarily unavailable.";
       }
       return;
     }
