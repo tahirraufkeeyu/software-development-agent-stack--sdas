@@ -507,6 +507,7 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
     copyToClipboard,
     type ExportInput,
   } from "@/lib/export";
+  import { track } from "@/lib/analytics";
 
   /**
    * Boot the customizer modal. Wires up:
@@ -540,6 +541,10 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
     document.querySelectorAll<HTMLElement>("[data-open-customizer]").forEach((el) => {
       el.addEventListener("click", (e) => {
         e.preventDefault();
+        track("customize_opened", {
+          skill: dialog!.dataset.skillSlug,
+          department: dialog!.dataset.skillDepartment,
+        });
         openDialog();
       });
     });
@@ -664,6 +669,15 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
         return;
       }
 
+      track("customize_submitted", {
+        skill: dialog!.dataset.skillSlug,
+        department: dialog!.dataset.skillDepartment,
+        model: settings.modelId || DEFAULT_MODEL_ID,
+        has_tech_stack: !!techInput?.value,
+        has_constraints: !!constraintsInput?.value,
+        has_extra: !!extraInput?.value,
+      });
+
       // Reset error UI
       if (errorBox) {
         errorBox.hidden = true;
@@ -755,6 +769,14 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
       const cleaned = cleanLlmOutput(ctx.customisedSkillMd);
       const { ok, issues } = quickValidate(cleaned);
       ctx.customisedSkillMd = cleaned;
+
+      track("customize_generated_ok", {
+        skill: dialog!.dataset.skillSlug,
+        department: dialog!.dataset.skillDepartment,
+        model: settings.modelId || DEFAULT_MODEL_ID,
+        output_chars: cleaned.length,
+        validation_ok: ok,
+      });
 
       // Populate done state with diff + final views
       renderDoneState(cleaned, ok, issues);
@@ -878,6 +900,10 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
       try {
         showFeedback("Building zip…");
         await downloadSkillBundle(currentExportInput());
+        track("customize_downloaded_zip", {
+          skill: dialog!.dataset.skillSlug,
+          department: dialog!.dataset.skillDepartment,
+        });
         showFeedback("✓ Zip downloaded. Unzip into ~/.claude/skills/", "ok");
       } catch (err) {
         showFeedback(
@@ -896,6 +922,10 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
       const cmd = buildInstallOneLiner(currentExportInput());
       const ok = await copyToClipboard(cmd);
       if (ok) {
+        track("customize_copied_oneliner", {
+          skill: dialog!.dataset.skillSlug,
+          department: dialog!.dataset.skillDepartment,
+        });
         showFeedback(
           "✓ Install command copied. Paste into a terminal to install.",
           "ok",
