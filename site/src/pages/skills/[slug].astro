@@ -139,6 +139,10 @@ const deptLabel = departmentLabel(skill.department);
   </div>
 
   <div class="source-links">
+    <button type="button" class="btn-cust-primary" data-open-customizer>
+      Customise for your organisation
+      <span class="btn-cust-sub">rewrite this skill for your stack via an LLM</span>
+    </button>
     <a href={sourceUrl} target="_blank" rel="noopener" class="btn-source">
       View SKILL.md on GitHub ↗
     </a>
@@ -150,12 +154,7 @@ const deptLabel = departmentLabel(skill.department);
   </article>
 
   <aside class="install-box">
-    <div class="install-head">
-      <h3>Install this skill</h3>
-      <button type="button" class="btn-cust" data-open-customizer>
-        Customise for your organisation ↗
-      </button>
-    </div>
+    <h3>Install this skill</h3>
     <pre><code>{`# install this department
 ./install.sh ${skill.department}
 
@@ -163,8 +162,9 @@ const deptLabel = departmentLabel(skill.department);
 git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
 cd ~/sdas && ./install.sh all`}</code></pre>
     <p class="subtle">
-      Using a different stack? Click <em>Customise</em> above and an LLM will rewrite this
-      skill for your environment — your API key and inputs stay in your browser.
+      Using a different stack? Use <button type="button" class="link-button" data-open-customizer
+        >Customise for your organisation</button> at the top of the page — an LLM rewrites
+      this skill for your environment, fully in your browser.
     </p>
   </aside>
 
@@ -275,6 +275,34 @@ cd ~/sdas && ./install.sh all`}</code></pre>
     align-items: center;
     margin-bottom: var(--space-8);
   }
+  .btn-cust-primary {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .btn-cust-primary:hover {
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+  }
+  .btn-cust-sub {
+    display: block;
+    font-weight: 400;
+    font-size: 0.72rem;
+    opacity: 0.85;
+    margin-top: 0.1em;
+    letter-spacing: 0.02em;
+  }
   .btn-source {
     display: inline-block;
     padding: 0.5rem 1rem;
@@ -332,35 +360,24 @@ cd ~/sdas && ./install.sh all`}</code></pre>
     padding: var(--space-6);
     margin-top: var(--space-8);
   }
-  .install-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-4);
-    flex-wrap: wrap;
-    margin-bottom: var(--space-3);
-  }
   .install-box h3 {
-    margin: 0;
+    margin: 0 0 var(--space-3);
     font-size: 1rem;
   }
   .install-box pre {
     margin-top: 0;
   }
-  .btn-cust {
-    font: inherit;
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 0.45rem 0.9rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--accent);
-    background: transparent;
+  .link-button {
+    background: none;
+    border: none;
     color: var(--accent);
+    font: inherit;
+    padding: 0;
     cursor: pointer;
-    transition: background 120ms ease, color 120ms ease;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
-  .btn-cust:hover {
-    background: var(--accent);
-    color: var(--bg);
+  .link-button:hover {
+    color: var(--accent-strong);
   }
 </style>
