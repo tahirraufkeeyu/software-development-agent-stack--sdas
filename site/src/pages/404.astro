@@ -1,0 +1,51 @@
+---
+import Base from "@/layouts/Base.astro";
+---
+
+<Base title="Not found">
+  <section class="nf">
+    <p class="eyebrow">404</p>
+    <h1>Page not found</h1>
+    <p class="muted">
+      That skill, department, or page isn't in the catalog. Either we renamed it, it moved
+      to a different department, or the URL was a miss.
+    </p>
+    <div class="cta-row">
+      <a class="btn" href="/">Back to the catalog</a>
+      <a class="btn btn-secondary" href="/departments">Browse departments</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    padding: var(--space-12) 0;
+    max-width: 40rem;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+    margin: 0 0 var(--space-3);
+  }
+  .cta-row {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-top: var(--space-6);
+  }
+  .btn {
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+  }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+  }
+</style>

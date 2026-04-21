@@ -1,0 +1,318 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getCollection, render } from "astro:content";
+import {
+  getAllSkills,
+  getSkillBySlug,
+  departmentLabel,
+  safetyLabel,
+  githubSourceUrl,
+} from "@/utils/skills";
+
+export async function getStaticPaths() {
+  const skills = getAllSkills();
+  return skills.map((s) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const skillSlug = slug ?? "";
+const skill = getSkillBySlug(skillSlug);
+
+if (!skill) {
+  return Astro.redirect("/404");
+}
+
+// Look up the content-collection entry for the body. Skipped gracefully if
+// the mirror is missing (only happens when the manifest was generated
+// without running the content mirror step, e.g. in tests).
+const mirrorEntries = await getCollection("skills");
+const entry = mirrorEntries.find((e) => e.data.slug === skillSlug);
+const Content = entry ? (await render(entry)).Content : null;
+
+const sourceUrl = githubSourceUrl(skill);
+const deptLabel = departmentLabel(skill.department);
+---
+
+<Base
+  title={skill.name}
+  description={skill.description}
+  canonical={`/skills/${skill.slug}`}
+>
+  <header class="page-head">
+    <p class="eyebrow">
+      <a href="/departments">Departments</a>
+      <span class="sep">/</span>
+      <a href={`/departments/${skill.department}`}>{skill.department}</a>
+      <span class="sep">/</span>
+      <span>{skill.slug}</span>
+    </p>
+    <h1>
+      {skill.name}
+      {skill.isOrchestrator ? <span class="orch-pill">orchestrator</span> : null}
+    </h1>
+    <p class="desc">{skill.description}</p>
+  </header>
+
+  <div class="meta-grid">
+    <div class="meta-card">
+      <h3>Department</h3>
+      <p>
+        <a href={`/departments/${skill.department}`}>{deptLabel}</a>
+      </p>
+    </div>
+    <div class="meta-card">
+      <h3>Safety</h3>
+      <p>
+        <span class:list={["badge", `badge-${skill.safety}`]}>{skill.safety}</span>
+        <br />
+        <span class="subtle">{safetyLabel(skill.safety)}</span>
+      </p>
+    </div>
+    {
+      skill.supportedStacks.length > 0 ? (
+        <div class="meta-card">
+          <h3>Supported stacks</h3>
+          <p class="stack-list">
+            {skill.supportedStacks.map((s) => (
+              <span class="badge">{s}</span>
+            ))}
+          </p>
+        </div>
+      ) : (
+        <div class="meta-card">
+          <h3>Supported stacks</h3>
+          <p class="subtle">Stack-agnostic — no detection required.</p>
+        </div>
+      )
+    }
+    {
+      skill.chains.length > 0 ? (
+        <div class="meta-card">
+          <h3>Chains</h3>
+          <p class="chain-list">
+            {skill.chains.map((c, i) => (
+              <>
+                <a href={`/skills/${c}`}>
+                  <code>{c}</code>
+                </a>
+                {i < skill.chains.length - 1 ? <span class="arrow"> → </span> : null}
+              </>
+            ))}
+          </p>
+        </div>
+      ) : null
+    }
+    {
+      skill.produces ? (
+        <div class="meta-card">
+          <h3>Produces</h3>
+          <p>
+            <code>{skill.produces}</code>
+          </p>
+        </div>
+      ) : null
+    }
+    {
+      skill.consumes.length > 0 ? (
+        <div class="meta-card">
+          <h3>Consumes</h3>
+          <ul class="path-list">
+            {skill.consumes.map((c) => (
+              <li>
+                <code>{c}</code>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null
+    }
+  </div>
+
+  <div class="source-links">
+    <a href={sourceUrl} target="_blank" rel="noopener" class="btn-source">
+      View SKILL.md on GitHub ↗
+    </a>
+    <span class="subtle">source of truth · edit there, not here</span>
+  </div>
+
+  <article class="skill-body" data-pagefind-body>
+    {Content ? <Content /> : <p class="muted">Body unavailable.</p>}
+  </article>
+
+  <aside class="install-box">
+    <h3>Install this skill</h3>
+    <pre><code>{`# install this department
+./install.sh ${skill.department}
+
+# or clone the whole kit and install everything
+git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
+cd ~/sdas && ./install.sh all`}</code></pre>
+    <p class="subtle">
+      Phase B will add a customizer that lets you tweak this skill for your stack and
+      download a customized <code>SKILL.md</code> — coming soon.
+    </p>
+  </aside>
+</Base>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-6);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+    margin: 0 0 var(--space-3);
+  }
+  .eyebrow a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .eyebrow .sep {
+    margin: 0 var(--space-2);
+    color: var(--fg-subtle);
+  }
+  .page-head h1 {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 1.8rem;
+    letter-spacing: -0.01em;
+  }
+  .orch-pill {
+    display: inline-block;
+    margin-left: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    padding: 0.2em 0.6em;
+    border-radius: 999px;
+    vertical-align: middle;
+  }
+  .desc {
+    margin: 0 0 var(--space-4);
+    font-size: 1.05rem;
+    color: var(--fg-muted);
+    max-width: 52rem;
+    line-height: 1.55;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-3);
+    margin: var(--space-6) 0;
+  }
+  .meta-card {
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+  .meta-card h3 {
+    margin: 0 0 var(--space-2);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+  }
+  .meta-card p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .stack-list,
+  .chain-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+  }
+  .chain-list a {
+    text-decoration: none;
+  }
+  .chain-list .arrow {
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+  }
+  .path-list {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: 0.9rem;
+  }
+
+  .source-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+    margin-bottom: var(--space-8);
+  }
+  .btn-source {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .btn-source:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .skill-body {
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-6);
+    margin-bottom: var(--space-12);
+  }
+  .skill-body :global(h2) {
+    font-size: 1.35rem;
+    margin-top: var(--space-8);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .skill-body :global(h3) {
+    font-size: 1.1rem;
+    margin-top: var(--space-6);
+  }
+  .skill-body :global(blockquote) {
+    margin: var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+    border-left: 3px solid var(--accent);
+    background: var(--bg-elev-1);
+    color: var(--fg-muted);
+  }
+  .skill-body :global(ul),
+  .skill-body :global(ol) {
+    padding-left: var(--space-6);
+  }
+  .skill-body :global(li) {
+    margin: var(--space-2) 0;
+  }
+  .skill-body :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: var(--space-8) 0;
+  }
+
+  .install-box {
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-top: var(--space-8);
+  }
+  .install-box h3 {
+    margin: 0 0 var(--space-3);
+    font-size: 1rem;
+  }
+  .install-box pre {
+    margin-top: 0;
+  }
+</style>
