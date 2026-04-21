@@ -1,0 +1,91 @@
+name: Deploy skillkit.dev to Azure Static Web Apps
+
+# Triggers:
+#   - Push to main              → deploy to the production environment
+#   - Pull requests into main   → deploy to a preview / staging environment
+#     (Azure creates a unique URL per PR and posts it as a comment)
+#   - Manual dispatch           → redeploy on demand without pushing code
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "departments/**/SKILL.md"
+      - "departments/**/*.md"
+      - ".github/workflows/azure-static-web-apps.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+    paths:
+      - "site/**"
+      - "departments/**/SKILL.md"
+      - "departments/**/*.md"
+      - ".github/workflows/azure-static-web-apps.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write # required so Azure can post the preview-URL comment
+
+jobs:
+  build_and_deploy:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    name: Build + deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 0 # needed if the manifest ever reads git history
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install site dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Generate manifest
+        # The prebuild npm script also runs generate-manifest, but running
+        # it explicitly here makes failures attributable at this step.
+        working-directory: site
+        run: npx tsx scripts/generate-manifest.ts
+
+      - name: Build Astro site + Pagefind index
+        working-directory: site
+        run: npm run build
+
+      - name: Deploy to Azure Static Web Apps
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          # This token is set as a repo secret by Azure when you create the
+          # Static Web App resource and link it to this repo. The secret
+          # name in the portal defaults to AZURE_STATIC_WEB_APPS_API_TOKEN_*;
+          # the line below should be updated to match the exact name Azure
+          # generated. See site/README.md for setup.
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLKIT }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "site"        # repo-relative path to the app root
+          api_location: ""            # no Azure Functions backend
+          output_location: "dist"     # relative to app_location
+          skip_app_build: true        # we built above; Azure just uploads
+          skip_api_build: true
+
+  close_pr_preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close PR preview
+    steps:
+      - name: Close pull request preview
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SKILLKIT }}
+          action: "close"
