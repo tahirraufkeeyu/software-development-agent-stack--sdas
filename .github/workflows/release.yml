@@ -1,0 +1,69 @@
+name: Release skillskit CLI
+
+# Triggers on any tag matching v*. The conventional workflow is:
+#   1. Merge your changes to main.
+#   2. git tag v0.1.0 && git push origin v0.1.0
+#   3. This workflow runs, GoReleaser builds and publishes.
+#
+# For a dry-run (no publish), trigger workflow_dispatch manually — it
+# passes --snapshot to GoReleaser and uploads artifacts to the workflow
+# run for inspection without creating a GitHub Release.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      snapshot:
+        description: "Build a snapshot (no publish)"
+        type: boolean
+        default: true
+
+permissions:
+  # Contents write is needed for creating the GitHub Release + uploading
+  # the binaries. No other permissions needed; GoReleaser does not push
+  # to the source repo — only to the brew tap + scoop bucket via their
+  # own tokens (TAP_GITHUB_TOKEN secret below).
+  contents: write
+
+jobs:
+  goreleaser:
+    name: GoReleaser
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full git history — GoReleaser uses git log for the
+          # auto-generated changelog section of the release notes.
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: >-
+            release --clean
+            ${{ github.event_name == 'workflow_dispatch' && inputs.snapshot && '--snapshot' || '' }}
+        env:
+          # GitHub token for creating the Release + uploading assets on
+          # this repo. Automatically provided by Actions.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT with write access to:
+          #   github.com/tahirraufkeeyu/homebrew-tap
+          #   github.com/tahirraufkeeyu/scoop-bucket
+          # Create at https://github.com/settings/tokens/new with repo
+          # scope scoped to those two repos; add as a repo secret named
+          # TAP_GITHUB_TOKEN. Required for `brews:` and `scoops:`
+          # entries in .goreleaser.yaml to succeed. If this token is
+          # missing the release will still produce binaries but won't
+          # update the brew/scoop repos; the failure is clearly logged.
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
