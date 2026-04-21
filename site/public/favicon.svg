@@ -1,4 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="4" y="4" width="56" height="56" rx="12" fill="#7ac8ff"/>
-  <text x="32" y="42" text-anchor="middle" font-family="ui-monospace, monospace" font-size="28" font-weight="700" fill="#0b0d10">sk</text>
+<!-- Option 2: Stacked cards — three cards fanned out, representing
+     a library of skills. Literal + clean. Works monochrome or with
+     accent fills. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="skillskit">
+  <!-- Back card -->
+  <rect x="10" y="14" width="38" height="40" rx="5"
+        fill="none" stroke="#1e6fd1" stroke-width="2.5" opacity="0.35"
+        transform="rotate(-8 29 34)"/>
+  <!-- Middle card -->
+  <rect x="14" y="12" width="38" height="40" rx="5"
+        fill="none" stroke="#1e6fd1" stroke-width="2.5" opacity="0.7"
+        transform="rotate(-3 33 32)"/>
+  <!-- Front card — solid -->
+  <rect x="16" y="10" width="38" height="40" rx="5" fill="#1e6fd1"/>
+  <!-- SK wordmark on front card -->
+  <text x="35" y="36" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="17" font-weight="700" fill="#ffffff" letter-spacing="-0.02em">sk</text>
 </svg>
