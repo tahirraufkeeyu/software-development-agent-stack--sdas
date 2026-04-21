@@ -1,0 +1,353 @@
+---
+/**
+ * Terminal.astro — a replayable animated terminal.
+ *
+ * Shows a realistic end-to-end skill invocation without requiring a video
+ * file. Each line is revealed with a staggered CSS animation; an
+ * IntersectionObserver starts playback when the element enters view.
+ * Respects prefers-reduced-motion (shows everything instantly).
+ *
+ * Lines are data-driven via the `script` array below. Types:
+ *   prompt   user-typed command or natural-language request (with "> " prefix)
+ *   cmd      a shell command (with "$ " prefix)
+ *   stdout   plain output line
+ *   muted    dim commentary / metadata
+ *   info     highlight-coloured status line (e.g. "stack detected: ...")
+ *   match    skill-matching announcement
+ *   ok       a success line (renders a ✓ marker and success colour)
+ *   h        a section heading inside the output
+ *   blank    a blank spacer line
+ *
+ * Each entry can also specify `delay` (ms) to override the default 220 ms
+ * step between lines — e.g. longer pauses for dramatic moments, shorter
+ * for rapid output blocks.
+ */
+
+type LineType =
+  | "prompt"
+  | "cmd"
+  | "stdout"
+  | "muted"
+  | "info"
+  | "match"
+  | "ok"
+  | "h"
+  | "blank";
+
+interface Line {
+  type: LineType;
+  text?: string;
+  delay?: number; // absolute delay ms from start, overrides stagger
+}
+
+const script: Line[] = [
+  { type: "muted", text: "— user starts Claude Code in a Node.js repo —" },
+  { type: "cmd", text: "claude" },
+
+  { type: "blank" },
+  { type: "prompt", text: "design a REST API for a bookmarks feature —" },
+  { type: "prompt", text: "  users save URLs with tags and notes;" },
+  { type: "prompt", text: "  standard CRUD plus search by tag." },
+
+  { type: "blank" },
+  { type: "match", text: "matched skill: api-design" },
+  { type: "muted", text: "       description match: \"Use when designing REST or GraphQL endpoints...\"" },
+
+  { type: "blank" },
+  { type: "h", text: "1  Detect the stack" },
+  { type: "cmd", text: "cat package.json | head" },
+  { type: "stdout", text: "  \"dependencies\": { \"express\": \"^4.18.2\", \"zod\": \"^3.23.8\" }" },
+  { type: "cmd", text: "ls api/ 2>/dev/null" },
+  { type: "stdout", text: "  (no existing spec)" },
+  { type: "info", text: "stack: node.js + express · no prior OpenAPI in repo" },
+
+  { type: "blank" },
+  { type: "h", text: "2  Draft endpoints (REST, cursor-paginated, RFC 7807 errors)" },
+  { type: "stdout", text: "  POST   /bookmarks              create" },
+  { type: "stdout", text: "  GET    /bookmarks              list" },
+  { type: "stdout", text: "  GET    /bookmarks/:id          read" },
+  { type: "stdout", text: "  PATCH  /bookmarks/:id          update" },
+  { type: "stdout", text: "  DELETE /bookmarks/:id          delete" },
+  { type: "stdout", text: "  GET    /bookmarks/search       filter by tag" },
+
+  { type: "blank" },
+  { type: "h", text: "3  Emit OpenAPI 3.1 spec + types" },
+  { type: "ok", text: "api/openapi.yaml       (142 lines, 6 endpoints, validates)" },
+  { type: "ok", text: "api/types/bookmark.ts  (TypeScript types generated)" },
+
+  { type: "blank" },
+  { type: "info", text: "Done. Chain to test-writer for fixtures?" },
+];
+
+// Stagger defaults: base offset + per-line increment unless overridden.
+const BASE_OFFSET_MS = 120;
+const STEP_MS = 240;
+
+const withDelays = script.map((l, i) => ({
+  ...l,
+  computedDelay: l.delay ?? BASE_OFFSET_MS + i * STEP_MS,
+}));
+
+// Final delay drives the "done" state + loop reset.
+const totalMs = withDelays.reduce(
+  (max, l) => Math.max(max, l.computedDelay + 400),
+  0,
+);
+---
+
+<section class="term-wrap" aria-label="Example of running a skill end to end">
+  <div class="term-meta">
+    <span class="term-eyebrow">What running a skill looks like</span>
+    <span class="term-muted">api-design skill · end to end</span>
+  </div>
+
+  <figure class="terminal" data-total-ms={String(totalMs)}>
+    <div class="term-chrome" aria-hidden="true">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="term-title">~/acme-api · claude</span>
+    </div>
+    <div class="term-body">
+      {
+        withDelays.map((l) => (
+          <span
+            class:list={["line", `line-${l.type}`]}
+            style={`--d: ${l.computedDelay}ms`}
+          >
+            {l.type === "cmd" && <span class="sigil">$ </span>}
+            {l.type === "prompt" && <span class="sigil">&gt; </span>}
+            {l.type === "match" && <span class="sigil">▸ </span>}
+            {l.type === "ok" && <span class="sigil ok">✓ </span>}
+            {l.type === "h" && <span class="sigil h">#</span>}
+            {l.text ?? ""}
+          </span>
+        ))
+      }
+      <span class="cursor" aria-hidden="true"></span>
+    </div>
+    <figcaption class="term-cap">
+      A real end-to-end run of the <code>api-design</code> skill. The skill
+      declares <code>supported-stacks</code>, runs the detection step against
+      the repo, then produces the OpenAPI spec and TypeScript types.
+      <a href="/skills/api-design">Read the SKILL.md →</a>
+    </figcaption>
+  </figure>
+</section>
+
+<style>
+  .term-wrap {
+    margin: var(--space-8) 0 var(--space-12);
+  }
+  .term-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  .term-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  .term-muted {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+  }
+
+  .terminal {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--code-bg);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.55);
+  }
+
+  .term-chrome {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-elev-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .dot {
+    display: inline-block;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+  .term-title {
+    margin-left: auto;
+    margin-right: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+  }
+
+  .term-body {
+    position: relative;
+    padding: var(--space-4) var(--space-5);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--fg);
+    min-height: 22rem;
+    max-height: 32rem;
+    overflow: hidden;
+  }
+
+  .line {
+    display: block;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 160ms ease, transform 160ms ease;
+    /* --d is set inline per line; playing class flips opacity via animation-delay */
+  }
+  .line.line-blank {
+    height: 0.7em;
+  }
+
+  .line-prompt { color: var(--fg); }
+  .line-prompt .sigil { color: var(--accent); font-weight: 700; }
+  .line-cmd { color: var(--fg); }
+  .line-cmd .sigil { color: var(--success); font-weight: 700; }
+  .line-stdout { color: var(--fg-muted); }
+  .line-muted { color: var(--fg-subtle); font-style: italic; }
+  .line-info { color: var(--accent); }
+  .line-match { color: var(--accent); font-weight: 600; }
+  .line-match .sigil { color: var(--accent); }
+  .line-ok { color: var(--success); }
+  .line-ok .sigil { color: var(--success); }
+  .line-h {
+    color: var(--warning);
+    font-weight: 600;
+    margin-top: 0.25em;
+  }
+  .line-h .sigil { color: var(--warning); margin-right: 0.2em; }
+
+  .cursor {
+    display: inline-block;
+    width: 0.55ch;
+    height: 1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 0.1ch;
+    opacity: 0;
+    animation: blink 1.05s step-end infinite;
+  }
+
+  /* Playback: playing class adds reveal animations; delay comes from --d.
+     Loop: after totalMs + pause, JS re-adds the class to replay. */
+  .terminal.playing .line {
+    animation: appear 220ms ease forwards;
+    animation-delay: var(--d);
+  }
+  .terminal.playing .cursor {
+    opacity: 1;
+  }
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .term-cap {
+    padding: var(--space-3) var(--space-5);
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    background: var(--bg-elev-1);
+  }
+  .term-cap a {
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal .line {
+      opacity: 1;
+      transform: none;
+      animation: none !important;
+    }
+    .terminal .cursor {
+      opacity: 0;
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Start the animation when the terminal is at least 25% visible,
+   * and replay it on a loop (with a gentle pause between runs). Honors
+   * prefers-reduced-motion by rendering everything instantly and not
+   * scheduling any loops.
+   */
+  function init() {
+    const terms = document.querySelectorAll<HTMLElement>(".terminal");
+    if (terms.length === 0) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      terms.forEach((t) => t.classList.add("playing"));
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const t = entry.target as HTMLElement;
+          schedulePlayback(t);
+          obs.unobserve(t);
+        }
+      },
+      { threshold: 0.25 },
+    );
+
+    terms.forEach((t) => io.observe(t));
+  }
+
+  function schedulePlayback(t: HTMLElement) {
+    const totalMs = Number(t.dataset.totalMs ?? "5000");
+    const pauseMs = 3200; // hold the final frame before replay
+    const cycleMs = totalMs + pauseMs;
+
+    // First play
+    t.classList.add("playing");
+
+    // Loop: force a reflow between cycles so animations restart.
+    setInterval(() => {
+      t.classList.remove("playing");
+      // Trigger reflow to reset animation
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      void t.offsetWidth;
+      t.classList.add("playing");
+    }, cycleMs);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+</script>
