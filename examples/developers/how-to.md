@@ -29,15 +29,21 @@
 
 ## Pre-flight
 
-Install SDAS (once, from anywhere on your machine):
+Install the `skillskit` CLI (once), then pull in the developer skills:
 
 ```bash
-git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
-cd ~/sdas
-./install.sh developers
+# macOS / Linux
+brew install tahirraufkeeyu/tap/skillskit
+
+# Windows (PowerShell)
+scoop bucket add skillskit https://github.com/tahirraufkeeyu/scoop-bucket
+scoop install skillskit
+
+# Then install the developer skills
+skillskit install developers
 ```
 
-That copies the 8 developer skills into `~/.claude/skills/`.
+That copies the 8 developer skills into `~/.claude/skills/`. No package manager? Use `curl -fsSL https://skillskit.dev/install | sh` instead.
 
 Clone the target repo and open Claude Code in it:
 
@@ -552,9 +558,9 @@ Selective triggering (skills only activating when the description matches the us
 ## If you want to run this end-to-end
 
 ```bash
-# Install once
-git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
-cd ~/sdas && ./install.sh developers
+# Install once (macOS / Linux — Windows users use scoop or the PowerShell installer)
+brew install tahirraufkeeyu/tap/skillskit
+skillskit install developers
 
 # Clone and run
 cd ~/src

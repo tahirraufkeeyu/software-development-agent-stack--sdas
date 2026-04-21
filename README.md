@@ -15,7 +15,7 @@ You don't need to be an AI expert to use this. If you can copy and paste a comma
 5. [What you need before you start](#what-you-need-before-you-start)
 6. [See it in action — examples](#see-it-in-action--examples)
 7. [Install in 2 minutes](#install-in-2-minutes)
-8. [What install.sh actually does](#what-installsh-actually-does)
+8. [What the installer actually does](#what-the-installer-actually-does)
 9. [How to use a skill](#how-to-use-a-skill)
 10. [The 8 departments and 64 skills](#the-8-departments-and-64-skills)
 11. [Customising skills for your team](#customising-skills-for-your-team)
@@ -223,63 +223,59 @@ This is unchanged from earlier versions of the kit — useful if you want to edi
 
 ### Install into Cursor, Codex, or Gemini
 
-The installer also targets other AI tools. Use `--host` to pick one:
+The CLI targets other AI tools too. Use `--host` to pick one:
 
 ```bash
-./install.sh all                             # default: ~/.claude/skills/ (Claude Code)
-./install.sh --host cursor all               # writes to ./.cursor/rules/ (project-local)
-./install.sh --host codex all                # writes to ./.codex/skills/ (project-local)
-./install.sh --host gemini all               # writes to ~/.gemini/skills/
+skillskit install all                             # default: ~/.claude/skills/ (Claude Code)
+skillskit install --host cursor all               # writes to ./.cursor/rules/ (project-local)
+skillskit install --host codex all                # writes to ./.codex/skills/ (project-local)
+skillskit install --host gemini all               # writes to ~/.gemini/skills/
 ```
 
 All other flags compose with `--host`:
 
 ```bash
-./install.sh --host cursor sales             # just sales skills, into Cursor
-./install.sh --host cursor --update          # keep the Cursor install in sync
-./install.sh --host cursor --dry-run all     # preview the Cursor install
+skillskit install --host cursor sales             # just sales skills, into Cursor
+skillskit install --host cursor --dry-run all     # preview the Cursor install
+skillskit update --host cursor                    # keep the Cursor install in sync
 ```
 
 Override the default target directory per host with an env var: `CLAUDE_SKILLS_DIR`, `CURSOR_RULES_DIR`, `CODEX_SKILLS_DIR`, or `GEMINI_SKILLS_DIR`. Useful for monorepos where the `.cursor/rules/` folder lives somewhere other than the current directory.
 
-### If you don't have `git`
-
-You can also [download the ZIP file](https://github.com/<your-org>/SoftwareDevelopmentAgentStack/archive/refs/heads/main.zip), unzip it, and then run `./install.sh all` from the unzipped folder.
-
 ---
 
-## What install.sh actually does
+## What the installer actually does
 
-If you're wondering what the install script is doing to your computer, here's the plain-English version.
+If you're wondering what `skillskit install` is doing to your computer, here's the plain-English version.
 
 **It copies files. That's all.**
 
-Specifically, it takes the skill folders from this repo and copies them into `~/.claude/skills/` — a folder on your computer that Claude Code watches. When you start Claude, it reads every skill in that folder so they're ready to use.
+The `skillskit` binary has every skill bundled inside it (via Go `embed`). `skillskit install all` unpacks those embedded files into `~/.claude/skills/` — a folder Claude Code watches. When you start Claude, it reads every skill in that folder so they're ready to use.
 
 ### What it does NOT do
 
 - ❌ Does not run any of the scripts inside the skills (e.g. the security audit scripts stay inert until *you* run them manually).
 - ❌ Does not install software, libraries, or dependencies.
-- ❌ Does not access the internet.
+- ❌ Does not access the internet (except `skillskit update` when you explicitly ask it to check for a new CLI version).
 - ❌ Does not require admin / root / sudo privileges.
 - ❌ Does not modify your system configuration.
 - ❌ Does not collect data or telemetry.
 
 ### What it does step-by-step
 
-1. Finds every skill folder under `departments/<dept>/skills/`.
-2. For each one, checks if a skill with the same name already exists in `~/.claude/skills/`.
-   - If yes, **asks you** before overwriting (defaults to "no, skip").
-   - If no, copies the folder into place.
-3. Prints a summary of what was installed and what was skipped.
+1. For each skill folder bundled in the CLI binary, checks if a skill with the same name already exists in `~/.claude/skills/`.
+   - If yes, **asks you** before overwriting (defaults to "no, skip"). Use `--force` to overwrite without prompting.
+   - If no, writes the folder into place.
+2. Prints a summary of what was installed and what was skipped.
 
 ### If you'd rather do it manually
 
-Skip the script entirely — just copy folders:
+Skip the CLI entirely — clone the repo and copy folders:
 
 ```bash
+git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git
 mkdir -p ~/.claude/skills
-cp -R departments/developers/skills/* ~/.claude/skills/
+cp -R software-development-agent-stack--sdas/departments/developers/skills/* ~/.claude/skills/
 ```
 
 Same result.
@@ -287,7 +283,7 @@ Same result.
 ### Install to a different location
 
 ```bash
-CLAUDE_SKILLS_DIR=/custom/path ./install.sh all
+CLAUDE_SKILLS_DIR=/custom/path skillskit install all
 ```
 
 Useful if you want to keep skills in a shared folder or sync them via Dropbox.
@@ -405,7 +401,7 @@ Every skill is a plain Markdown file. Edit them freely — this is the whole poi
 
 ### Finding a skill after install
 
-After running `./install.sh`, your skills live at `~/.claude/skills/<skill-name>/SKILL.md`.
+After running `skillskit install`, your skills live at `~/.claude/skills/<skill-name>/SKILL.md`.
 
 Open one in any text editor:
 
@@ -458,7 +454,7 @@ No. The **sales, marketing, and internal-comms** skills work fine without any co
 
 ### Is my data sent anywhere?
 
-Not by this repo. `install.sh` only copies files locally. Whatever data-sharing policy applies to the AI tool you use (Claude Code, Cursor, etc.) is the same before and after you install skills.
+Not by this repo. `skillskit install` only copies files locally. Whatever data-sharing policy applies to the AI tool you use (Claude Code, Cursor, etc.) is the same before and after you install skills.
 
 ### Is this free?
 
@@ -466,18 +462,23 @@ Yes, this repo is free (MIT licensed). You'll pay for the AI tool you use Claude
 
 ### Can I use this on Windows?
 
-Yes. The installer is a Bash script, so on Windows you'll want either:
-- **Windows Subsystem for Linux (WSL)** — install Ubuntu, run as on Linux.
-- **Git Bash** — comes with [Git for Windows](https://git-scm.com/download/win).
-- Or just copy the `departments/<dept>/skills/<skill>/` folders into `%USERPROFILE%\.claude\skills\` manually.
+Yes. The `skillskit` CLI ships as a native Windows binary — no WSL, no Git Bash required:
+
+```powershell
+scoop bucket add skillskit https://github.com/tahirraufkeeyu/scoop-bucket
+scoop install skillskit
+skillskit install all
+```
+
+Or use the PowerShell one-liner: `iwr https://skillskit.dev/install.ps1 -useb | iex`.
 
 ### Why are the security scripts not executable?
 
-The four helper scripts under `departments/security/.../scripts/` ship without the executable bit to keep the clone simple. Either run them with `bash run-dast.sh`, or run once:
+The four helper scripts under `departments/security/.../scripts/` ship without the executable bit. `skillskit install security` sets the bit automatically on macOS/Linux. If you're installing manually, either run them with `bash run-dast.sh`, or run once:
 
 ```bash
-chmod +x departments/security/skills/security-audit/scripts/*.sh \
-         departments/security/skills/secret-scanner/scripts/*.sh
+chmod +x ~/.claude/skills/security-audit/scripts/*.sh \
+         ~/.claude/skills/secret-scanner/scripts/*.sh
 ```
 
 ### What if I want to uninstall?

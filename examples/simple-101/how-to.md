@@ -41,15 +41,30 @@ Sign in once:
 claude
 ```
 
-#### Install the SDAS skills
+#### Install the skillskit CLI, then the skills
+
+The `skillskit` CLI is distributed as a single cross-platform binary. Every skill is bundled inside it, so you never need to clone this repo.
 
 ```bash
-git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
-cd ~/sdas
-./install.sh all
+# macOS / Linux — via Homebrew
+brew install tahirraufkeeyu/tap/skillskit
+
+# Windows — via Scoop (in PowerShell)
+scoop bucket add skillskit https://github.com/tahirraufkeeyu/scoop-bucket
+scoop install skillskit
+
+# Or one-line install without a package manager
+curl -fsSL https://skillskit.dev/install | sh          # macOS / Linux
+iwr https://skillskit.dev/install.ps1 -useb | iex      # Windows PowerShell
 ```
 
-The installer copies every skill into `~/.claude/skills/`. You'll see it list each folder as it copies. Done — Claude Code will pick them up next time it starts.
+Install all the skills:
+
+```bash
+skillskit install all
+```
+
+That writes every skill into `~/.claude/skills/`. You'll see it list each folder as it copies. Done — Claude Code will pick them up next time it starts.
 
 #### Verify it works
 
@@ -66,7 +81,7 @@ Claude should list skills grouped by department. If it can't see them:
 
 1. Check the folder exists: `ls ~/.claude/skills/` — should show ~64 folders.
 2. Restart Claude Code (`Ctrl+C`, then `claude` again).
-3. Re-run `~/sdas/install.sh --update` to resync.
+3. Re-run `skillskit update` to resync.
 
 **You're done with setup.** Jump to the [tiny API example](#part-2--tiny-api-example).
 
@@ -87,9 +102,11 @@ Claude Code ships a VS Code extension that runs the same Claude Code in a side p
 Same as Option A — the skills live in `~/.claude/skills/` regardless of how Claude Code is invoked:
 
 ```bash
-git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
-cd ~/sdas && ./install.sh all
+brew install tahirraufkeeyu/tap/skillskit   # macOS / Linux
+skillskit install all
 ```
+
+(Windows users: `scoop install tahirraufkeeyu/scoop-bucket/skillskit` then `skillskit install all`.)
 
 #### Verify
 
@@ -115,15 +132,15 @@ Copilot is a VS Code extension installed from the Marketplace. If you already ha
 
 #### Copy the skills somewhere Copilot can see them
 
-The installer has a `--host` flag for project-local installs:
+The CLI has a `--host` flag for project-local installs:
 
 ```bash
 cd ~/your-project
-~/sdas/install.sh all --host cursor
+skillskit install --host cursor all
 # writes to ./.cursor/rules/ — Copilot can read these with @file
 ```
 
-Alternatively, just clone the SDAS repo into a sibling folder and reference files from there.
+Alternatively, `skillskit install --host cursor code-review` drops just one skill into `.cursor/rules/` for targeted reference.
 
 #### Use a skill
 
@@ -149,7 +166,7 @@ codex login
 #### Install the skills
 
 ```bash
-~/sdas/install.sh all --host codex
+skillskit install --host codex all
 # writes to ./.codex/skills/ — project-local
 ```
 
@@ -288,16 +305,17 @@ You installed SDAS, triggered one skill, and shipped a working endpoint. Everyth
 
 **"Claude can't find my skills."**
 - `ls ~/.claude/skills/` — should show ~64 folders.
-- If empty, re-run `~/sdas/install.sh all`.
+- If empty, re-run `skillskit install all`.
 - If populated but Claude still doesn't see them, restart Claude Code.
 
-**"install.sh says command not found."**
-- You need to be in the SDAS repo: `cd ~/sdas && ./install.sh all`.
-- Make sure it's executable: `chmod +x install.sh`.
+**"skillskit: command not found."**
+- Install the CLI first: `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows).
+- No package manager? Use the one-line installer: `curl -fsSL https://skillskit.dev/install | sh`.
 
-**"I'm on Windows and the install script won't run."**
-- Install [Git Bash](https://git-scm.com/download/win) or use WSL.
-- Alternatively, copy the `departments/*/skills/*/` folders manually into `%USERPROFILE%\.claude\skills\`.
+**"I'm on Windows."**
+- `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (recommended).
+- Or PowerShell: `iwr https://skillskit.dev/install.ps1 -useb | iex`.
+- The CLI is a native Windows binary — no WSL, no Git Bash required.
 
 **"Claude Code invoked the wrong skill."**
 - Be more specific in your prompt — reference the skill by name: *"Use the `project-bootstrap` skill to scaffold a FastAPI project."*

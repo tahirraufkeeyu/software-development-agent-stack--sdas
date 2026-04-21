@@ -25,13 +25,13 @@ This department ships one **workflow orchestrator** skill that chains the task s
 
 ## Quick install
 
-From the repository root:
-
 ```bash
-./install.sh developers
+skillskit install developers
 ```
 
-This copies every skill under `skills/` into `~/.claude/skills/` and makes them available to Claude Code.
+This copies every skill in this department into `~/.claude/skills/` and makes them available to Claude Code.
+
+Don't have the CLI yet? Install it with `brew install tahirraufkeeyu/tap/skillskit` (macOS/Linux) or `scoop install tahirraufkeeyu/scoop-bucket/skillskit` (Windows). See [skillskit.dev](https://skillskit.dev/#install) for alternative installers.
 
 ## Recommended MCP servers
 
