@@ -1,0 +1,57 @@
+---
+import Nav from "@/components/Nav.astro";
+import Footer from "@/components/Footer.astro";
+import "@/styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Absolute or root-relative canonical path (no domain). */
+  canonical?: string;
+}
+
+const {
+  title,
+  description = "64 Claude Code skills for engineering, security, devops, sales, marketing, and internal comms — clone and use in 2 minutes.",
+  canonical,
+} = Astro.props;
+
+const siteName = "skillkit.dev";
+const displayTitle = title === siteName ? title : `${title} · ${siteName}`;
+const canonicalUrl = canonical
+  ? new URL(canonical, Astro.site ?? "https://skillkit.dev").toString()
+  : Astro.url.toString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{displayTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={displayTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={siteName} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={displayTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <Nav />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

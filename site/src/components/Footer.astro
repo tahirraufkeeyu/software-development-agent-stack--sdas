@@ -1,0 +1,68 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer>
+  <div class="foot-inner">
+    <div>
+      <span class="muted">skillkit.dev</span> · MIT licensed · {year}
+    </div>
+    <ul class="foot-links">
+      <li>
+        <a href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas"
+          >GitHub</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/CONTRIBUTING.md"
+          >Contribute</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/LICENSE"
+          >License</a
+        >
+      </li>
+    </ul>
+  </div>
+</footer>
+
+<style>
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: var(--space-16);
+    padding: var(--space-6) 0;
+    font-size: 0.875rem;
+  }
+  .foot-inner {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    justify-content: space-between;
+    align-items: center;
+  }
+  @media (min-width: 48rem) {
+    .foot-inner {
+      padding: 0 var(--space-6);
+    }
+  }
+  .foot-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: var(--space-6);
+  }
+  .foot-links a {
+    color: var(--fg-muted);
+    text-decoration: none;
+  }
+  .foot-links a:hover {
+    color: var(--fg);
+  }
+</style>
