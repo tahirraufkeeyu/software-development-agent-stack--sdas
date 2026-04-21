@@ -2,6 +2,7 @@
 import Base from "@/layouts/Base.astro";
 import Search from "@/components/Search.astro";
 import Terminal from "@/components/Terminal.astro";
+import CustomiseAnimation from "@/components/CustomiseAnimation.astro";
 import {
   getManifest,
   departmentLabel,
@@ -54,7 +55,19 @@ const featured = featuredSlugs
     </p>
   </section>
 
-  <Terminal />
+  <section class="anim-pair" aria-label="How the kit runs and how skills get customised">
+    <div class="anim-headline">
+      <h2>Run it. Or rewrite it for your stack.</h2>
+      <p class="muted">
+        Left: how a skill runs end to end when you invoke it. Right: how the per-skill
+        customizer rewrites it for your org in one click. Both are real flows.
+      </p>
+    </div>
+    <div class="anim-grid">
+      <Terminal />
+      <CustomiseAnimation />
+    </div>
+  </section>
 
   <section>
     <h2>Find a skill</h2>
@@ -263,6 +276,42 @@ cd ~/sdas
   }
   .hero-custom strong {
     color: var(--fg);
+  }
+
+  .anim-pair {
+    margin: var(--space-12) 0;
+  }
+  .anim-headline {
+    margin-bottom: var(--space-6);
+    max-width: 52rem;
+  }
+  .anim-headline h2 {
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+  }
+  .anim-headline p {
+    margin: 0;
+  }
+  .anim-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: stretch;
+  }
+  .anim-grid > * {
+    /* Override per-component wrappers so the grid owns layout. */
+    margin: 0 !important;
+  }
+  @media (min-width: 72rem) {
+    .anim-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  /* Inside the pair, each component's own section-level heading would
+     compete with the anim-headline above the grid. Hide it so the two
+     panels read as matched halves. */
+  .anim-grid .term-meta {
+    display: none;
   }
 
   .dept-card {
