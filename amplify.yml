@@ -1,0 +1,80 @@
+# AWS Amplify Hosting build configuration for skillskit.dev
+#
+# Amplify Hosting connects directly to GitHub and handles the full CI/CD
+# pipeline: builds on every push to main, creates preview URLs for PRs,
+# provisions ACM certs for custom domains, serves from a global CDN.
+#
+# This file is the build spec. When Amplify detects a push, it:
+#   1. Clones the repo (only `site/` is relevant here).
+#   2. Runs the commands below in phases.
+#   3. Uploads the artifact `baseDirectory` to its global CDN.
+#   4. Invalidates the CDN cache for the new deploy.
+#
+# For the human setup steps (creating the Amplify app, linking GitHub,
+# custom-domain wiring), see site/SETUP-AWS.md.
+
+version: 1
+
+applications:
+  - appRoot: site
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            # Echo the commit SHA + branch so deploy logs surface them.
+            # Amplify exposes AWS_BRANCH / AWS_COMMIT_ID env vars already,
+            # but printing explicitly makes log-tailing easier.
+            - echo "Building $AWS_BRANCH @ $AWS_COMMIT_ID"
+            - node --version
+            - npm --version
+            # `npm ci` instead of `npm install` — deterministic install
+            # from package-lock.json, fails on lockfile drift.
+            - npm ci
+        build:
+          commands:
+            # The prebuild npm script runs scripts/generate-manifest.ts
+            # which regenerates src/data/skills.json, src/content/skills/,
+            # and public/raw/skills/ from the departments/ tree. Then
+            # astro build + the post-build pagefind indexer run via the
+            # `build` script in package.json.
+            - npm run build
+      artifacts:
+        # Amplify uploads everything under this directory (relative to
+        # appRoot, so actually site/dist/). Includes the _pagefind/
+        # folder produced by the post-build step.
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        # Caching node_modules + ~/.npm cuts build times from ~2 min
+        # (cold) to ~30 s (warm) on Amplify's build containers.
+        paths:
+          - node_modules/**/*
+          - ~/.npm/**/*
+
+  # Custom HTTP headers applied to every response. Equivalent to Azure
+  # Static Web Apps' staticwebapp.config.json, just Amplify's syntax.
+  # Security headers + long-cache for static assets, short-cache for HTML.
+  customHeaders:
+    - pattern: '**/*'
+      headers:
+        - key: Strict-Transport-Security
+          value: max-age=31536000; includeSubDomains; preload
+        - key: X-Content-Type-Options
+          value: nosniff
+        - key: Referrer-Policy
+          value: strict-origin-when-cross-origin
+        - key: Permissions-Policy
+          value: 'camera=(), microphone=(), geolocation=()'
+    - pattern: '**/*.html'
+      headers:
+        - key: Cache-Control
+          value: 'public, max-age=0, must-revalidate'
+    - pattern: 'assets/**/*'
+      headers:
+        - key: Cache-Control
+          value: 'public, max-age=31536000, immutable'
+    - pattern: '_pagefind/**/*'
+      headers:
+        - key: Cache-Control
+          value: 'public, max-age=31536000, immutable'
