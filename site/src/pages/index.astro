@@ -320,15 +320,23 @@ cd ~/sdas
   /* Chain height: 100% all the way from the grid cell down to the
      inner figure so the terminal wrapper <section> doesn't collapse
      to content height while the customise <figure> stretches to cell
-     height. Without this the two panels end up different heights. */
+     height. Without this the two panels end up different heights.
+
+     Also zero the vertical margin on .term-wrap explicitly. The
+     component defines `margin: var(--space-8) 0 var(--space-12)` for
+     standalone use outside a grid; inside the grid that margin would
+     push the Terminal panel downward from the top of its cell while
+     the Customise figure (no such margin) sits flush to the top,
+     misaligning the two panels' top edges. */
   .anim-grid :global(.term-wrap) {
+    margin: 0 !important;
     height: 100%;
     display: flex;
     flex-direction: column;
   }
   .anim-grid :global(.term-wrap > figure.terminal) {
-    flex: 1;
     margin: 0 !important;
+    flex: 1;
   }
 
   @media (min-width: 72rem) {
