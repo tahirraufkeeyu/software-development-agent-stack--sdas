@@ -50,6 +50,8 @@ On this repo (`software-development-agent-stack--sdas`):
 
 The release workflow reads this to push to the two target repos.
 
+> **Security note.** The PAT is a write credential to the target repos. Paste it into GitHub's "New repository secret" form directly from the token-generation success page; **never** paste it into chat, email, shared notes, tickets, or any file. Once the secret is saved, GitHub stores it encrypted and never reveals the value again — even to you — which is by design. If a token does end up anywhere else, **revoke it immediately** at `https://github.com/settings/tokens` and generate a new one. GitHub's own secret scanner also auto-revokes PATs that appear in public artefacts (commits, gists, release notes), but the revocation window is minutes, not instant. Treat any token that has left the Secrets form as compromised and rotate.
+
 ### 5. Install GoReleaser locally (optional)
 
 Only needed if you want to run `make release-snapshot` locally before tagging. CI handles real releases.
