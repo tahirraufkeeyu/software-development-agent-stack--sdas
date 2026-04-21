@@ -59,7 +59,7 @@ A one-table summary of what this repo is and isn't, for readers who want the ess
 | **Skill count** | 64 skills across 8 departments — 55 task skills plus 9 workflow orchestrators. Security ships scan/report and paired remediation halves (secrets, dependencies, code, containers, compliance) with two orchestrators for the scan pass and the close-out pass. |
 | **Skill format** | `SKILL.md` files with YAML frontmatter (`name`, `description`). Claude auto-triggers the right skill by matching the `description` against your natural-language request — you don't have to memorise commands. |
 | **Workflow** | Loose library plus one *workflow orchestrator* skill per department (e.g. `full-security-audit`, `release-to-prod`). Orchestrators chain the underlying skills and pass artifacts between them via `produces:` / `consumes:` frontmatter fields. Individual skills still work standalone. |
-| **Install** | One command: `./install.sh all` copies Markdown files into `~/.claude/skills/`. `--update` re-syncs later; `--host cursor\|codex\|gemini` targets other AI tools. No daemons, no runtime, no background processes. |
+| **Install** | One command via the `skillskit` CLI — `brew install skillskit` on macOS/Linux, `scoop install skillskit` on Windows, or `curl \| sh`. Then `skillskit install all` copies skills into `~/.claude/skills/`. `skillskit update` re-syncs later; `--host cursor\|codex\|gemini` targets other AI tools. No daemons, no runtime, no background processes. Legacy `git clone + ./install.sh` path still works. |
 | **Tooling** | Pure Markdown + a few helper shell scripts (security scans). No Node/Bun/Python runtime required. No custom browser. No server. No telemetry. |
 | **Model & tool support** | Format-agnostic. First-class fit for Claude Code (auto-discovery from `~/.claude/skills/`). Also usable in Cursor, Gemini CLI, Codex CLI, ChatGPT, or any LLM interface that can read a Markdown file. |
 | **Safety model** | Every skill declares a `safety:` level in its frontmatter — `safe`, `writes-local`, `writes-shared`, or `destructive` — so tools reading the file can prompt before risky actions. Also relies on Claude Code's permission system (`allow` / `ask` / `deny` in `.claude/settings.json`). Skills encode boundaries in their `Constraints` section. |
@@ -150,47 +150,76 @@ See the [examples/ README](examples/README.md) for the format, conventions, and 
 
 ## Install in 2 minutes
 
-Open a terminal and run:
+You don't need to clone this repo. The `skillskit` CLI ships as a single cross-platform binary with every skill bundled in. Pick the install method that matches your setup:
+
+### macOS (Homebrew)
 
 ```bash
-# 1. Download this repo
-git clone https://github.com/<your-org>/SoftwareDevelopmentAgentStack.git
-cd SoftwareDevelopmentAgentStack
+brew tap tahirraufkeeyu/tap
+brew install skillskit
+```
 
-# 2. Install all skills
+### Linux (Homebrew — recommended)
+
+Same as above — Homebrew works on Linux too.
+
+### Windows (Scoop)
+
+```powershell
+scoop bucket add skillskit https://github.com/tahirraufkeeyu/scoop-bucket
+scoop install skillskit
+```
+
+### One-line install (macOS / Linux, no package manager)
+
+```bash
+curl -fsSL https://skillskit.dev/install | sh
+```
+
+### One-line install (Windows)
+
+```powershell
+iwr https://skillskit.dev/install.ps1 -useb | iex
+```
+
+### Then install the skills
+
+Every method above gives you a `skillskit` binary on your PATH. Install the skills themselves with:
+
+```bash
+skillskit install all                 # install every skill
+skillskit install developers          # install one department
+skillskit install --host cursor all   # target Cursor's rules dir instead
+skillskit list                        # show what's installed
+skillskit search "code review"        # find skills by keyword
+skillskit update                      # re-sync installed skills from the latest binary
+```
+
+That's it. The next time you run `claude`, all 64 skills are available. Run `skillskit --help` for the full command list.
+
+### Upgrading
+
+Skills are embedded in the binary, so upgrading the CLI upgrades the skills.
+
+```bash
+brew upgrade skillskit          # Homebrew
+scoop update skillskit          # Scoop
+skillskit update                # then re-sync any already-installed skills
+```
+
+Re-run the one-line installer on systems without a package manager.
+
+### For the old school: git clone + install.sh
+
+The legacy shell-script installer still works if you'd rather clone the repo:
+
+```bash
+git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
+cd ~/sdas
 ./install.sh all
 ```
 
-That's it. The next time you run `claude`, all 64 skills are available.
-
-### Install only some departments
-
-Not everyone needs the security audit skills. Install just what your team uses:
-
-```bash
-./install.sh developers       # just developer skills
-./install.sh sales            # just sales skills
-./install.sh marketing        # just marketing skills
-```
-
-### See what's available
-
-```bash
-./install.sh --list           # list all departments
-./install.sh --dry-run all    # preview without actually installing
-./install.sh --help           # show usage
-```
-
-### Keep skills up to date
-
-Once you've installed, pulling in the latest upstream changes is one command:
-
-```bash
-./install.sh --update         # git-pull the repo + re-sync every installed skill
-./install.sh --dry-run --update   # preview the re-sync without changing anything
-```
-
-`--update` only touches skills this kit ships. If you've added your own skills alongside, or installed skills from another source, they're left untouched. If the repo has uncommitted local changes the script skips the `git pull` so your edits are preserved.
+This is unchanged from earlier versions of the kit — useful if you want to edit the skills locally in the clone and install from there, or if your environment can't download a prebuilt binary. For everyone else, `brew install skillskit` (or the curl one-liner) is faster and ships shell completions.
 
 ### Install into Cursor, Codex, or Gemini
 

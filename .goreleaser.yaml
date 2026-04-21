@@ -1,0 +1,163 @@
+# GoReleaser config for the skillskit CLI.
+#
+# How this gets run:
+#   - Local test:        goreleaser release --snapshot --clean   (no publish)
+#   - Actual release:    tag `vX.Y.Z`, push. A GitHub Actions workflow
+#                        (.github/workflows/release.yml) runs
+#                        `goreleaser release --clean` which:
+#                          1. cross-compiles 6 binaries (linux/darwin/windows
+#                             x amd64/arm64).
+#                          2. creates a GitHub Release with the binaries +
+#                             SHA256 checksums + source archives.
+#                          3. pushes an updated Formula to the Homebrew tap
+#                             (requires TAP_GITHUB_TOKEN secret).
+#                          4. pushes an updated manifest to the Scoop bucket
+#                             (same secret; different target repo).
+#                          5. creates a winget manifest pull request (only
+#                             if the winget PR action is enabled at release
+#                             time; disabled by default here — opt-in).
+#
+# The embed directive in embed.go bakes whatever is in departments/ at
+# the tagged commit into every binary. Skills, release, and binary are
+# versioned together by design — upgrading the binary upgrades the
+# installed skills (when the user runs `skillskit update`).
+
+version: 2
+
+project_name: skillskit
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  - id: skillskit
+    main: .
+    binary: skillskit
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    # Skip darwin/386 / windows/386 etc. — 32-bit is dead for this audience.
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+      - -X main.Commit={{.ShortCommit}}
+      - -X main.Date={{.Date}}
+    flags:
+      - -trimpath
+
+archives:
+  - id: default
+    # Tar.gz for Unix-family, zip for Windows — the expected formats for
+    # each platform's package managers and for curl-extract flows.
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- if eq .Os "darwin" }}macOS
+      {{- else }}{{ .Os }}{{ end }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}arm64
+      {{- else }}{{ .Arch }}{{ end }}
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  # Use git commit messages grouped by Conventional Commits prefix.
+  # Anything without a recognised prefix falls into "Other" — that's
+  # fine; forces a good commit-message habit over time.
+  sort: asc
+  use: github
+  groups:
+    - title: "Features"
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: "Fixes"
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: "Chores"
+      regexp: '^.*?chore(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: "Docs"
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: Other
+      order: 999
+  filters:
+    exclude:
+      - "^test:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: tahirraufkeeyu
+    name: software-development-agent-stack--sdas
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}} {{.Version}}"
+  header: |
+    ## skillskit {{.Version}}
+
+    Installable via:
+
+    ```bash
+    # Homebrew (macOS + Linux)
+    brew tap tahirraufkeeyu/tap
+    brew install skillskit
+
+    # Scoop (Windows)
+    scoop bucket add skillskit https://github.com/tahirraufkeeyu/scoop-bucket
+    scoop install skillskit
+
+    # Or download a binary from below and drop it on your PATH.
+    ```
+
+    Then: `skillskit install all`.
+
+brews:
+  - name: skillskit
+    repository:
+      owner: tahirraufkeeyu
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: "https://skillskit.dev"
+    description: "Install and manage Claude Code skills from SDAS"
+    license: "MIT"
+    commit_author:
+      name: "skillskit-release"
+      email: "release@skillskit.dev"
+    commit_msg_template: "Brew formula bump: {{.ProjectName}} {{.Tag}}"
+    install: |
+      bin.install "skillskit"
+      generate_completions_from_executable(bin/"skillskit", "completion")
+    test: |
+      assert_match "skillskit #{version}", shell_output("#{bin}/skillskit version")
+
+scoops:
+  - name: skillskit
+    repository:
+      owner: tahirraufkeeyu
+      name: scoop-bucket
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    homepage: "https://skillskit.dev"
+    description: "Install and manage Claude Code skills from SDAS"
+    license: "MIT"
+    commit_author:
+      name: "skillskit-release"
+      email: "release@skillskit.dev"
+    commit_msg_template: "skillskit: bump to {{.Tag}}"
