@@ -1,0 +1,37 @@
+<!-- Option 6: Dot grid — a 4x4 matrix with some filled, others hollow.
+     Represents the catalog (many skills), with a few highlighted
+     (your customized ones). Clean, quiet, professional. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="skillskit">
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#ffffff" stroke="#e1e5eb" stroke-width="1"/>
+  <!-- Grid of dots, 4x4, spaced 9px apart starting at 14 -->
+  <!-- Hollow dots (muted) -->
+  <g fill="none" stroke="#c4cad3" stroke-width="1.5">
+    <circle cx="14" cy="14" r="2.5"/>
+    <circle cx="14" cy="32" r="2.5"/>
+    <circle cx="14" cy="50" r="2.5"/>
+    <circle cx="32" cy="50" r="2.5"/>
+    <circle cx="50" cy="14" r="2.5"/>
+    <circle cx="50" cy="32" r="2.5"/>
+    <circle cx="50" cy="50" r="2.5"/>
+  </g>
+  <!-- Filled accent dots (a diagonal path through the grid) -->
+  <g fill="#1e6fd1">
+    <circle cx="14" cy="23" r="2.8"/>
+    <circle cx="23" cy="23" r="2.8"/>
+    <circle cx="23" cy="14" r="2.8"/>
+    <circle cx="23" cy="32" r="2.8"/>
+    <circle cx="32" cy="32" r="3.4"/>
+    <circle cx="32" cy="14" r="2.8"/>
+    <circle cx="41" cy="32" r="2.8"/>
+    <circle cx="41" cy="41" r="2.8"/>
+    <circle cx="32" cy="41" r="2.8"/>
+    <circle cx="41" cy="23" r="2.8"/>
+    <circle cx="41" cy="14" r="2.8"/>
+    <circle cx="23" cy="41" r="2.8"/>
+    <circle cx="23" cy="50" r="2.8"/>
+    <circle cx="14" cy="41" r="2.8"/>
+    <circle cx="50" cy="23" r="2.8"/>
+    <circle cx="50" cy="41" r="2.8"/>
+    <circle cx="32" cy="23" r="2.8"/>
+  </g>
+</svg>
