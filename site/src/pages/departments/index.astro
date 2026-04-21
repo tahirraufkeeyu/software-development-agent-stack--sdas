@@ -1,0 +1,112 @@
+---
+import Base from "@/layouts/Base.astro";
+import {
+  getManifest,
+  departmentLabel,
+  departmentPitch,
+} from "@/utils/skills";
+
+const { departments, totals } = getManifest();
+---
+
+<Base title="Departments" description="All 8 departments and 64 Claude Code skills in SDAS.">
+  <header class="page-head">
+    <p class="eyebrow">Catalog</p>
+    <h1>All departments</h1>
+    <p class="muted">
+      {totals.skills} skills, {totals.orchestrators} workflow orchestrators, {totals.departments}
+      departments. Pick one to dive in, or use search to jump to a specific skill.
+    </p>
+  </header>
+
+  <ul class="dept-list">
+    {
+      departments.map((d) => (
+        <li class="dept-row">
+          <a class="dept-row-link card card-link" href={`/departments/${d.slug}`}>
+            <div class="row-main">
+              <h2>{departmentLabel(d.slug)}</h2>
+              <p class="muted">{departmentPitch(d.slug)}</p>
+            </div>
+            <div class="row-meta">
+              <div>
+                <span class="num">{d.skillCount}</span>
+                <span class="lbl">skills</span>
+              </div>
+              <div>
+                <span class="num">{d.orchestratorCount}</span>
+                <span class="lbl">orchestrator{d.orchestratorCount === 1 ? "" : "s"}</span>
+              </div>
+            </div>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-8);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 0 0 var(--space-2);
+  }
+  .page-head h1 {
+    margin: 0 0 var(--space-3);
+  }
+  .dept-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .dept-row-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-4) var(--space-5);
+  }
+  .dept-row-link h2 {
+    margin: 0 0 var(--space-2);
+    font-size: 1.15rem;
+  }
+  .dept-row-link p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .row-meta {
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .row-meta .num {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1;
+  }
+  .row-meta .lbl {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: var(--space-1);
+  }
+  @media (max-width: 36rem) {
+    .row-meta {
+      gap: var(--space-4);
+    }
+  }
+</style>

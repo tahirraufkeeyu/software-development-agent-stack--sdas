@@ -1,0 +1,131 @@
+---
+import Base from "@/layouts/Base.astro";
+import SkillCard from "@/components/SkillCard.astro";
+import {
+  getManifest,
+  getSkillsByDepartment,
+  departmentLabel,
+  departmentPitch,
+} from "@/utils/skills";
+
+export async function getStaticPaths() {
+  const { departments } = getManifest();
+  return departments.map((d) => ({ params: { id: d.slug } }));
+}
+
+const { id } = Astro.params;
+const departmentId = id ?? "";
+const skills = getSkillsByDepartment(departmentId);
+const label = departmentLabel(departmentId);
+const pitch = departmentPitch(departmentId);
+
+const tasks = skills.filter((s) => !s.isOrchestrator);
+const orchestrators = skills.filter((s) => s.isOrchestrator);
+---
+
+<Base title={label} description={pitch} canonical={`/departments/${departmentId}`}>
+  <header class="page-head">
+    <p class="eyebrow">
+      <a href="/departments">Departments</a>
+      <span class="sep">/</span>
+      <span>{departmentId}</span>
+    </p>
+    <h1>{label}</h1>
+    <p class="pitch muted">{pitch}</p>
+    <p class="counts subtle">
+      {skills.length} skills · {orchestrators.length} orchestrator{orchestrators.length === 1 ? "" : "s"}
+    </p>
+    <div class="install">
+      <code>./install.sh {departmentId}</code>
+      <span class="subtle">installs just this department into <code>~/.claude/skills/</code></span>
+    </div>
+  </header>
+
+  {
+    tasks.length > 0 ? (
+      <section>
+        <h2>Task skills</h2>
+        <div class="grid-auto">
+          {tasks.map((s) => (
+            <SkillCard skill={s} />
+          ))}
+        </div>
+      </section>
+    ) : null
+  }
+
+  {
+    orchestrators.length > 0 ? (
+      <section>
+        <h2>Workflow orchestrators</h2>
+        <p class="muted">
+          Orchestrators chain the task skills above into an end-to-end flow. Invoke them the
+          same way as any other skill — they declare <code>chains:</code> in frontmatter, which
+          means tooling can pass artifacts between steps automatically.
+        </p>
+        <div class="grid-auto">
+          {orchestrators.map((s) => (
+            <SkillCard skill={s} />
+          ))}
+        </div>
+      </section>
+    ) : null
+  }
+
+  {
+    skills.length === 0 ? (
+      <p class="muted">No skills in this department yet.</p>
+    ) : null
+  }
+</Base>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-8);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+    margin: 0 0 var(--space-3);
+  }
+  .eyebrow a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .eyebrow .sep {
+    margin: 0 var(--space-2);
+    color: var(--fg-subtle);
+  }
+  .page-head h1 {
+    margin: 0 0 var(--space-3);
+  }
+  .pitch {
+    margin: 0 0 var(--space-3);
+    font-size: 1.1rem;
+    line-height: 1.55;
+    max-width: 48rem;
+  }
+  .counts {
+    font-family: var(--font-mono);
+    margin: 0 0 var(--space-4);
+  }
+  .install {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    max-width: 44rem;
+  }
+  .install code {
+    font-size: 0.95em;
+    background: var(--code-bg);
+  }
+</style>
