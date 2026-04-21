@@ -1,0 +1,93 @@
+---
+import type { SkillEntry } from "@/utils/skills";
+import { safetyLabel } from "@/utils/skills";
+
+interface Props {
+  skill: SkillEntry;
+  /** When true, show the department as a chip on the card. */
+  showDepartment?: boolean;
+}
+
+const { skill, showDepartment = false } = Astro.props;
+const href = `/skills/${skill.slug}`;
+---
+
+<a class="card card-link skill-card" href={href}>
+  <div class="skill-head">
+    <h3 class="skill-title">
+      {skill.name}
+      {skill.isOrchestrator ? <span class="orch">orchestrator</span> : null}
+    </h3>
+    {showDepartment ? <span class="dept">{skill.department}</span> : null}
+  </div>
+  <p class="skill-desc">{skill.description}</p>
+  <div class="skill-meta">
+    <span class:list={["badge", `badge-${skill.safety}`]} title={safetyLabel(skill.safety)}>
+      {skill.safety}
+    </span>
+    {
+      skill.supportedStacks.length > 0
+        ? skill.supportedStacks.slice(0, 3).map((s) => <span class="badge">{s}</span>)
+        : null
+    }
+    {
+      skill.supportedStacks.length > 3 ? (
+        <span class="badge">+{skill.supportedStacks.length - 3}</span>
+      ) : null
+    }
+  </div>
+</a>
+
+<style>
+  .skill-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-height: 11rem;
+  }
+  .skill-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .skill-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+  .orch {
+    display: inline-block;
+    margin-left: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    padding: 0.1em 0.45em;
+    border-radius: 999px;
+    vertical-align: middle;
+  }
+  .dept {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+  }
+  .skill-desc {
+    color: var(--fg-muted);
+    font-size: 0.95rem;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .skill-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: auto;
+  }
+</style>
