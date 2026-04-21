@@ -302,29 +302,39 @@ cd ~/sdas
     /* Override per-component wrappers so the grid owns layout. */
     margin: 0 !important;
   }
+  /* Cross-component selectors MUST be wrapped in :global() — Astro
+     scopes .term-wrap / .term-meta / figure.terminal to Terminal.astro
+     by default, so an unscoped selector here wouldn't match anything
+     in the generated HTML. That was the root cause of the earlier
+     misalignment: 'display: none' on .term-meta silently didn't apply,
+     leaving the Terminal's own eyebrow row ("WHAT RUNNING A SKILL
+     LOOKS LIKE · ...") visible above its chrome while the customise
+     panel had nothing equivalent on its side. */
+
+  /* Kill the Terminal's built-in eyebrow row — the section-level
+     <h2> above the grid already explains both panels. */
+  .anim-grid :global(.term-meta) {
+    display: none !important;
+  }
+
   /* Chain height: 100% all the way from the grid cell down to the
      inner figure so the terminal wrapper <section> doesn't collapse
      to content height while the customise <figure> stretches to cell
      height. Without this the two panels end up different heights. */
-  .anim-grid .term-wrap {
+  .anim-grid :global(.term-wrap) {
     height: 100%;
     display: flex;
     flex-direction: column;
   }
-  .anim-grid .term-wrap > figure.terminal {
+  .anim-grid :global(.term-wrap > figure.terminal) {
     flex: 1;
     margin: 0 !important;
   }
+
   @media (min-width: 72rem) {
     .anim-grid {
       grid-template-columns: 1fr 1fr;
     }
-  }
-  /* Inside the pair, each component's own section-level heading would
-     compete with the anim-headline above the grid. Hide it so the two
-     panels read as matched halves. */
-  .anim-grid .term-meta {
-    display: none;
   }
 
   .dept-card {
