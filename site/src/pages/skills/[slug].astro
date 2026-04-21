@@ -1,5 +1,6 @@
 ---
 import Base from "@/layouts/Base.astro";
+import CustomiseModal from "@/components/CustomiseModal.astro";
 import { getEntry, render } from "astro:content";
 import {
   getAllSkills,
@@ -149,7 +150,12 @@ const deptLabel = departmentLabel(skill.department);
   </article>
 
   <aside class="install-box">
-    <h3>Install this skill</h3>
+    <div class="install-head">
+      <h3>Install this skill</h3>
+      <button type="button" class="btn-cust" data-open-customizer>
+        Customise for your organisation ↗
+      </button>
+    </div>
     <pre><code>{`# install this department
 ./install.sh ${skill.department}
 
@@ -157,10 +163,19 @@ const deptLabel = departmentLabel(skill.department);
 git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
 cd ~/sdas && ./install.sh all`}</code></pre>
     <p class="subtle">
-      Phase B will add a customizer that lets you tweak this skill for your stack and
-      download a customized <code>SKILL.md</code> — coming soon.
+      Using a different stack? Click <em>Customise</em> above and an LLM will rewrite this
+      skill for your environment — your API key and inputs stay in your browser.
     </p>
   </aside>
+
+  <CustomiseModal
+    skillSlug={skill.slug}
+    skillName={skill.name}
+    skillDescription={skill.description}
+    skillSafety={skill.safety}
+    skillMdPath={skill.sourcePath}
+    department={skill.department}
+  />
 </Base>
 
 <style>
@@ -317,11 +332,35 @@ cd ~/sdas && ./install.sh all`}</code></pre>
     padding: var(--space-6);
     margin-top: var(--space-8);
   }
+  .install-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-3);
+  }
   .install-box h3 {
-    margin: 0 0 var(--space-3);
+    margin: 0;
     font-size: 1rem;
   }
   .install-box pre {
     margin-top: 0;
+  }
+  .btn-cust {
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 0.9rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .btn-cust:hover {
+    background: var(--accent);
+    color: var(--bg);
   }
 </style>
