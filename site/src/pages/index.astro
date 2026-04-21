@@ -324,6 +324,8 @@ skillskit --help                 # full command list`}</code></pre>
 </Base>
 
 <script>
+  import { track } from "@/lib/analytics";
+
   /**
    * Copy-to-clipboard wiring for the hero install bar + every install
    * card's snippet. Handles the navigator.clipboard path and falls
@@ -341,6 +343,20 @@ skillskit --help                 # full command list`}</code></pre>
 
         btn.classList.toggle("copied", ok);
         btn.textContent = ok ? "copied ✓" : "failed";
+
+        if (ok) {
+          // Derive a source label: "hero" for the hero bar, or the card
+          // heading (e.g. "macOS & Linux") for the platform cards.
+          let source = "unknown";
+          if (btn.classList.contains("hero-copy-btn")) {
+            source = "hero";
+          } else {
+            const card = btn.closest<HTMLElement>(".install-card");
+            const heading = card?.querySelector<HTMLElement>("h3");
+            source = heading?.textContent?.trim() ?? "install-card";
+          }
+          track("install_snippet_copied", { source });
+        }
 
         setTimeout(() => {
           btn.textContent = originalLabel;
