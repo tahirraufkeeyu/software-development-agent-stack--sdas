@@ -1,5 +1,6 @@
 ---
 import Base from "@/layouts/Base.astro";
+import Search from "@/components/Search.astro";
 import {
   getManifest,
   departmentLabel,
@@ -45,6 +46,11 @@ const featured = featuredSlugs
       · {totals.bySafety["writes-shared"]} writes-shared
       · {totals.bySafety.destructive} destructive
     </p>
+  </section>
+
+  <section>
+    <h2>Find a skill</h2>
+    <Search />
   </section>
 
   <section>

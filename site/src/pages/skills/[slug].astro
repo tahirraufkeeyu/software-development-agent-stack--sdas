@@ -38,6 +38,14 @@ const deptLabel = departmentLabel(skill.department);
   description={skill.description}
   canonical={`/skills/${skill.slug}`}
 >
+  <!-- Pagefind indexer metadata — picked up by the post-build step -->
+  <meta
+    data-pagefind-meta={`title:${skill.name}`}
+    data-pagefind-filter={`department:${skill.department}`}
+  />
+  <meta data-pagefind-filter={`safety:${skill.safety}`} />
+  {skill.isOrchestrator ? <meta data-pagefind-filter="kind:orchestrator" /> : <meta data-pagefind-filter="kind:task" />}
+
   <header class="page-head">
     <p class="eyebrow">
       <a href="/departments">Departments</a>
