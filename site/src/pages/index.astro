@@ -99,7 +99,12 @@ const featured = featuredSlugs
     <div class="install-grid">
       <div class="install-card install-card-primary">
         <div class="install-card-head">
-          <h3>macOS &amp; Linux</h3>
+          <div class="install-card-title">
+            <span class="platform-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            </span>
+            <h3>macOS &amp; Linux</h3>
+          </div>
           <span class="install-chip">Recommended</span>
         </div>
         <p class="muted">Homebrew on macOS or Linuxbrew on Linux.</p>
@@ -113,7 +118,12 @@ skillskit install all`}</code><button class="install-copy" type="button" data-co
 
       <div class="install-card">
         <div class="install-card-head">
-          <h3>Windows</h3>
+          <div class="install-card-title">
+            <span class="platform-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.48L10.05 4.5v6.85H3V5.48zm0 13.04L10.05 19.5v-6.84H3v5.86zm7.85 1.09L21 21V13H10.85v6.61zm0-7.61H21V3l-10.15 1.39V12z"/></svg>
+            </span>
+            <h3>Windows</h3>
+          </div>
           <span class="install-chip">Scoop</span>
         </div>
         <p class="muted">One-liner via the <a href="https://scoop.sh">Scoop</a> package manager.</p>
@@ -127,7 +137,12 @@ skillskit install all`}</code><button class="install-copy" type="button" data-co
 
       <div class="install-card">
         <div class="install-card-head">
-          <h3>One-liner (no package manager)</h3>
+          <div class="install-card-title">
+            <span class="platform-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 10 12 4 17"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            </span>
+            <h3>One-liner (no package manager)</h3>
+          </div>
           <span class="install-chip">macOS / Linux</span>
         </div>
         <p class="muted">Grabs the latest release from GitHub, verifies SHA256, drops the binary on <code>PATH</code>.</p>
@@ -140,7 +155,12 @@ skillskit install all`}</code><button class="install-copy" type="button" data-co
 
       <div class="install-card">
         <div class="install-card-head">
-          <h3>Windows — PowerShell</h3>
+          <div class="install-card-title">
+            <span class="platform-icon platform-icon-ps" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 5 14 12 6 19"/><line x1="13" y1="19" x2="19" y2="19"/></svg>
+            </span>
+            <h3>Windows — PowerShell</h3>
+          </div>
           <span class="install-chip">No package manager</span>
         </div>
         <p class="muted">Same installer, PowerShell flavour. Adds <code>%LOCALAPPDATA%\Programs\skillskit</code> to your user <code>PATH</code>.</p>
@@ -552,9 +572,34 @@ skillskit --help                 # full command list`}</code></pre>
   .install-card-head {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: var(--space-3);
     margin-bottom: var(--space-2);
+  }
+  .install-card-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .platform-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    color: var(--fg-muted);
+    flex-shrink: 0;
+  }
+  .platform-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+  .install-card-primary .platform-icon {
+    color: var(--accent);
+  }
+  .platform-icon-ps {
+    color: #1a7bd6;
   }
   .install-card h3 {
     margin: 0;
