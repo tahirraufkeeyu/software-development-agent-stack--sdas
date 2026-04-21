@@ -67,3 +67,22 @@ jobs:
           # missing the release will still produce binaries but won't
           # update the brew/scoop repos; the failure is clearly logged.
           TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+
+      # Upload the dist/ directory (binaries + checksums) as a workflow
+      # artifact. On a tag-triggered run this is redundant with the
+      # GitHub Release assets, but it's small (a few MB) and makes
+      # snapshot runs — where GoReleaser builds without publishing —
+      # actually useful: you can download the dist/ zip from the
+      # workflow run page and smoke-test the binary locally before
+      # cutting a real tag.
+      - name: Upload dist artifacts
+        if: always() && hashFiles('dist/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: skillskit-${{ github.event.inputs.snapshot == 'true' && 'snapshot' || github.ref_name }}-dist
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/checksums.txt
+          if-no-files-found: warn
+          retention-days: 14
