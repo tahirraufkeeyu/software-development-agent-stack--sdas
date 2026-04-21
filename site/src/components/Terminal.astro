@@ -41,42 +41,35 @@ interface Line {
 }
 
 const script: Line[] = [
-  { type: "muted", text: "— user starts Claude Code in a Node.js repo —" },
+  { type: "muted", text: "— install skillskit, install the 64 skills, use one —" },
+
+  { type: "blank" },
+  { type: "h", text: "1  Install the CLI" },
+  { type: "cmd", text: "brew tap tahirraufkeeyu/tap" },
+  { type: "cmd", text: "brew install skillskit" },
+  { type: "stdout", text: "  Pouring skillskit...done" },
+  { type: "ok", text: "installed skillskit v0.1.0 to /opt/homebrew/bin/skillskit" },
+
+  { type: "blank" },
+  { type: "h", text: "2  Install all 64 skills" },
+  { type: "cmd", text: "skillskit install all" },
+  { type: "stdout", text: "  ▸ developers    ✓ 8 skills" },
+  { type: "stdout", text: "  ▸ security      ✓ 11 skills" },
+  { type: "stdout", text: "  ▸ devops        ✓ 7 skills" },
+  { type: "stdout", text: "  ▸ infrastructure ✓ 6 skills" },
+  { type: "stdout", text: "  ▸ qa            ✓ 6 skills" },
+  { type: "stdout", text: "  ▸ sales         ✓ 6 skills" },
+  { type: "stdout", text: "  ▸ marketing     ✓ 6 skills" },
+  { type: "stdout", text: "  ▸ internal-comms ✓ 6 skills" },
+  { type: "ok", text: "64 installed across 8 departments → ~/.claude/skills/" },
+
+  { type: "blank" },
+  { type: "h", text: "3  Start using them" },
   { type: "cmd", text: "claude" },
-
+  { type: "prompt", text: "review my staged changes for security and perf issues" },
   { type: "blank" },
-  { type: "prompt", text: "design a REST API for a bookmarks feature —" },
-  { type: "prompt", text: "  users save URLs with tags and notes;" },
-  { type: "prompt", text: "  standard CRUD plus search by tag." },
-
-  { type: "blank" },
-  { type: "match", text: "matched skill: api-design" },
-  { type: "muted", text: "       description match: \"Use when designing REST or GraphQL endpoints...\"" },
-
-  { type: "blank" },
-  { type: "h", text: "1  Detect the stack" },
-  { type: "cmd", text: "cat package.json | head" },
-  { type: "stdout", text: "  \"dependencies\": { \"express\": \"^4.18.2\", \"zod\": \"^3.23.8\" }" },
-  { type: "cmd", text: "ls api/ 2>/dev/null" },
-  { type: "stdout", text: "  (no existing spec)" },
-  { type: "info", text: "stack: node.js + express · no prior OpenAPI in repo" },
-
-  { type: "blank" },
-  { type: "h", text: "2  Draft endpoints (REST, cursor-paginated, RFC 7807 errors)" },
-  { type: "stdout", text: "  POST   /bookmarks              create" },
-  { type: "stdout", text: "  GET    /bookmarks              list" },
-  { type: "stdout", text: "  GET    /bookmarks/:id          read" },
-  { type: "stdout", text: "  PATCH  /bookmarks/:id          update" },
-  { type: "stdout", text: "  DELETE /bookmarks/:id          delete" },
-  { type: "stdout", text: "  GET    /bookmarks/search       filter by tag" },
-
-  { type: "blank" },
-  { type: "h", text: "3  Emit OpenAPI 3.1 spec + types" },
-  { type: "ok", text: "api/openapi.yaml       (142 lines, 6 endpoints, validates)" },
-  { type: "ok", text: "api/types/bookmark.ts  (TypeScript types generated)" },
-
-  { type: "blank" },
-  { type: "info", text: "Done. Chain to test-writer for fixtures?" },
+  { type: "match", text: "matched skill: code-review" },
+  { type: "info", text: "Claude auto-picked code-review from its description." },
 ];
 
 // Stagger defaults: base offset + per-line increment unless overridden.
@@ -106,7 +99,7 @@ const totalMs = withDelays.reduce(
       <span class="dot red"></span>
       <span class="dot yellow"></span>
       <span class="dot green"></span>
-      <span class="term-title">~/acme-api · claude</span>
+      <span class="term-title">zsh — install + first use</span>
     </div>
     <div class="term-body">
       {
@@ -127,10 +120,10 @@ const totalMs = withDelays.reduce(
       <span class="cursor" aria-hidden="true"></span>
     </div>
     <figcaption class="term-cap">
-      A real end-to-end run of the <code>api-design</code> skill. The skill
-      declares <code>supported-stacks</code>, runs the detection step against
-      the repo, then produces the OpenAPI spec and TypeScript types.
-      <a href="/skills/api-design">Read the SKILL.md →</a>
+      Three commands: install the CLI with Homebrew, install all 64 skills into
+      <code>~/.claude/skills/</code>, then start Claude Code. Skills auto-trigger
+      by description — no slash commands to memorise.
+      <a href="#install">See all install options →</a>
     </figcaption>
   </figure>
 </section>
