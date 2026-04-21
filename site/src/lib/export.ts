@@ -95,10 +95,22 @@ Or run the one-line install command shown on skillskit.dev right after generatio
 If the customisation doesn't work out, re-install the upstream version:
 
 \`\`\`bash
-cd ~/.claude/skills
-rm -rf ${input.skillSlug}
-# then from the SDAS repo:
-./install.sh ${input.skillDepartment}
+skillskit remove ${input.skillSlug}          # remove this customised copy
+skillskit install ${input.skillSlug}         # re-install the upstream version
+\`\`\`
+
+If you don't have the CLI:
+
+\`\`\`bash
+# macOS / Linux
+brew tap tahirraufkeeyu/tap
+brew install skillskit
+
+# Windows
+scoop bucket add skillskit https://github.com/tahirraufkeeyu/scoop-bucket
+scoop install skillskit
+
+# See https://skillskit.dev/#install for all options.
 \`\`\`
 `;
 }

@@ -36,8 +36,9 @@ const orchestrators = skills.filter((s) => s.isOrchestrator);
       {skills.length} skills · {orchestrators.length} orchestrator{orchestrators.length === 1 ? "" : "s"}
     </p>
     <div class="install">
-      <code>./install.sh {departmentId}</code>
-      <span class="subtle">installs just this department into <code>~/.claude/skills/</code></span>
+      <code>skillskit install {departmentId}</code>
+      <span class="subtle">installs just this department into <code>~/.claude/skills/</code> —
+        need the CLI? <a href="/#install">install it first</a>.</span>
     </div>
   </header>
 

@@ -155,12 +155,24 @@ const deptLabel = departmentLabel(skill.department);
 
   <aside class="install-box">
     <h3>Install this skill</h3>
-    <pre><code>{`# install this department
-./install.sh ${skill.department}
+    <p class="muted" style="margin-top: -0.25rem;">
+      Install just this skill, or grab the whole department, or install everything. Every command
+      works on macOS, Linux, and Windows once the <code>skillskit</code> CLI is on your PATH
+      (<a href="/#install">install the CLI →</a>).
+    </p>
+    <pre><code>{`# just this skill
+skillskit install ${skill.name}
 
-# or clone the whole kit and install everything
-git clone https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas.git ~/sdas
-cd ~/sdas && ./install.sh all`}</code></pre>
+# the full ${skill.department} department
+skillskit install ${skill.department}
+
+# the whole kit
+skillskit install all`}</code></pre>
+    <p class="subtle">
+      Don't have the CLI yet? One line on macOS / Linux:
+      <code>brew install tahirraufkeeyu/tap/skillskit</code>. See
+      <a href="/#install">#install</a> for Windows / Scoop / curl / manual.
+    </p>
     <p class="subtle">
       Using a different stack? Use <button type="button" class="link-button" data-open-customizer
         >Customise for your organisation</button> at the top of the page — an LLM rewrites
