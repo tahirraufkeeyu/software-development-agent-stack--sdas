@@ -12,13 +12,21 @@ const { skill, showDepartment = false } = Astro.props;
 const href = `/skills/${skill.slug}`;
 ---
 
-<a class="card card-link skill-card" href={href}>
+<a
+  class:list={["card", "card-link", "skill-card", `dept-${skill.department}`]}
+  href={href}
+>
   <div class="skill-head">
     <h3 class="skill-title">
       {skill.name}
       {skill.isOrchestrator ? <span class="orch">orchestrator</span> : null}
     </h3>
-    {showDepartment ? <span class="dept">{skill.department}</span> : null}
+    {showDepartment ? (
+      <span class="dept">
+        <span class="dept-dot" aria-hidden="true"></span>
+        {skill.department}
+      </span>
+    ) : null}
   </div>
   <p class="skill-desc">{skill.description}</p>
   <div class="skill-meta">
@@ -44,6 +52,31 @@ const href = `/skills/${skill.slug}`;
     flex-direction: column;
     gap: var(--space-3);
     min-height: 11rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 120ms ease;
+  }
+  .skill-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--dept-c, var(--border-strong));
+    opacity: 0.7;
+  }
+  .skill-card:hover {
+    border-color: color-mix(in srgb, var(--dept-c, var(--accent)) 40%, var(--border));
+  }
+  .dept-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--dept-c, var(--accent));
+    margin-right: 0.35rem;
+    vertical-align: 0;
   }
   .skill-head {
     display: flex;

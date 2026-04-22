@@ -154,20 +154,24 @@
   .hero-anim {
     position: relative;
     width: 100%;
-    max-width: 30rem;
+    max-width: 32rem;
     aspect-ratio: 4 / 5;
-    min-height: 26rem;
+    min-height: 28rem;
     margin: 0 auto;
     color: var(--fg);
-    /* Cap text inside skill labels so absolute positioning is reliable. */
-    overflow: hidden;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--accent) 4%, var(--bg-elev-1)) 0%,
-      var(--bg-elev-1) 70%
+    /* No border, no container background — the scene sits directly
+       on the page and its edges fade into the page background via an
+       alpha mask. */
+    -webkit-mask-image: radial-gradient(
+      ellipse 75% 80% at 50% 45%,
+      black 55%,
+      transparent 100%
     );
-    border: 1px solid var(--border);
+    mask-image: radial-gradient(
+      ellipse 75% 80% at 50% 45%,
+      black 55%,
+      transparent 100%
+    );
   }
 
   /* ------------------------------------------------------------------ */

@@ -259,7 +259,10 @@ skillskit --help                 # full command list`}</code></pre>
     <div class="grid-auto">
       {
         departments.map((d) => (
-          <a class="card card-link dept-card" href={`/departments/${d.slug}`}>
+          <a
+            class:list={["card", "card-link", "dept-card", `dept-${d.slug}`]}
+            href={`/departments/${d.slug}`}
+          >
             <div class="dept-head">
               <h3>{departmentLabel(d.slug)}</h3>
               <span class="dept-count">{d.skillCount} skills</span>
@@ -852,6 +855,40 @@ skillskit --help                 # full command list`}</code></pre>
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 120ms ease, transform 160ms ease, background 160ms ease;
+  }
+  .dept-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--dept-c, var(--accent));
+    opacity: 0.9;
+  }
+  .dept-card::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    right: -40%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle, var(--dept-c, var(--accent)) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 160ms ease;
+    pointer-events: none;
+  }
+  .dept-card:hover {
+    border-color: color-mix(in srgb, var(--dept-c, var(--accent)) 50%, var(--border));
+  }
+  .dept-card:hover::after {
+    opacity: 0.08;
+  }
+  .dept-card h3 {
+    color: color-mix(in srgb, var(--dept-c, var(--fg)) 80%, var(--fg));
   }
   .dept-head {
     display: flex;

@@ -15,10 +15,6 @@ const isActive = (href: string) =>
       <span class="brand-text">skillskit<span class="brand-dim">.dev</span></span>
     </a>
 
-    <div class="nav-search">
-      <Search variant="nav" />
-    </div>
-
     <ul class="nav-links">
       <li>
         <a href="/" class:list={{ active: isActive("/") }}>Catalog</a>
@@ -37,6 +33,10 @@ const isActive = (href: string) =>
         >
       </li>
     </ul>
+
+    <div class="nav-search">
+      <Search variant="nav" />
+    </div>
   </div>
 </nav>
 
@@ -53,11 +53,10 @@ const isActive = (href: string) =>
     max-width: var(--container);
     margin: 0 auto;
     padding: var(--space-3) var(--space-4);
-    display: grid;
-    /* brand | centered search | links */
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    display: flex;
     align-items: center;
-    gap: var(--space-4);
+    justify-content: space-between;
+    gap: var(--space-5);
   }
   @media (min-width: 48rem) {
     .nav-inner {
@@ -92,19 +91,13 @@ const isActive = (href: string) =>
     font-weight: 500;
   }
 
-  .nav-search {
-    justify-self: center;
-    width: 100%;
-    max-width: 28rem;
-    min-width: 0;
-  }
-
   .nav-links {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 auto 0 0;        /* links sit left, next to brand */
+    margin-left: var(--space-6);
     display: flex;
-    gap: var(--space-6);
+    gap: var(--space-5);
     font-size: 0.95rem;
     white-space: nowrap;
   }
@@ -112,35 +105,37 @@ const isActive = (href: string) =>
     color: var(--fg-muted);
     text-decoration: none;
     font-weight: 500;
+    transition: color 120ms ease;
   }
   .nav-links a:hover,
   .nav-links a.active {
     color: var(--fg);
   }
+  .nav-links a.active {
+    position: relative;
+  }
+  .nav-links a.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.35rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
 
-  /* Narrow viewports: the 3-column grid gets cramped. Collapse to two
-     rows — brand+links on top, search bar full-width below — so the
-     search is still visible without a hamburger. */
+  .nav-search {
+    margin-left: auto;         /* push the search icon to the far right */
+    position: relative;
+  }
+
+  /* Narrow viewports: hide the text nav links to save room; brand +
+     search icon are always visible. The search panel still reaches
+     every linked area via typing. */
   @media (max-width: 47.99rem) {
-    .nav-inner {
-      grid-template-columns: auto 1fr;
-      grid-template-areas:
-        "brand links"
-        "search search";
-      row-gap: var(--space-3);
-    }
-    .brand {
-      grid-area: brand;
-    }
     .nav-links {
-      grid-area: links;
-      justify-self: end;
-      gap: var(--space-4);
-      font-size: 0.9rem;
-    }
-    .nav-search {
-      grid-area: search;
-      max-width: none;
+      display: none;
     }
   }
 </style>
