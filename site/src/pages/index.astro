@@ -231,26 +231,31 @@ skillskit --help                 # full command list`}</code></pre>
   </section>
 
   <section>
-    <h2>What this is</h2>
+    <h2>Why skills, not just prompts.</h2>
     <p>
-      Most "AI for teams" content stops at "install Claude Code and good luck." The gap is the
-      layer that makes Claude behave like a reliable teammate — one that triggers on the right
-      work, follows the same process your senior people would, and produces output consistent
-      with what your team already ships.
+      Most "AI for teams" content stops at "install Claude Code and good luck."
+      skillskit is the missing layer — the one that makes Claude trigger on the right work,
+      follow the same process your senior people would, and produce output consistent with
+      what your team already ships.
     </p>
     <p>
-      Skills are that layer. A skill is a single Markdown file (<code>SKILL.md</code>) that
-      declares when it should run, the exact procedure, concrete examples, constraints, and
-      quality checks. Claude Code auto-triggers the right one based on your natural-language
-      request — no slash commands to memorise.
+      A skill is a single Markdown file (<code>SKILL.md</code>) that declares when it should
+      run, the exact procedure, concrete examples, constraints, and quality checks. Claude
+      Code auto-triggers the right one based on your natural-language request — no slash
+      commands to memorise, no framework to learn.
     </p>
     <p>
-      Everything here is MIT licensed. Clone, install, customise, share.
+      <strong>MIT licensed. No vendor lock-in, no telemetry, no black box.</strong> Fork it,
+      customise it for your org, ship it.
     </p>
   </section>
 
   <section>
-    <h2>Departments</h2>
+    <h2>An expert for every department.</h2>
+    <p class="muted section-intro">
+      Eight teams. {totals.skills} playbooks. Browse by role — each department ships its own
+      skill set, MCP recommendations, and recommended weekly rhythm.
+    </p>
     <div class="grid-auto">
       {
         departments.map((d) => (
@@ -273,9 +278,11 @@ skillskit --help                 # full command list`}</code></pre>
   </section>
 
   <section>
-    <h2>Featured orchestrators</h2>
-    <p class="muted">
-      End-to-end flows that chain multiple skills. Each department ships at least one.
+    <h2>End-to-end flows, not just tools.</h2>
+    <p class="muted section-intro">
+      Orchestrators chain the task skills into a single auditable run — pre-commit gate,
+      release audit, weekly comms cycle — and pass artifacts between steps. Every department
+      ships at least one.
     </p>
     <div class="grid-auto">
       {
@@ -299,27 +306,28 @@ skillskit --help                 # full command list`}</code></pre>
   </section>
 
   <section>
-    <h2>See it in action</h2>
+    <h2>See it ship real work.</h2>
     <p>
-      Two worked walkthroughs in the repo show the kit end-to-end, with the exact user prompt,
-      the skill Claude matched, what Claude did, and files changed:
+      Two worked walkthroughs in the repo — the exact prompt, the skill Claude matched,
+      every file changed. No toy demos:
     </p>
     <ul>
       <li>
         <a
           href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/examples/simple-101/how-to.md"
           target="_blank"
-          rel="noopener">Simple 101 — setup + first skill</a
-        > (15 min). Covers Claude Code, the VS Code extension, GitHub Copilot, and Codex CLI. Ships a
-        FastAPI <code>/hello</code> endpoint.
+          rel="noopener"><strong>Simple 101 — setup + first skill</strong></a
+        > (15 min). Set up in Claude Code, VS Code, GitHub Copilot, or Codex CLI, then ship a
+        working FastAPI <code>/hello</code> endpoint with one prompt.
       </li>
       <li>
         <a
           href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/examples/developers/how-to.md"
           target="_blank"
-          rel="noopener">Developers — full end-to-end</a
-        > (45 min). Nine skills on a real public repo (node-express-boilerplate). One shipped
-        feature, one merged PR.
+          rel="noopener"><strong>Developers — full end-to-end</strong></a
+        > (45 min). Nine skills, one real public repo
+        (<a href="https://github.com/hagopj13/node-express-boilerplate" target="_blank" rel="noopener">node-express-boilerplate</a>),
+        one shipped feature, one merged PR.
       </li>
     </ul>
   </section>
@@ -868,5 +876,13 @@ skillskit --help                 # full command list`}</code></pre>
   }
   .feat-chains code {
     font-size: 0.8rem;
+  }
+
+  /* Lead-line under a section h2, before a grid or list. */
+  .section-intro {
+    margin: calc(var(--space-2) * -1) 0 var(--space-5);
+    font-size: 1rem;
+    line-height: 1.55;
+    max-width: 52rem;
   }
 </style>
