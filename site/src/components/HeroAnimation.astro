@@ -87,12 +87,14 @@
        infra). The belt rail + roller ticks below sell the "conveyor"
        read. -->
   <div class="belt" aria-hidden="true">
-    <div class="belt-rail"></div>
-    <div class="belt-tick t1"></div>
-    <div class="belt-tick t2"></div>
-    <div class="belt-tick t3"></div>
-    <div class="belt-tick t4"></div>
-    <div class="belt-tick t5"></div>
+    <!-- Pulleys at both ends (with a spinning inner ring). -->
+    <div class="pulley pulley-left"></div>
+    <div class="pulley pulley-right"></div>
+    <!-- Belt body — rounded pill between the pulleys, with diagonal
+         stripes animating right-to-left inside to suggest motion. -->
+    <div class="belt-body">
+      <div class="belt-stripes"></div>
+    </div>
 
     <!-- DEVELOPMENT — rounded square in dept-developers blue. -->
     <div class="package pkg-dev" style="--d: 0s;">
@@ -105,7 +107,7 @@
     </div>
 
     <!-- SECURITY — pentagonal shield in dept-security coral. -->
-    <div class="package pkg-sec" style="--d: 1.2s;">
+    <div class="package pkg-sec" style="--d: 2s;">
       <svg class="pkg-shape" viewBox="0 0 28 22">
         <path d="M14 1 L27 5 V13 Q27 19 14 21 Q1 19 1 13 V5 Z" fill="currentColor" opacity="0.95"/>
         <text x="14" y="15" text-anchor="middle" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700" fill="#0b0d10">sec</text>
@@ -115,7 +117,7 @@
     </div>
 
     <!-- OBSERVABILITY — bar-chart shape in dept-internal-comms cyan. -->
-    <div class="package pkg-obs" style="--d: 2.4s;">
+    <div class="package pkg-obs" style="--d: 4s;">
       <svg class="pkg-shape" viewBox="0 0 28 22">
         <rect x="1" y="1" width="26" height="20" rx="3" fill="currentColor" opacity="0.2"/>
         <rect x="4"  y="13" width="4" height="7"  fill="currentColor"/>
@@ -128,7 +130,7 @@
     </div>
 
     <!-- QUALITY — diamond with checkmark in dept-devops mint. -->
-    <div class="package pkg-qa" style="--d: 3.6s;">
+    <div class="package pkg-qa" style="--d: 6s;">
       <svg class="pkg-shape" viewBox="0 0 28 22">
         <path d="M14 1 L27 11 L14 21 L1 11 Z" fill="currentColor" opacity="0.95"/>
         <path d="M9 11 L13 15 L19 8" stroke="#0b0d10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -138,7 +140,7 @@
     </div>
 
     <!-- MOBILE — tall phone outline in dept-qa lavender. -->
-    <div class="package pkg-mob" style="--d: 4.8s;">
+    <div class="package pkg-mob" style="--d: 8s;">
       <svg class="pkg-shape" viewBox="0 0 22 22">
         <rect x="4" y="1" width="14" height="20" rx="3" fill="currentColor" opacity="0.95"/>
         <rect x="9" y="3.5" width="4" height="0.8" rx="0.4" fill="#0b0d10" opacity="0.6"/>
@@ -149,7 +151,7 @@
     </div>
 
     <!-- INFRASTRUCTURE — isometric cube in dept-infrastructure amber. -->
-    <div class="package pkg-infra" style="--d: 6s;">
+    <div class="package pkg-infra" style="--d: 10s;">
       <svg class="pkg-shape" viewBox="0 0 28 22">
         <path d="M14 1 L26 6 L14 11 L2 6 Z"  fill="currentColor" opacity="0.95"/>
         <path d="M2 6 L2 16 L14 21 L14 11 Z" fill="currentColor" opacity="0.75"/>
@@ -160,48 +162,6 @@
     </div>
   </div>
 
-  <!-- COFFEE — cup with rising steam. -->
-  <svg class="coffee" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-    <!-- Steam (3 wavy lines that rise + fade on loop). -->
-    <g
-      class="steam"
-      stroke="currentColor"
-      stroke-width="1.3"
-      fill="none"
-      stroke-linecap="round"
-      opacity="0.55"
-    >
-      <path class="steam-1" d="M18 32 q-3 -5 0 -10 q3 -5 0 -10"></path>
-      <path class="steam-2" d="M30 32 q3 -5 0 -10 q-3 -5 0 -10"></path>
-      <path class="steam-3" d="M42 32 q-3 -5 0 -10 q3 -5 0 -10"></path>
-    </g>
-    <!-- Saucer. -->
-    <ellipse
-      cx="30"
-      cy="68"
-      rx="22"
-      ry="3"
-      fill="var(--bg-elev-2)"
-      stroke="currentColor"
-      stroke-width="1"
-    ></ellipse>
-    <!-- Cup body. -->
-    <path
-      d="M12 35 h30 v18 a8 8 0 0 1 -8 8 h-14 a8 8 0 0 1 -8 -8 z"
-      fill="var(--bg-elev-2)"
-      stroke="currentColor"
-      stroke-width="1.4"
-    ></path>
-    <!-- Coffee surface inside cup (ellipse). -->
-    <ellipse cx="27" cy="35" rx="15" ry="2" fill="currentColor" opacity="0.25"></ellipse>
-    <!-- Handle. -->
-    <path
-      d="M42 40 a5 5 0 0 1 0 10"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.4"
-    ></path>
-  </svg>
 </div>
 
 <style>
@@ -367,74 +327,107 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* ASSEMBLY BELT                                                      */
+  /* ASSEMBLY BELT — pulleys + moving-stripe belt + packages            */
   /* ------------------------------------------------------------------ */
 
   .belt {
     position: absolute;
-    left: 5%;
-    right: 5%;
-    bottom: 16%;
-    height: 3.5rem;
-  }
-  .belt-rail {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0.35rem;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      color-mix(in srgb, var(--fg-muted) 55%, transparent) 12%,
-      color-mix(in srgb, var(--fg-muted) 70%, transparent) 88%,
-      transparent 100%
-    );
-    border-radius: 2px;
-  }
-  /* Little notches under the rail to suggest rollers. */
-  .belt-tick {
-    position: absolute;
-    bottom: 0;
-    width: 3px;
-    height: 3px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--fg-subtle) 70%, transparent);
-    animation: tickShift 1.4s linear infinite;
-  }
-  .belt-tick.t1 { left: 15%; }
-  .belt-tick.t2 { left: 30%; animation-delay: -0.3s; }
-  .belt-tick.t3 { left: 45%; animation-delay: -0.6s; }
-  .belt-tick.t4 { left: 60%; animation-delay: -0.9s; }
-  .belt-tick.t5 { left: 75%; animation-delay: -1.2s; }
-  @keyframes tickShift {
-    0%   { opacity: 0.2; transform: translateY(0); }
-    50%  { opacity: 0.9; transform: translateY(-1px); }
-    100% { opacity: 0.2; transform: translateY(0); }
+    left: 6%;
+    right: 6%;
+    bottom: 12%;
+    height: 3.25rem;
+    /* Total loop time used for all sub-animations so they stay in
+       phase across packages + belt stripes. Increased from the
+       earlier 7.2s to 12s per user feedback (too fast). */
   }
 
-  /* Each package travels from just off-left to ~92% right, then
-     scales + fades (the "pop"). Packages share one animation but get
-     their own --d delay so the belt is never empty. Total cycle 7.2s
-     spread across 6 packages = 1.2s gap between arrivals, well-paced
-     on the belt rail. */
+  /* The belt body is a rounded pill connecting the two pulleys. */
+  .belt-body {
+    position: absolute;
+    top: 50%;
+    left: 0.65rem;        /* starts inside the left pulley */
+    right: 0.65rem;       /* ends inside the right pulley */
+    height: 1.4rem;
+    transform: translateY(-50%);
+    background: var(--bg-elev-2);
+    border: 1px solid color-mix(in srgb, var(--fg-muted) 55%, transparent);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  /* Diagonal stripes inside the belt, sliding right-to-left so the
+     belt reads as carrying things to the right. */
+  .belt-stripes {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      -60deg,
+      color-mix(in srgb, var(--fg-muted) 32%, transparent) 0 2px,
+      transparent 2px 10px
+    );
+    background-size: 14px 100%;
+    animation: beltMove 1.8s linear infinite;
+  }
+  @keyframes beltMove {
+    from { background-position: 0 0; }
+    to   { background-position: -28px 0; }
+  }
+
+  /* Pulleys — circles at each end of the belt with a dashed inner
+     ring that rotates, so the wheels read as spinning. */
+  .pulley {
+    position: absolute;
+    top: 50%;
+    width: 1.65rem;
+    height: 1.65rem;
+    transform: translateY(-50%);
+    border-radius: 999px;
+    background: var(--bg-elev-2);
+    border: 1.5px solid color-mix(in srgb, var(--fg-muted) 65%, transparent);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--fg-subtle) 22%, transparent);
+  }
+  .pulley-left  { left: 0; }
+  .pulley-right { right: 0; }
+  .pulley::before {
+    content: "";
+    position: absolute;
+    inset: 0.3rem;
+    border-radius: 999px;
+    border: 1.2px dashed color-mix(in srgb, var(--fg-muted) 80%, transparent);
+    animation: pulleySpin 1.8s linear infinite;
+  }
+  @keyframes pulleySpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* Each package travels from just off-left to ~88% right, then
+     scales + fades (the "pop"). Packages share one 12s animation
+     but get their own --d delay so a new package arrives every 2s.
+     animation-fill-mode: backwards keeps them at the 0% frame
+     (left: -12%, opacity: 0) *before* their delay fires, which
+     fixes the first-load glitch where icons appeared stuck at x=0
+     until each animation first kicked in. */
   .package {
     position: absolute;
-    bottom: 0.6rem;
-    left: 0;
-    width: 2rem;
-    height: 2rem;
+    top: 0.05rem;           /* ride on top of the belt */
+    left: -12%;
+    opacity: 0;
+    width: 1.75rem;
+    height: 1.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: pkgSlide 7.2s cubic-bezier(0.4, 0.1, 0.9, 0.6) infinite;
+    animation: pkgSlide 12s cubic-bezier(0.45, 0.1, 0.85, 0.55) infinite;
     animation-delay: var(--d, 0s);
+    animation-fill-mode: backwards;
   }
   .pkg-shape {
     width: 100%;
     height: 100%;
-    animation: pkgBurstShape 7.2s cubic-bezier(0.4, 0.1, 0.9, 0.6) infinite;
+    animation: pkgBurstShape 12s cubic-bezier(0.45, 0.1, 0.85, 0.55) infinite;
     animation-delay: var(--d, 0s);
+    animation-fill-mode: backwards;
   }
 
   /* Per-package colors read via currentColor on the SVG. */
@@ -446,17 +439,16 @@
   .pkg-infra { color: var(--dept-infrastructure); }
 
   @keyframes pkgSlide {
-    0%   { left: -10%; opacity: 0; }
-    6%   { opacity: 1; }
-    80%  { left: 92%; opacity: 1; }
-    83%  { left: 94%; opacity: 1; }
-    88%  { left: 95%; opacity: 0; }
-    100% { left: 95%; opacity: 0; }
+    0%   { left: -12%; opacity: 0; }
+    4%   { opacity: 1; }
+    82%  { left: 88%; opacity: 1; }
+    86%  { left: 92%; opacity: 0; }
+    100% { left: 92%; opacity: 0; }
   }
   @keyframes pkgBurstShape {
-    0%, 78%  { transform: scale(1); filter: none; }
-    81%      { transform: scale(1.18); filter: drop-shadow(0 0 6px currentColor); }
-    85%      { transform: scale(0.3); opacity: 0; }
+    0%, 80%  { transform: scale(1); filter: none; }
+    83%      { transform: scale(1.22); filter: drop-shadow(0 0 8px currentColor); }
+    87%      { transform: scale(0.25); opacity: 0; }
     100%     { transform: scale(0); opacity: 0; }
   }
 
@@ -472,18 +464,19 @@
     background: currentColor;
     border-radius: 1px;
     opacity: 0;
-    animation: confettiBurst 7.2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+    animation: confettiBurst 12s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
     animation-delay: var(--d, 0s);
+    animation-fill-mode: backwards;
   }
-  .conf.c1 { --dx: -18px; --dy: -22px; --rot: 140deg; }
-  .conf.c2 { --dx:  16px; --dy: -26px; --rot: -120deg; }
-  .conf.c3 { --dx:  24px; --dy: -10px; --rot: 200deg; }
-  .conf.c4 { --dx: -22px; --dy:  -6px; --rot: -80deg; }
-  .conf.c5 { --dx:   4px; --dy: -30px; --rot: 60deg; }
+  .conf.c1 { --dx: -20px; --dy: -24px; --rot: 140deg; }
+  .conf.c2 { --dx:  18px; --dy: -28px; --rot: -120deg; }
+  .conf.c3 { --dx:  26px; --dy: -12px; --rot: 200deg; }
+  .conf.c4 { --dx: -24px; --dy:  -8px; --rot: -80deg; }
+  .conf.c5 { --dx:   4px; --dy: -32px; --rot: 60deg; }
 
   @keyframes confettiBurst {
-    0%, 78%  { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
-    82%      { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    0%, 80%  { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+    84%      { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
     100%     {
       opacity: 0;
       transform:
@@ -491,32 +484,6 @@
         scale(0.6)
         rotate(var(--rot, 180deg));
     }
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* COFFEE                                                             */
-  /* ------------------------------------------------------------------ */
-
-  .coffee {
-    position: absolute;
-    bottom: 4%;
-    right: 6%;
-    width: 22%;
-    max-width: 5.5rem;
-    color: var(--fg-muted);
-  }
-  .steam path {
-    transform-origin: bottom center;
-    animation: steamRise 3s ease-in-out infinite;
-  }
-  .steam-1 { animation-delay: 0s; }
-  .steam-2 { animation-delay: 0.6s; }
-  .steam-3 { animation-delay: 1.2s; }
-  @keyframes steamRise {
-    0%   { opacity: 0; transform: translateY(4px) scaleY(0.9); }
-    25%  { opacity: 0.7; }
-    70%  { opacity: 0.4; }
-    100% { opacity: 0; transform: translateY(-8px) scaleY(1.15); }
   }
 
   /* ------------------------------------------------------------------ */
@@ -538,11 +505,11 @@
     .spark,
     .skill,
     .pulse-line,
-    .belt-tick,
+    .belt-stripes,
+    .pulley::before,
     .package,
     .pkg-shape,
-    .conf,
-    .steam path {
+    .conf {
       animation: none !important;
     }
     .skill {
@@ -551,10 +518,10 @@
     .brain {
       transform: translate(-50%, -50%);
     }
-    /* Freeze 3 packages along the belt so the scene reads statically. */
+    /* Freeze 3 packages evenly along the belt; hide the rest. */
     .pkg-dev   { left: 15%; opacity: 1; }
-    .pkg-sec   { left: 40%; opacity: 1; }
-    .pkg-obs   { left: 65%; opacity: 1; }
+    .pkg-sec   { left: 42%; opacity: 1; }
+    .pkg-obs   { left: 68%; opacity: 1; }
     .pkg-qa, .pkg-mob, .pkg-infra { opacity: 0; }
     .conf { opacity: 0; }
   }
