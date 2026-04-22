@@ -117,6 +117,13 @@ html {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  /* Prevent any rogue descendant from causing the page to scroll
+     horizontally on mobile. `overflow-x: clip` (vs `hidden`) is the
+     right primitive here — it doesn't create a new scroll container
+     and therefore doesn't break the sticky nav or any position:
+     sticky inside the page. Safe fallback for any future component
+     that forgets to constrain width. */
+  overflow-x: clip;
 }
 
 body {
@@ -124,6 +131,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: clip;
 }
 
 main {

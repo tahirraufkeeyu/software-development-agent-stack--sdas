@@ -504,6 +504,10 @@ skillskit --help                 # full command list`}</code></pre>
   .stats {
     font-family: var(--font-mono);
     margin: 0;
+    /* Long hyphenated tokens like "writes-local" don't break cleanly
+       across all browsers; allow a break anywhere as a last resort
+       so this line never pushes the viewport wide on phones. */
+    overflow-wrap: anywhere;
   }
   .hero-accent {
     color: var(--accent);
@@ -513,7 +517,11 @@ skillskit --help                 # full command list`}</code></pre>
     margin: var(--space-6) 0;
   }
   .hero-install-copy {
-    display: inline-flex;
+    /* flex (not inline-flex) so the element obeys its parent's width
+       on mobile rather than sizing to intrinsic content. Previously
+       this caused horizontal page overflow on phones because the
+       long `brew install ...` command couldn't shrink. */
+    display: flex;
     align-items: stretch;
     gap: 0;
     border: 1px solid var(--border-strong);
@@ -521,8 +529,14 @@ skillskit --help                 # full command list`}</code></pre>
     background: var(--bg-elev-1);
     overflow: hidden;
     max-width: 100%;
+    min-width: 0;
   }
   .hero-install-copy code {
+    /* min-width: 0 + flex: 1 lets the inner overflow-x: auto actually
+       kick in. Without these, flex items default to min-content width
+       and refuse to shrink, overflowing the viewport. */
+    flex: 1;
+    min-width: 0;
     display: block;
     padding: var(--space-3) var(--space-5);
     font-family: var(--font-mono);
