@@ -81,84 +81,36 @@
     <span class="pulse-line"></span>
   </div>
 
-  <!-- ASSEMBLY BELT — shaped, colored packages travel left-to-right
-       and burst into confetti at the end. Each package has its own
-       shape, color, and short label (dev / sec / obs / qa / mob /
-       infra). The belt rail + roller ticks below sell the "conveyor"
-       read. -->
-  <div class="belt" aria-hidden="true">
-    <!-- Pulleys at both ends (with a spinning inner ring). -->
-    <div class="pulley pulley-left"></div>
-    <div class="pulley pulley-right"></div>
-    <!-- Belt body — rounded pill between the pulleys, with diagonal
-         stripes animating right-to-left inside to suggest motion. -->
-    <div class="belt-body">
-      <div class="belt-stripes"></div>
+  <!-- DELIVERY STREAM — artifacts the brain just produced drift down
+       from below the connector as notification chips, fading at the
+       bottom edge where the container mask already fades into the
+       page. Reads as a live activity feed: dept accent · skill name ·
+       short status line. -->
+  <div class="delivery" aria-hidden="true">
+    <div class="artifact dept-developers" style="--d: 0s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">code-review</code>
+      <span class="art-meta">PR #247 · 3 issues flagged</span>
     </div>
-
-    <!-- DEVELOPMENT — rounded square in dept-developers blue. -->
-    <div class="package pkg-dev" style="--d: 0s;">
-      <svg class="pkg-shape" viewBox="0 0 28 22">
-        <rect x="1" y="1" width="26" height="20" rx="4" fill="currentColor" opacity="0.95"/>
-        <text x="14" y="15" text-anchor="middle" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700" fill="#0b0d10">dev</text>
-      </svg>
-      <span class="conf c1"></span><span class="conf c2"></span>
-      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    <div class="artifact dept-security" style="--d: 2s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">security-audit</code>
+      <span class="art-meta">0 high-severity findings</span>
     </div>
-
-    <!-- SECURITY — pentagonal shield in dept-security coral. -->
-    <div class="package pkg-sec" style="--d: 2s;">
-      <svg class="pkg-shape" viewBox="0 0 28 22">
-        <path d="M14 1 L27 5 V13 Q27 19 14 21 Q1 19 1 13 V5 Z" fill="currentColor" opacity="0.95"/>
-        <text x="14" y="15" text-anchor="middle" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700" fill="#0b0d10">sec</text>
-      </svg>
-      <span class="conf c1"></span><span class="conf c2"></span>
-      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    <div class="artifact dept-devops" style="--d: 4s;">
+      <span class="art-status run" aria-hidden="true">▸</span>
+      <code class="art-title">deploy</code>
+      <span class="art-meta">canary 5% → 100%</span>
     </div>
-
-    <!-- OBSERVABILITY — bar-chart shape in dept-internal-comms cyan. -->
-    <div class="package pkg-obs" style="--d: 4s;">
-      <svg class="pkg-shape" viewBox="0 0 28 22">
-        <rect x="1" y="1" width="26" height="20" rx="3" fill="currentColor" opacity="0.2"/>
-        <rect x="4"  y="13" width="4" height="7"  fill="currentColor"/>
-        <rect x="10" y="9"  width="4" height="11" fill="currentColor"/>
-        <rect x="16" y="5"  width="4" height="15" fill="currentColor"/>
-        <rect x="22" y="11" width="4" height="9"  fill="currentColor"/>
-      </svg>
-      <span class="conf c1"></span><span class="conf c2"></span>
-      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    <div class="artifact dept-developers" style="--d: 6s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">api-design</code>
+      <span class="art-meta">openapi.yaml emitted</span>
     </div>
-
-    <!-- QUALITY — diamond with checkmark in dept-devops mint. -->
-    <div class="package pkg-qa" style="--d: 6s;">
-      <svg class="pkg-shape" viewBox="0 0 28 22">
-        <path d="M14 1 L27 11 L14 21 L1 11 Z" fill="currentColor" opacity="0.95"/>
-        <path d="M9 11 L13 15 L19 8" stroke="#0b0d10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      </svg>
-      <span class="conf c1"></span><span class="conf c2"></span>
-      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
-    </div>
-
-    <!-- MOBILE — tall phone outline in dept-qa lavender. -->
-    <div class="package pkg-mob" style="--d: 8s;">
-      <svg class="pkg-shape" viewBox="0 0 22 22">
-        <rect x="4" y="1" width="14" height="20" rx="3" fill="currentColor" opacity="0.95"/>
-        <rect x="9" y="3.5" width="4" height="0.8" rx="0.4" fill="#0b0d10" opacity="0.6"/>
-        <circle cx="11" cy="18.5" r="1" fill="#0b0d10" opacity="0.5"/>
-      </svg>
-      <span class="conf c1"></span><span class="conf c2"></span>
-      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
-    </div>
-
-    <!-- INFRASTRUCTURE — isometric cube in dept-infrastructure amber. -->
-    <div class="package pkg-infra" style="--d: 10s;">
-      <svg class="pkg-shape" viewBox="0 0 28 22">
-        <path d="M14 1 L26 6 L14 11 L2 6 Z"  fill="currentColor" opacity="0.95"/>
-        <path d="M2 6 L2 16 L14 21 L14 11 Z" fill="currentColor" opacity="0.75"/>
-        <path d="M14 11 L14 21 L26 16 L26 6 Z" fill="currentColor" opacity="0.55"/>
-      </svg>
-      <span class="conf c1"></span><span class="conf c2"></span>
-      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    <div class="artifact dept-internal-comms" style="--d: 8s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">changelog</code>
+      <span class="art-meta">v2.1.0 drafted</span>
     </div>
   </div>
 
@@ -327,163 +279,85 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* ASSEMBLY BELT — pulleys + moving-stripe belt + packages            */
+  /* DELIVERY STREAM                                                    */
   /* ------------------------------------------------------------------ */
 
-  .belt {
+  /* The delivery area hangs below the connector and runs to the
+     bottom of the hero-anim container. Artifacts spawn at the top,
+     drift downward, and fade out as they near the bottom edge (where
+     the hero-anim mask already fades to the page bg). */
+  .delivery {
     position: absolute;
-    left: 6%;
-    right: 6%;
-    bottom: 12%;
-    height: 3.25rem;
-    /* Total loop time used for all sub-animations so they stay in
-       phase across packages + belt stripes. Increased from the
-       earlier 7.2s to 12s per user feedback (too fast). */
+    left: 0;
+    right: 0;
+    top: 62%;
+    bottom: 0;
   }
 
-  /* The belt body is a rounded pill connecting the two pulleys. */
-  .belt-body {
+  /* Each artifact is a compact notification chip. Centered
+     horizontally; its vertical position animates over a 10s cycle,
+     staggered 2s apart so 2–3 are always visible at once.
+     animation-fill-mode: backwards keeps them hidden before their
+     delay elapses (fixes the "stuck near the top" first-load
+     glitch that plagued the earlier belt). */
+  .artifact {
     position: absolute;
-    top: 50%;
-    left: 0.65rem;        /* starts inside the left pulley */
-    right: 0.65rem;       /* ends inside the right pulley */
-    height: 1.4rem;
-    transform: translateY(-50%);
-    background: var(--bg-elev-2);
-    border: 1px solid color-mix(in srgb, var(--fg-muted) 55%, transparent);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  /* Diagonal stripes inside the belt, sliding right-to-left so the
-     belt reads as carrying things to the right. */
-  .belt-stripes {
-    position: absolute;
-    inset: 0;
-    background-image: repeating-linear-gradient(
-      -60deg,
-      color-mix(in srgb, var(--fg-muted) 32%, transparent) 0 2px,
-      transparent 2px 10px
-    );
-    background-size: 14px 100%;
-    animation: beltMove 1.8s linear infinite;
-  }
-  @keyframes beltMove {
-    from { background-position: 0 0; }
-    to   { background-position: -28px 0; }
-  }
-
-  /* Pulleys — circles at each end of the belt with a dashed inner
-     ring that rotates, so the wheels read as spinning. */
-  .pulley {
-    position: absolute;
-    top: 50%;
-    width: 1.65rem;
-    height: 1.65rem;
-    transform: translateY(-50%);
-    border-radius: 999px;
-    background: var(--bg-elev-2);
-    border: 1.5px solid color-mix(in srgb, var(--fg-muted) 65%, transparent);
-    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--fg-subtle) 22%, transparent);
-  }
-  .pulley-left  { left: 0; }
-  .pulley-right { right: 0; }
-  .pulley::before {
-    content: "";
-    position: absolute;
-    inset: 0.3rem;
-    border-radius: 999px;
-    border: 1.2px dashed color-mix(in srgb, var(--fg-muted) 80%, transparent);
-    animation: pulleySpin 1.8s linear infinite;
-  }
-  @keyframes pulleySpin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-
-  /* Each package travels from just off-left to ~88% right, then
-     scales + fades (the "pop"). Packages share one 12s animation
-     but get their own --d delay so a new package arrives every 2s.
-     animation-fill-mode: backwards keeps them at the 0% frame
-     (left: -12%, opacity: 0) *before* their delay fires, which
-     fixes the first-load glitch where icons appeared stuck at x=0
-     until each animation first kicked in. */
-  .package {
-    position: absolute;
-    top: 0.05rem;           /* ride on top of the belt */
-    left: -12%;
-    opacity: 0;
-    width: 1.75rem;
-    height: 1.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: pkgSlide 12s cubic-bezier(0.45, 0.1, 0.85, 0.55) infinite;
-    animation-delay: var(--d, 0s);
-    animation-fill-mode: backwards;
-  }
-  .pkg-shape {
-    width: 100%;
-    height: 100%;
-    animation: pkgBurstShape 12s cubic-bezier(0.45, 0.1, 0.85, 0.55) infinite;
-    animation-delay: var(--d, 0s);
-    animation-fill-mode: backwards;
-  }
-
-  /* Per-package colors read via currentColor on the SVG. */
-  .pkg-dev   { color: var(--dept-developers); }
-  .pkg-sec   { color: var(--dept-security); }
-  .pkg-obs   { color: var(--dept-internal-comms); }
-  .pkg-qa    { color: var(--dept-devops); }
-  .pkg-mob   { color: var(--dept-qa); }
-  .pkg-infra { color: var(--dept-infrastructure); }
-
-  @keyframes pkgSlide {
-    0%   { left: -12%; opacity: 0; }
-    4%   { opacity: 1; }
-    82%  { left: 88%; opacity: 1; }
-    86%  { left: 92%; opacity: 0; }
-    100% { left: 92%; opacity: 0; }
-  }
-  @keyframes pkgBurstShape {
-    0%, 80%  { transform: scale(1); filter: none; }
-    83%      { transform: scale(1.22); filter: drop-shadow(0 0 8px currentColor); }
-    87%      { transform: scale(0.25); opacity: 0; }
-    100%     { transform: scale(0); opacity: 0; }
-  }
-
-  /* Confetti: 5 small colored squares sprayed outward at burst time.
-     Each piece has its own --dx / --dy direction vector so they fan
-     out rather than overlap. Color inherited via currentColor. */
-  .conf {
-    position: absolute;
-    top: 50%;
     left: 50%;
-    width: 4px;
-    height: 4px;
-    background: currentColor;
-    border-radius: 1px;
+    top: 0;
+    transform: translate(-50%, 0);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.8rem 0.45rem 0.55rem;
+    background: color-mix(in srgb, var(--bg-elev-1) 85%, transparent);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--dept-c, var(--accent));
+    border-radius: var(--radius-md);
+    font-size: 0.72rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.5);
     opacity: 0;
-    animation: confettiBurst 12s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+    animation: artifactFall 10s cubic-bezier(0.2, 0.4, 0.3, 1) infinite;
     animation-delay: var(--d, 0s);
     animation-fill-mode: backwards;
   }
-  .conf.c1 { --dx: -20px; --dy: -24px; --rot: 140deg; }
-  .conf.c2 { --dx:  18px; --dy: -28px; --rot: -120deg; }
-  .conf.c3 { --dx:  26px; --dy: -12px; --rot: 200deg; }
-  .conf.c4 { --dx: -24px; --dy:  -8px; --rot: -80deg; }
-  .conf.c5 { --dx:   4px; --dy: -32px; --rot: 60deg; }
 
-  @keyframes confettiBurst {
-    0%, 80%  { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
-    84%      { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-    100%     {
-      opacity: 0;
-      transform:
-        translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px)))
-        scale(0.6)
-        rotate(var(--rot, 180deg));
-    }
+  .art-status {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1;
+    display: inline-flex;
+    width: 1rem;
+    justify-content: center;
+  }
+  .art-status.ok  { color: var(--success); }
+  .art-status.run { color: var(--accent); }
+
+  .art-title {
+    color: var(--fg);
+    background: transparent;
+    padding: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .art-meta {
+    color: var(--fg-muted);
+    font-size: 0.7rem;
+  }
+
+  /* Fall path:
+       spawn a bit above the delivery top (translateY -8px, opacity 0)
+       slide into place, hold the chip near the top for readability,
+       drift downward, and fade out as it approaches the bottom edge. */
+  @keyframes artifactFall {
+    0%   { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+    6%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    65%  { opacity: 1; transform: translate(-50%, 120%) scale(1); }
+    92%  { opacity: 0.15; transform: translate(-50%, 220%) scale(0.96); }
+    100% { opacity: 0; transform: translate(-50%, 240%) scale(0.94); }
   }
 
   /* ------------------------------------------------------------------ */
@@ -505,24 +379,18 @@
     .spark,
     .skill,
     .pulse-line,
-    .belt-stripes,
-    .pulley::before,
-    .package,
-    .pkg-shape,
-    .conf {
+    .artifact {
       animation: none !important;
     }
-    .skill {
-      opacity: 1;
-    }
-    .brain {
-      transform: translate(-50%, -50%);
-    }
-    /* Freeze 3 packages evenly along the belt; hide the rest. */
-    .pkg-dev   { left: 15%; opacity: 1; }
-    .pkg-sec   { left: 42%; opacity: 1; }
-    .pkg-obs   { left: 68%; opacity: 1; }
-    .pkg-qa, .pkg-mob, .pkg-infra { opacity: 0; }
-    .conf { opacity: 0; }
+    .skill { opacity: 1; }
+    .brain { transform: translate(-50%, -50%); }
+
+    /* Freeze 3 artifacts stacked below the brain so the scene reads
+       statically without motion. */
+    .artifact { opacity: 1; }
+    .artifact:nth-of-type(1) { transform: translate(-50%, 0); }
+    .artifact:nth-of-type(2) { transform: translate(-50%, 42px); }
+    .artifact:nth-of-type(3) { transform: translate(-50%, 84px); }
+    .artifact:nth-of-type(n+4) { opacity: 0; }
   }
 </style>
