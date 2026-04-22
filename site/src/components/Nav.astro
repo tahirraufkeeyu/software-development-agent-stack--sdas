@@ -94,8 +94,7 @@ const isActive = (href: string) =>
   .nav-links {
     list-style: none;
     padding: 0;
-    margin: 0 auto 0 0;        /* links sit left, next to brand */
-    margin-left: var(--space-6);
+    margin: 0 0 0 auto;        /* push links to the right, next to search */
     display: flex;
     gap: var(--space-5);
     font-size: 0.95rem;
@@ -126,8 +125,7 @@ const isActive = (href: string) =>
   }
 
   .nav-search {
-    margin-left: auto;         /* push the search icon to the far right */
-    position: relative;
+    position: relative;        /* sits naturally after .nav-links on the right */
   }
 
   /* Narrow viewports: hide the text nav links to save room; brand +
