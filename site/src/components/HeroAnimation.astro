@@ -1,0 +1,396 @@
+---
+/**
+ * HeroAnimation.astro — decorative scene for the hero's right column.
+ *
+ * A purely visual illustration of the product's mental model:
+ *   skill labels drift in from the edges and are absorbed into a brain
+ *   (the user's Claude Code setup with skills loaded). The brain
+ *   connects down to a 3-stage system (build / test / ship) where a
+ *   dot cycles through to suggest a working pipeline. A coffee cup
+ *   in the corner sets the tone — "sit back, the agents are working."
+ *
+ * Constraints:
+ * - Pure inline SVG + CSS keyframes. No external library, no GIF.
+ * - Scales to container width; portrait aspect so it fits the empty
+ *   space to the right of the hero copy.
+ * - aria-hidden — purely decorative.
+ * - Honors prefers-reduced-motion: locks to a static composition
+ *   (skills visible at rest, no movement).
+ */
+---
+
+<div class="hero-anim" aria-hidden="true">
+  <!-- SKILL STREAM — labels drift from edges toward the brain. -->
+  <div class="skill-stream">
+    <span class="skill skill-1"><code>code-review</code></span>
+    <span class="skill skill-2"><code>security-audit</code></span>
+    <span class="skill skill-3"><code>api-design</code></span>
+    <span class="skill skill-4"><code>deploy</code></span>
+    <span class="skill skill-5"><code>commit-message</code></span>
+    <span class="skill skill-6"><code>status-update</code></span>
+    <span class="skill skill-7"><code>proposal-writer</code></span>
+    <span class="skill skill-8"><code>pentest-report</code></span>
+  </div>
+
+  <!-- BRAIN — gentle pulse + glow aura. -->
+  <svg class="brain" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="currentColor" stop-opacity="0.35"></stop>
+        <stop offset="60%" stop-color="currentColor" stop-opacity="0.08"></stop>
+        <stop offset="100%" stop-color="currentColor" stop-opacity="0"></stop>
+      </radialGradient>
+    </defs>
+    <circle class="brain-aura" cx="60" cy="60" r="55" fill="url(#brainGlow)"></circle>
+    <g
+      class="brain-path"
+      stroke="currentColor"
+      stroke-width="2"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <!-- Left hemisphere (Lucide-style brain, scaled to 120x120). -->
+      <path
+        d="M60 30a15 15 0 0 0 -30 0 12 12 0 0 0 -10 20 12 12 0 0 0 2 22 12 12 0 0 0 8 20 12 12 0 0 0 30 6 z"
+      ></path>
+      <!-- Right hemisphere, mirrored. -->
+      <path
+        d="M60 30a15 15 0 0 1 30 0 12 12 0 0 1 10 20 12 12 0 0 1 -2 22 12 12 0 0 1 -8 20 12 12 0 0 1 -30 6"
+      ></path>
+      <!-- Central valley suggesting the brain's fold. -->
+      <path d="M60 30 V98" opacity="0.45"></path>
+      <!-- Two fold lines per hemisphere. -->
+      <path d="M40 50 Q50 56 42 66" opacity="0.45"></path>
+      <path d="M80 50 Q70 56 78 66" opacity="0.45"></path>
+      <path d="M38 78 Q50 82 44 90" opacity="0.45"></path>
+      <path d="M82 78 Q70 82 76 90" opacity="0.45"></path>
+    </g>
+    <!-- Spark nodes inside the brain that flicker as skills land. -->
+    <g class="sparks" fill="currentColor">
+      <circle class="spark spark-1" cx="48" cy="55" r="2"></circle>
+      <circle class="spark spark-2" cx="72" cy="50" r="2"></circle>
+      <circle class="spark spark-3" cx="55" cy="75" r="2"></circle>
+      <circle class="spark spark-4" cx="68" cy="82" r="2"></circle>
+      <circle class="spark spark-5" cx="60" cy="62" r="2.5"></circle>
+    </g>
+  </svg>
+
+  <!-- Connector from brain to system. -->
+  <div class="connector" aria-hidden="true">
+    <span class="pulse-line"></span>
+  </div>
+
+  <!-- DELIVERY STREAM — artifacts the brain just produced drift down
+       from below the connector as notification chips, fading at the
+       bottom edge where the container mask already fades into the
+       page. Reads as a live activity feed: dept accent · skill name ·
+       short status line. -->
+  <div class="delivery" aria-hidden="true">
+    <div class="artifact dept-developers" style="--d: 0s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">code-review</code>
+      <span class="art-meta">PR #247 · 3 issues flagged</span>
+    </div>
+    <div class="artifact dept-security" style="--d: 2s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">security-audit</code>
+      <span class="art-meta">0 high-severity findings</span>
+    </div>
+    <div class="artifact dept-devops" style="--d: 4s;">
+      <span class="art-status run" aria-hidden="true">▸</span>
+      <code class="art-title">deploy</code>
+      <span class="art-meta">canary 5% → 100%</span>
+    </div>
+    <div class="artifact dept-developers" style="--d: 6s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">api-design</code>
+      <span class="art-meta">openapi.yaml emitted</span>
+    </div>
+    <div class="artifact dept-internal-comms" style="--d: 8s;">
+      <span class="art-status ok" aria-hidden="true">✓</span>
+      <code class="art-title">changelog</code>
+      <span class="art-meta">v2.1.0 drafted</span>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .hero-anim {
+    position: relative;
+    width: 100%;
+    max-width: 32rem;
+    aspect-ratio: 4 / 5;
+    min-height: 28rem;
+    margin: 0 auto;
+    color: var(--fg);
+    /* No border, no container background — the scene sits directly
+       on the page and its edges fade into the page background via an
+       alpha mask. */
+    -webkit-mask-image: radial-gradient(
+      ellipse 75% 80% at 50% 45%,
+      black 55%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      ellipse 75% 80% at 50% 45%,
+      black 55%,
+      transparent 100%
+    );
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* BRAIN                                                              */
+  /* ------------------------------------------------------------------ */
+
+  .brain {
+    position: absolute;
+    top: 28%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44%;
+    height: auto;
+    color: var(--accent);
+    animation: brainPulse 4s ease-in-out infinite;
+  }
+  @keyframes brainPulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(1);
+      filter: drop-shadow(0 0 0 transparent);
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.03);
+      filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 40%, transparent));
+    }
+  }
+  .brain-aura {
+    animation: auraPulse 4s ease-in-out infinite;
+  }
+  @keyframes auraPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+
+  /* Inner sparks flicker out of sync with the pulse. */
+  .spark {
+    opacity: 0.4;
+    animation: sparkBlink 2.4s ease-in-out infinite;
+  }
+  .spark-1 { animation-delay: 0s; }
+  .spark-2 { animation-delay: 0.5s; }
+  .spark-3 { animation-delay: 1s; }
+  .spark-4 { animation-delay: 1.5s; }
+  .spark-5 { animation-delay: 0.25s; }
+  @keyframes sparkBlink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SKILL STREAM                                                       */
+  /* ------------------------------------------------------------------ */
+
+  .skill-stream {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .skill {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--fg-muted);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.22em 0.7em;
+    white-space: nowrap;
+    /* translate(-50%, -50%) keeps the label centered on its top/left
+       anchor; scale shrinks it as it "dissolves" into the brain. */
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+    animation: skillDrift 7s ease-in-out infinite;
+  }
+  .skill code {
+    font-size: 1em;
+    color: var(--accent);
+    background: transparent;
+    padding: 0;
+  }
+
+  /* Spawn positions + delays for each skill so the viewer always has
+     2–3 labels visible at any time, staggered around the brain. */
+  .skill-1 { top: 14%; left: 20%; animation-delay: 0s;   }
+  .skill-2 { top: 9%;  left: 74%; animation-delay: 0.9s; }
+  .skill-3 { top: 24%; left: 88%; animation-delay: 1.8s; }
+  .skill-4 { top: 44%; left: 14%; animation-delay: 2.6s; }
+  .skill-5 { top: 44%; left: 82%; animation-delay: 3.4s; }
+  .skill-6 { top: 20%; left: 8%;  animation-delay: 4.2s; }
+  .skill-7 { top: 32%; left: 92%; animation-delay: 5.0s; }
+  .skill-8 { top: 10%; left: 50%; animation-delay: 5.8s; }
+
+  @keyframes skillDrift {
+    0%, 6%   { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+    14%      { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    65%      { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    82%      { opacity: 0.35; transform: translate(-50%, -50%) scale(0.55); }
+    100%     { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* CONNECTOR (brain -> system)                                        */
+  /* ------------------------------------------------------------------ */
+
+  .connector {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: 2px;
+    height: 14%;
+    transform: translateX(-50%);
+    overflow: hidden;
+  }
+  .connector::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .pulse-line {
+    position: absolute;
+    top: -40%;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--accent) 50%,
+      transparent 100%
+    );
+    animation: pulseDown 1.8s linear infinite;
+  }
+  @keyframes pulseDown {
+    0%   { top: -50%; opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* DELIVERY STREAM                                                    */
+  /* ------------------------------------------------------------------ */
+
+  /* The delivery area hangs below the connector and runs to the
+     bottom of the hero-anim container. Artifacts spawn at the top,
+     drift downward, and fade out as they near the bottom edge (where
+     the hero-anim mask already fades to the page bg). */
+  .delivery {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 62%;
+    bottom: 0;
+  }
+
+  /* Each artifact is a compact notification chip. Centered
+     horizontally; its vertical position animates over a 10s cycle,
+     staggered 2s apart so 2–3 are always visible at once.
+     animation-fill-mode: backwards keeps them hidden before their
+     delay elapses (fixes the "stuck near the top" first-load
+     glitch that plagued the earlier belt). */
+  .artifact {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, 0);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.8rem 0.45rem 0.55rem;
+    background: color-mix(in srgb, var(--bg-elev-1) 85%, transparent);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--dept-c, var(--accent));
+    border-radius: var(--radius-md);
+    font-size: 0.72rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    animation: artifactFall 10s cubic-bezier(0.2, 0.4, 0.3, 1) infinite;
+    animation-delay: var(--d, 0s);
+    animation-fill-mode: backwards;
+  }
+
+  .art-status {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1;
+    display: inline-flex;
+    width: 1rem;
+    justify-content: center;
+  }
+  .art-status.ok  { color: var(--success); }
+  .art-status.run { color: var(--accent); }
+
+  .art-title {
+    color: var(--fg);
+    background: transparent;
+    padding: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .art-meta {
+    color: var(--fg-muted);
+    font-size: 0.7rem;
+  }
+
+  /* Fall path:
+       spawn a bit above the delivery top (translateY -8px, opacity 0)
+       slide into place, hold the chip near the top for readability,
+       drift downward, and fade out as it approaches the bottom edge. */
+  @keyframes artifactFall {
+    0%   { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+    6%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    65%  { opacity: 1; transform: translate(-50%, 120%) scale(1); }
+    92%  { opacity: 0.15; transform: translate(-50%, 220%) scale(0.96); }
+    100% { opacity: 0; transform: translate(-50%, 240%) scale(0.94); }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* RESPONSIVE + REDUCED MOTION                                        */
+  /* ------------------------------------------------------------------ */
+
+  /* Hide the whole scene below the breakpoint where we can show it
+     side-by-side with the hero copy. Mobile hero already tells the
+     story in text; we don't want to stack a decorative box below. */
+  @media (max-width: 63.99rem) {
+    .hero-anim {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brain,
+    .brain-aura,
+    .spark,
+    .skill,
+    .pulse-line,
+    .artifact {
+      animation: none !important;
+    }
+    .skill { opacity: 1; }
+    .brain { transform: translate(-50%, -50%); }
+
+    /* Freeze 3 artifacts stacked below the brain so the scene reads
+       statically without motion. */
+    .artifact { opacity: 1; }
+    .artifact:nth-of-type(1) { transform: translate(-50%, 0); }
+    .artifact:nth-of-type(2) { transform: translate(-50%, 42px); }
+    .artifact:nth-of-type(3) { transform: translate(-50%, 84px); }
+    .artifact:nth-of-type(n+4) { opacity: 0; }
+  }
+</style>

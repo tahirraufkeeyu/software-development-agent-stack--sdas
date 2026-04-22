@@ -1,4 +1,6 @@
 ---
+import Search from "@/components/Search.astro";
+
 const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -12,6 +14,7 @@ const isActive = (href: string) =>
       </span>
       <span class="brand-text">skillskit<span class="brand-dim">.dev</span></span>
     </a>
+
     <ul class="nav-links">
       <li>
         <a href="/" class:list={{ active: isActive("/") }}>Catalog</a>
@@ -30,6 +33,10 @@ const isActive = (href: string) =>
         >
       </li>
     </ul>
+
+    <div class="nav-search">
+      <Search variant="nav" />
+    </div>
   </div>
 </nav>
 
@@ -49,11 +56,12 @@ const isActive = (href: string) =>
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
   @media (min-width: 48rem) {
     .nav-inner {
       padding: var(--space-3) var(--space-6);
+      gap: var(--space-6);
     }
   }
   .brand {
@@ -64,6 +72,7 @@ const isActive = (href: string) =>
     gap: var(--space-2);
     font-weight: 700;
     letter-spacing: -0.01em;
+    white-space: nowrap;
   }
   .brand-mark {
     display: inline-flex;
@@ -81,21 +90,50 @@ const isActive = (href: string) =>
     color: var(--fg-muted);
     font-weight: 500;
   }
+
   .nav-links {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 0 auto;        /* push links to the right, next to search */
     display: flex;
-    gap: var(--space-6);
+    gap: var(--space-5);
     font-size: 0.95rem;
+    white-space: nowrap;
   }
   .nav-links a {
     color: var(--fg-muted);
     text-decoration: none;
     font-weight: 500;
+    transition: color 120ms ease;
   }
   .nav-links a:hover,
   .nav-links a.active {
     color: var(--fg);
+  }
+  .nav-links a.active {
+    position: relative;
+  }
+  .nav-links a.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.35rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+
+  .nav-search {
+    position: relative;        /* sits naturally after .nav-links on the right */
+  }
+
+  /* Narrow viewports: hide the text nav links to save room; brand +
+     search icon are always visible. The search panel still reaches
+     every linked area via typing. */
+  @media (max-width: 47.99rem) {
+    .nav-links {
+      display: none;
+    }
   }
 </style>

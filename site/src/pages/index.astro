@@ -1,8 +1,8 @@
 ---
 import Base from "@/layouts/Base.astro";
-import Search from "@/components/Search.astro";
 import Terminal from "@/components/Terminal.astro";
 import CustomiseAnimation from "@/components/CustomiseAnimation.astro";
+import HeroAnimation from "@/components/HeroAnimation.astro";
 import {
   getManifest,
   departmentLabel,
@@ -24,50 +24,57 @@ const featured = featuredSlugs
 
 <Base title="skillskit.dev">
   <section class="hero">
-    <p class="eyebrow">Software Development Agent Stack · open source</p>
-    <h1>Claude Code skills for every department —<br /><span class="hero-accent">install in 30 seconds.</span></h1>
-    <p class="lede">
-      A curated library of <strong>{totals.skills}</strong> production-ready skills across
-      <strong>{totals.departments}</strong> departments. Engineering, security, devops, infrastructure,
-      QA, sales, marketing, internal comms. Plus <strong>{totals.orchestrators}</strong>
-      workflow orchestrators that chain skills into end-to-end flows.
-    </p>
+    <div class="hero-copy">
+      <p class="eyebrow">Software Development Agent Stack · open source</p>
+      <h1>Automate your SDLC. And everything around it.<br /><span class="hero-accent">An elite expert for every department.</span></h1>
+      <p class="lede">
+        <strong>{totals.skills}</strong> industry-best-practice playbooks — code review, security audits,
+        deploy pipelines, proposals, release notes, outbound sequences — packaged as Claude Code skills
+        that trigger on plain-English requests. The exact procedure a senior engineer, security lead,
+        DevOps veteran, or marketing director would follow, shipped as a file your team can read and edit.
+        <strong>{totals.departments}</strong> departments. <strong>{totals.orchestrators}</strong>
+        end-to-end orchestrators. One install command.
+      </p>
 
-    <div class="hero-install">
-      <div class="hero-install-copy">
-        <code>brew install skillskit &amp;&amp; skillskit install all</code>
-        <button class="hero-copy-btn" type="button" data-copy="brew tap tahirraufkeeyu/tap && brew install skillskit && skillskit install all" aria-label="Copy install command">
-          copy
-        </button>
+      <div class="hero-install">
+        <div class="hero-install-copy">
+          <code>brew install skillskit &amp;&amp; skillskit install all</code>
+          <button class="hero-copy-btn" type="button" data-copy="brew tap tahirraufkeeyu/tap && brew install skillskit && skillskit install all" aria-label="Copy install command">
+            copy
+          </button>
+        </div>
+        <p class="hero-install-note muted">
+          One line. macOS and Linux via Homebrew.
+          <a href="#install">Windows, curl, and manual install →</a>
+        </p>
       </div>
-      <p class="hero-install-note muted">
-        One line. macOS and Linux via Homebrew.
-        <a href="#install">Windows, curl, and manual install →</a>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#install">Install</a>
+        <a class="btn btn-secondary" href="/departments">Browse departments</a>
+        <a
+          class="btn btn-secondary"
+          href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas"
+          target="_blank"
+          rel="noopener">View on GitHub ↗</a
+        >
+      </div>
+      <p class="hero-custom muted">
+        Every skill ships a <strong>Customise for your organisation</strong> button — rewrite any
+        skill for your stack via an LLM, fully in your browser. <a href="/settings">Add your
+        OpenRouter key →</a>
+      </p>
+      <p class="stats subtle">
+        {totals.skills} skills
+        · {totals.bySafety.safe} safe
+        · {totals.bySafety["writes-local"]} writes-local
+        · {totals.bySafety["writes-shared"]} writes-shared
+        · {totals.bySafety.destructive} destructive
       </p>
     </div>
-
-    <div class="cta-row">
-      <a class="btn btn-primary" href="#install">Install</a>
-      <a class="btn btn-secondary" href="/departments">Browse departments</a>
-      <a
-        class="btn btn-secondary"
-        href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas"
-        target="_blank"
-        rel="noopener">View on GitHub ↗</a
-      >
+    <div class="hero-visual">
+      <HeroAnimation />
     </div>
-    <p class="hero-custom muted">
-      Every skill ships a <strong>Customise for your organisation</strong> button — rewrite any
-      skill for your stack via an LLM, fully in your browser. <a href="/settings">Add your
-      OpenRouter key →</a>
-    </p>
-    <p class="stats subtle">
-      {totals.skills} skills
-      · {totals.bySafety.safe} safe
-      · {totals.bySafety["writes-local"]} writes-local
-      · {totals.bySafety["writes-shared"]} writes-shared
-      · {totals.bySafety.destructive} destructive
-    </p>
   </section>
 
   <section class="anim-pair" aria-label="How the kit runs and how skills get customised">
@@ -224,35 +231,38 @@ skillskit --help                 # full command list`}</code></pre>
   </section>
 
   <section>
-    <h2>Find a skill</h2>
-    <Search />
-  </section>
-
-  <section>
-    <h2>What this is</h2>
+    <h2>Why skills, not just prompts.</h2>
     <p>
-      Most "AI for teams" content stops at "install Claude Code and good luck." The gap is the
-      layer that makes Claude behave like a reliable teammate — one that triggers on the right
-      work, follows the same process your senior people would, and produces output consistent
-      with what your team already ships.
+      Most "AI for teams" content stops at "install Claude Code and good luck."
+      skillskit is the missing layer — the one that makes Claude trigger on the right work,
+      follow the same process your senior people would, and produce output consistent with
+      what your team already ships.
     </p>
     <p>
-      Skills are that layer. A skill is a single Markdown file (<code>SKILL.md</code>) that
-      declares when it should run, the exact procedure, concrete examples, constraints, and
-      quality checks. Claude Code auto-triggers the right one based on your natural-language
-      request — no slash commands to memorise.
+      A skill is a single Markdown file (<code>SKILL.md</code>) that declares when it should
+      run, the exact procedure, concrete examples, constraints, and quality checks. Claude
+      Code auto-triggers the right one based on your natural-language request — no slash
+      commands to memorise, no framework to learn.
     </p>
     <p>
-      Everything here is MIT licensed. Clone, install, customise, share.
+      <strong>MIT licensed. No vendor lock-in, no telemetry, no black box.</strong> Fork it,
+      customise it for your org, ship it.
     </p>
   </section>
 
   <section>
-    <h2>Departments</h2>
+    <h2>An expert for every department.</h2>
+    <p class="muted section-intro">
+      Eight teams. {totals.skills} playbooks. Browse by role — each department ships its own
+      skill set, MCP recommendations, and recommended weekly rhythm.
+    </p>
     <div class="grid-auto">
       {
         departments.map((d) => (
-          <a class="card card-link dept-card" href={`/departments/${d.slug}`}>
+          <a
+            class:list={["card", "card-link", "dept-card", `dept-${d.slug}`]}
+            href={`/departments/${d.slug}`}
+          >
             <div class="dept-head">
               <h3>{departmentLabel(d.slug)}</h3>
               <span class="dept-count">{d.skillCount} skills</span>
@@ -271,9 +281,11 @@ skillskit --help                 # full command list`}</code></pre>
   </section>
 
   <section>
-    <h2>Featured orchestrators</h2>
-    <p class="muted">
-      End-to-end flows that chain multiple skills. Each department ships at least one.
+    <h2>End-to-end flows, not just tools.</h2>
+    <p class="muted section-intro">
+      Orchestrators chain the task skills into a single auditable run — pre-commit gate,
+      release audit, weekly comms cycle — and pass artifacts between steps. Every department
+      ships at least one.
     </p>
     <div class="grid-auto">
       {
@@ -297,27 +309,28 @@ skillskit --help                 # full command list`}</code></pre>
   </section>
 
   <section>
-    <h2>See it in action</h2>
+    <h2>See it ship real work.</h2>
     <p>
-      Two worked walkthroughs in the repo show the kit end-to-end, with the exact user prompt,
-      the skill Claude matched, what Claude did, and files changed:
+      Two worked walkthroughs in the repo — the exact prompt, the skill Claude matched,
+      every file changed. No toy demos:
     </p>
     <ul>
       <li>
         <a
           href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/examples/simple-101/how-to.md"
           target="_blank"
-          rel="noopener">Simple 101 — setup + first skill</a
-        > (15 min). Covers Claude Code, the VS Code extension, GitHub Copilot, and Codex CLI. Ships a
-        FastAPI <code>/hello</code> endpoint.
+          rel="noopener"><strong>Simple 101 — setup + first skill</strong></a
+        > (15 min). Set up in Claude Code, VS Code, GitHub Copilot, or Codex CLI, then ship a
+        working FastAPI <code>/hello</code> endpoint with one prompt.
       </li>
       <li>
         <a
           href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas/blob/main/examples/developers/how-to.md"
           target="_blank"
-          rel="noopener">Developers — full end-to-end</a
-        > (45 min). Nine skills on a real public repo (node-express-boilerplate). One shipped
-        feature, one merged PR.
+          rel="noopener"><strong>Developers — full end-to-end</strong></a
+        > (45 min). Nine skills, one real public repo
+        (<a href="https://github.com/hagopj13/node-express-boilerplate" target="_blank" rel="noopener">node-express-boilerplate</a>),
+        one shipped feature, one merged PR.
       </li>
     </ul>
   </section>
@@ -401,7 +414,28 @@ skillskit --help                 # full command list`}</code></pre>
 <style>
   .hero {
     padding: var(--space-8) 0 var(--space-12);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+  .hero-copy {
     max-width: 48rem;
+    min-width: 0;
+  }
+  .hero-visual {
+    display: none; /* shown at ≥64rem */
+  }
+  @media (min-width: 64rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(20rem, 32rem);
+      gap: var(--space-10);
+    }
+    .hero-visual {
+      display: block;
+      position: sticky;
+      top: 5rem; /* below sticky nav */
+    }
   }
   .eyebrow {
     font-family: var(--font-mono);
@@ -821,6 +855,40 @@ skillskit --help                 # full command list`}</code></pre>
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 120ms ease, transform 160ms ease, background 160ms ease;
+  }
+  .dept-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--dept-c, var(--accent));
+    opacity: 0.9;
+  }
+  .dept-card::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    right: -40%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle, var(--dept-c, var(--accent)) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 160ms ease;
+    pointer-events: none;
+  }
+  .dept-card:hover {
+    border-color: color-mix(in srgb, var(--dept-c, var(--accent)) 50%, var(--border));
+  }
+  .dept-card:hover::after {
+    opacity: 0.08;
+  }
+  .dept-card h3 {
+    color: color-mix(in srgb, var(--dept-c, var(--fg)) 80%, var(--fg));
   }
   .dept-head {
     display: flex;
@@ -866,5 +934,13 @@ skillskit --help                 # full command list`}</code></pre>
   }
   .feat-chains code {
     font-size: 0.8rem;
+  }
+
+  /* Lead-line under a section h2, before a grid or list. */
+  .section-intro {
+    margin: calc(var(--space-2) * -1) 0 var(--space-5);
+    font-size: 1rem;
+    line-height: 1.55;
+    max-width: 52rem;
   }
 </style>

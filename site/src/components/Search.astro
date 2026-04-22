@@ -2,37 +2,173 @@
 /**
  * Search component — client-side only.
  *
- * Loads Pagefind from /_pagefind/ (generated post-build by the pagefind
- * CLI; see package.json build script). In development the /_pagefind/
- * directory doesn't exist, so the search input shows a hint that search
- * only works in production builds.
+ * Two variants:
+ *   inline (default) — full-width search box with a hint line below.
+ *                      Kept for standalone use; no page currently uses it.
+ *   nav              — collapsed magnifier icon in the primary nav.
+ *                      Click to expand into a dropdown panel with a
+ *                      search input + a "Popular skills" suggestion
+ *                      list. Typing (>=2 chars) hides suggestions
+ *                      and shows Pagefind results. Empty input shows
+ *                      suggestions again.
  *
- * Purely static — no server, no API, no analytics hook unless the site
- * wires one in Phase B.
+ * Only one instance can live on a page — the script looks up its
+ * elements by fixed IDs.
  */
+
+import { getManifest } from "@/utils/skills";
+
+interface Props {
+  variant?: "inline" | "nav";
+}
+
+const { variant = "inline" } = Astro.props;
+const isNav = variant === "nav";
+
+// Curated suggestions shown when the nav search panel opens with an
+// empty query. Hand-picked to span departments so newcomers see the
+// breadth at a glance. Resolved against the manifest so titles,
+// safety labels, and departments stay correct if names change.
+const SUGGESTED_SLUGS = [
+  "code-review",
+  "debug",
+  "deploy",
+  "security-audit",
+  "release-to-prod",
+  "status-update",
+  "lead-research",
+  "full-security-audit",
+];
+
+let suggestions: Array<{
+  slug: string;
+  name: string;
+  department: string;
+  description: string;
+}> = [];
+
+if (isNav) {
+  const { skills } = getManifest();
+  suggestions = SUGGESTED_SLUGS
+    .map((slug) => skills.find((s) => s.slug === slug))
+    .filter((x): x is NonNullable<typeof x> => Boolean(x))
+    .map((s) => ({
+      slug: s.slug,
+      name: s.name,
+      department: s.department,
+      description: s.description,
+    }));
+}
 ---
 
-<div class="search" id="skillskit-search">
-  <label class="sr-only" for="skillskit-search-input">Search skills</label>
-  <input
-    type="search"
-    id="skillskit-search-input"
-    placeholder="Search skills... (try 'code review' or 'prometheus')"
-    autocomplete="off"
-    spellcheck="false"
-  />
-  <div class="hint subtle" id="skillskit-search-hint">
-    Powered by Pagefind · ctrl+/ to focus
+<div class:list={["search", isNav && "search-nav is-collapsed"]} id="skillskit-search">
+  {
+    isNav ? (
+      <button
+        type="button"
+        class="search-toggle"
+        aria-label="Search skills"
+        aria-expanded="false"
+        aria-controls="skillskit-search-panel"
+        data-search-toggle
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <span class="search-toggle-hint" aria-hidden="true">
+          <kbd>⌘</kbd><kbd>K</kbd>
+        </span>
+      </button>
+    ) : null
+  }
+
+  <div
+    class:list={[isNav && "search-panel"]}
+    id={isNav ? "skillskit-search-panel" : undefined}
+    hidden={isNav}
+    data-search-panel={isNav ? "" : undefined}
+  >
+    <div class:list={[isNav && "search-inputwrap"]}>
+      {
+        isNav ? (
+          <svg class="search-inputwrap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        ) : null
+      }
+      <label class="sr-only" for="skillskit-search-input">Search skills</label>
+      <input
+        type="search"
+        id="skillskit-search-input"
+        placeholder={isNav ? "Search 64 skills…" : "Search skills... (try 'code review' or 'prometheus')"}
+        autocomplete="off"
+        spellcheck="false"
+      />
+      {
+        isNav ? (
+          <button
+            type="button"
+            class="search-close"
+            aria-label="Close search"
+            data-search-close
+          >
+            ×
+          </button>
+        ) : null
+      }
+    </div>
+
+    {
+      !isNav ? (
+        <div class="hint subtle" id="skillskit-search-hint">
+          Powered by Pagefind · ctrl+/ to focus
+        </div>
+      ) : (
+        <div class="hint sr-only" id="skillskit-search-hint" aria-live="polite"></div>
+      )
+    }
+
+    {
+      isNav ? (
+        <div class="search-suggest" id="skillskit-search-suggest">
+          <div class="suggest-label">Popular skills</div>
+          <ul class="suggest-list">
+            {suggestions.map((s) => (
+              <li>
+                <a href={`/skills/${s.slug}`} class="suggest-item">
+                  <code class="suggest-name">{s.name}</code>
+                  <span class="suggest-dept">{s.department}</span>
+                  <span class="suggest-desc">{s.description.slice(0, 90)}{s.description.length > 90 ? "…" : ""}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div class="suggest-foot subtle">
+            Or type to search all {suggestions.length > 0 ? "64" : ""} skills · <kbd>↵</kbd> to open
+          </div>
+        </div>
+      ) : null
+    }
+
+    <ul class="results" id="skillskit-search-results" role="listbox" hidden></ul>
   </div>
-  <ul class="results" id="skillskit-search-results" role="listbox" hidden></ul>
 </div>
 
 <style>
   .search {
     position: relative;
+  }
+  .search:not(.search-nav) {
     max-width: 40rem;
     margin: 0 0 var(--space-8);
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Common input styling (used by both variants)                       */
+  /* ------------------------------------------------------------------ */
+
   input[type="search"] {
     width: 100%;
     font: inherit;
@@ -56,6 +192,196 @@
     margin-top: var(--space-2);
     font-size: 0.8rem;
   }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* NAV VARIANT                                                        */
+  /* ------------------------------------------------------------------ */
+
+  .search-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.4rem 0.6rem 0.4rem 0.55rem;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    color: var(--fg-muted);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+  }
+  .search-toggle svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  .search-toggle:hover,
+  .search-toggle:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--bg-elev-2);
+  }
+  .search-toggle-hint {
+    display: inline-flex;
+    gap: 0.15rem;
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+  .search-toggle-hint kbd {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05rem 0.25rem;
+    font-size: 0.7rem;
+  }
+  @media (max-width: 47.99rem) {
+    .search-toggle-hint { display: none; }
+  }
+
+  /* Panel that drops down when the toggle is clicked. Right-aligned
+     so it hangs off the toggle without overflowing the viewport. */
+  .search-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: min(32rem, calc(100vw - 2rem));
+    padding: var(--space-3);
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.6);
+    z-index: 30;
+  }
+  .search-panel[hidden] { display: none; }
+
+  .search-inputwrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-inputwrap-icon {
+    position: absolute;
+    left: 0.7rem;
+    width: 1rem;
+    height: 1rem;
+    color: var(--fg-subtle);
+    pointer-events: none;
+  }
+  .search-nav input[type="search"] {
+    padding-left: 2.2rem;
+    padding-right: 2.2rem;
+    font-size: 0.95rem;
+  }
+  .search-close {
+    position: absolute;
+    right: 0.35rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.75rem;
+    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--fg-subtle);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 999px;
+  }
+  .search-close:hover { color: var(--fg); background: var(--bg-elev-2); }
+
+  /* Suggestions block — shown while input is empty. */
+  .search-suggest {
+    margin-top: var(--space-3);
+  }
+  .suggest-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg-subtle);
+    margin-bottom: var(--space-2);
+  }
+  .suggest-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.15rem;
+  }
+  .suggest-item {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: var(--space-2) var(--space-3);
+    align-items: baseline;
+    padding: 0.55rem 0.7rem;
+    border-radius: var(--radius-md);
+    color: inherit;
+    text-decoration: none;
+    transition: background 120ms ease;
+  }
+  .suggest-item:hover,
+  .suggest-item:focus-visible {
+    outline: none;
+    background: var(--bg-elev-2);
+  }
+  .suggest-name {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    background: transparent;
+    padding: 0;
+  }
+  .suggest-dept {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+  }
+  .suggest-desc {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    line-height: 1.35;
+    grid-column: 1 / -1;
+  }
+  .suggest-foot {
+    margin-top: var(--space-3);
+    font-size: 0.72rem;
+    color: var(--fg-subtle);
+    padding: 0 0.4rem;
+  }
+  .suggest-foot kbd {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+
+  /* Panel collapsed → hide suggestions when typing. Toggled via JS. */
+  .search-nav[data-mode="searching"] .search-suggest { display: none; }
+
+  /* ------------------------------------------------------------------ */
+  /* RESULTS (both variants)                                            */
+  /* ------------------------------------------------------------------ */
+
   .results {
     list-style: none;
     padding: 0;
@@ -63,14 +389,27 @@
     display: grid;
     gap: var(--space-2);
   }
-  .results[hidden] {
-    display: none;
+  .search-nav .results {
+    max-height: 60vh;
+    overflow-y: auto;
   }
+  .results[hidden] { display: none; }
+
   .results :global(li) {
     background: var(--bg-elev-1);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-4);
+  }
+  .search-nav .results :global(li) {
+    border: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    background: transparent;
+  }
+  .search-nav .results :global(li:hover),
+  .search-nav .results :global(li:focus-within) {
+    background: var(--bg-elev-2);
   }
   .results :global(a) {
     display: block;
@@ -82,17 +421,20 @@
     font-weight: 600;
     font-size: 0.95rem;
     margin-bottom: var(--space-1);
+    color: var(--accent);
   }
   .results :global(.r-meta) {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--fg-muted);
     font-family: var(--font-mono);
     margin-bottom: var(--space-1);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
   .results :global(.r-excerpt) {
     color: var(--fg-muted);
-    font-size: 0.9rem;
-    line-height: 1.45;
+    font-size: 0.85rem;
+    line-height: 1.4;
   }
   .results :global(.r-excerpt mark) {
     background: color-mix(in srgb, var(--accent) 25%, transparent);
@@ -107,42 +449,86 @@
 </style>
 
 <script>
-  // Pagefind UI is loaded lazily — the index lives at /_pagefind/pagefind.js
-  // after the post-build step. In dev the file doesn't exist at all, and
-  // Vite would otherwise try to statically resolve the import during
-  // dev-server transform (even with @vite-ignore). We dodge both issues
-  // by short-circuiting in dev and computing the URL at runtime in prod.
   async function boot() {
+    const wrap = document.getElementById("skillskit-search");
     const input = document.getElementById("skillskit-search-input") as HTMLInputElement | null;
     const results = document.getElementById("skillskit-search-results") as HTMLUListElement | null;
     const hint = document.getElementById("skillskit-search-hint");
-    if (!input || !results) return;
+    const panel = document.querySelector<HTMLElement>("[data-search-panel]");
+    const toggle = document.querySelector<HTMLButtonElement>("[data-search-toggle]");
+    const closeBtn = document.querySelector<HTMLButtonElement>("[data-search-close]");
+    const suggest = document.getElementById("skillskit-search-suggest");
+    if (!input || !results || !wrap) return;
 
-    // Ctrl+/ or Cmd+K focuses the search box.
+    const isNav = wrap.classList.contains("search-nav");
+
+    // --- Nav panel open/close plumbing -----------------------------
+    function openPanel() {
+      if (!panel || !toggle) return;
+      panel.hidden = false;
+      toggle.setAttribute("aria-expanded", "true");
+      // Defer focus so the browser registers the hidden→visible flip.
+      setTimeout(() => input!.focus(), 0);
+    }
+    function closePanel() {
+      if (!panel || !toggle) return;
+      panel.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+      input!.value = "";
+      results!.hidden = true;
+      results!.innerHTML = "";
+      wrap.removeAttribute("data-mode");
+    }
+    toggle?.addEventListener("click", () => {
+      if (panel?.hidden) openPanel();
+      else closePanel();
+    });
+    closeBtn?.addEventListener("click", closePanel);
+
+    // --- Global keyboard shortcuts ---------------------------------
     document.addEventListener("keydown", (e) => {
       const mod = e.ctrlKey || e.metaKey;
       if ((mod && e.key === "/") || (mod && e.key.toLowerCase() === "k")) {
         e.preventDefault();
-        input.focus();
-        input.select();
+        if (isNav && panel?.hidden) openPanel();
+        else {
+          input.focus();
+          input.select();
+        }
+      }
+      if (e.key === "Escape" && isNav && !panel?.hidden) {
+        closePanel();
       }
     });
 
-    // Dev: Pagefind index doesn't exist, so don't try to import it.
-    // import.meta.env.DEV is replaced at compile time with a boolean
-    // literal, so the branch below is dead-code-eliminated in prod builds.
+    // --- Click outside closes the nav panel ------------------------
+    if (isNav) {
+      document.addEventListener("click", (e) => {
+        if (panel?.hidden) return;
+        if (wrap.contains(e.target as Node)) return;
+        closePanel();
+      });
+    }
+
+    // --- Dev-mode short-circuit: no Pagefind index ------------------
     if (import.meta.env.DEV) {
       if (hint) {
         hint.textContent =
-          "Search is disabled in dev mode — run 'npm run build && npm run preview' to try it.";
+          "Live search disabled in dev mode — run 'npm run build && npm run preview' to try it.";
       }
+      // Still allow the panel to open and show suggestions.
+      input.addEventListener("input", () => {
+        const q = input.value.trim();
+        if (isNav && wrap) {
+          wrap.setAttribute("data-mode", q.length >= 2 ? "searching" : "");
+        }
+      });
       return;
     }
 
+    // --- Pagefind load ---------------------------------------------
     let pagefind: any = null;
     try {
-      // Compute the URL at runtime so Vite's static analysis can't try
-      // to resolve /_pagefind/pagefind.js during the dev transform.
       const pagefindUrl = new URL(
         "/_pagefind/pagefind.js",
         window.location.origin,
@@ -165,10 +551,12 @@
       if (!q || q.length < 2) {
         results!.hidden = true;
         results!.innerHTML = "";
+        if (isNav && wrap) wrap.removeAttribute("data-mode");
         return;
       }
+      if (isNav && wrap) wrap.setAttribute("data-mode", "searching");
       const r = await pagefind.search(q);
-      if (q !== currentQuery) return; // race
+      if (q !== currentQuery) return;
       results!.hidden = false;
       if (r.results.length === 0) {
         results!.innerHTML = `<li class="r-empty">No matches for "${escapeHtml(q)}".</li>`;
@@ -197,15 +585,6 @@
       currentQuery = q;
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => runSearch(q), 120);
-    });
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        input.value = "";
-        currentQuery = "";
-        results!.hidden = true;
-        results!.innerHTML = "";
-      }
     });
   }
 

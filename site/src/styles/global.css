@@ -49,6 +49,19 @@
   --warning: #f3c162;
   --danger: #ef6b73;
   --code-bg: #0f1418;
+
+  /* Per-department accent hues. Subtle, low-saturation — meant to
+     appear as a thin colored bar on cards, never as a fill. Defined
+     once here so any consumer can read var(--dept-<slug>). Kept in
+     sync with the 8 department slugs produced by the manifest. */
+  --dept-developers: #7ac8ff;       /* cool blue (matches accent) */
+  --dept-security: #ff8a94;          /* soft coral */
+  --dept-devops: #7eddb9;            /* mint */
+  --dept-infrastructure: #f5c871;    /* warm amber */
+  --dept-qa: #c9a6ff;                /* lavender */
+  --dept-sales: #ff9fc4;             /* soft pink */
+  --dept-marketing: #ffb37a;         /* peach */
+  --dept-internal-comms: #7fdbe8;    /* cyan */
 }
 
 @media (prefers-color-scheme: light) {
@@ -67,8 +80,31 @@
     --warning: #8a6200;
     --danger: #a4201f;
     --code-bg: #f6f7f9;
+
+    /* Department hues — darker in light mode so the colored bar
+       is still legible against white cards. */
+    --dept-developers: #1e6fd1;
+    --dept-security: #c94654;
+    --dept-devops: #2e9e72;
+    --dept-infrastructure: #c9881f;
+    --dept-qa: #7b52c4;
+    --dept-sales: #d25a8d;
+    --dept-marketing: #d9723d;
+    --dept-internal-comms: #2a99a8;
   }
 }
+
+/* Utility: set --dept-c on any element based on a department class,
+   so descendants can read `var(--dept-c)` without duplicating the
+   lookup table. */
+.dept-developers      { --dept-c: var(--dept-developers); }
+.dept-security        { --dept-c: var(--dept-security); }
+.dept-devops          { --dept-c: var(--dept-devops); }
+.dept-infrastructure  { --dept-c: var(--dept-infrastructure); }
+.dept-qa              { --dept-c: var(--dept-qa); }
+.dept-sales           { --dept-c: var(--dept-sales); }
+.dept-marketing       { --dept-c: var(--dept-marketing); }
+.dept-internal-comms  { --dept-c: var(--dept-internal-comms); }
 
 * {
   box-sizing: border-box;
