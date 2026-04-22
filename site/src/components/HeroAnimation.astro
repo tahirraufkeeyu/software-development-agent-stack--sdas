@@ -1,0 +1,397 @@
+---
+/**
+ * HeroAnimation.astro — decorative scene for the hero's right column.
+ *
+ * A purely visual illustration of the product's mental model:
+ *   skill labels drift in from the edges and are absorbed into a brain
+ *   (the user's Claude Code setup with skills loaded). The brain
+ *   connects down to a 3-stage system (build / test / ship) where a
+ *   dot cycles through to suggest a working pipeline. A coffee cup
+ *   in the corner sets the tone — "sit back, the agents are working."
+ *
+ * Constraints:
+ * - Pure inline SVG + CSS keyframes. No external library, no GIF.
+ * - Scales to container width; portrait aspect so it fits the empty
+ *   space to the right of the hero copy.
+ * - aria-hidden — purely decorative.
+ * - Honors prefers-reduced-motion: locks to a static composition
+ *   (skills visible at rest, no movement).
+ */
+---
+
+<div class="hero-anim" aria-hidden="true">
+  <!-- SKILL STREAM — labels drift from edges toward the brain. -->
+  <div class="skill-stream">
+    <span class="skill skill-1"><code>code-review</code></span>
+    <span class="skill skill-2"><code>security-audit</code></span>
+    <span class="skill skill-3"><code>api-design</code></span>
+    <span class="skill skill-4"><code>deploy</code></span>
+    <span class="skill skill-5"><code>commit-message</code></span>
+    <span class="skill skill-6"><code>status-update</code></span>
+    <span class="skill skill-7"><code>proposal-writer</code></span>
+    <span class="skill skill-8"><code>pentest-report</code></span>
+  </div>
+
+  <!-- BRAIN — gentle pulse + glow aura. -->
+  <svg class="brain" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="currentColor" stop-opacity="0.35"></stop>
+        <stop offset="60%" stop-color="currentColor" stop-opacity="0.08"></stop>
+        <stop offset="100%" stop-color="currentColor" stop-opacity="0"></stop>
+      </radialGradient>
+    </defs>
+    <circle class="brain-aura" cx="60" cy="60" r="55" fill="url(#brainGlow)"></circle>
+    <g
+      class="brain-path"
+      stroke="currentColor"
+      stroke-width="2"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <!-- Left hemisphere (Lucide-style brain, scaled to 120x120). -->
+      <path
+        d="M60 30a15 15 0 0 0 -30 0 12 12 0 0 0 -10 20 12 12 0 0 0 2 22 12 12 0 0 0 8 20 12 12 0 0 0 30 6 z"
+      ></path>
+      <!-- Right hemisphere, mirrored. -->
+      <path
+        d="M60 30a15 15 0 0 1 30 0 12 12 0 0 1 10 20 12 12 0 0 1 -2 22 12 12 0 0 1 -8 20 12 12 0 0 1 -30 6"
+      ></path>
+      <!-- Central valley suggesting the brain's fold. -->
+      <path d="M60 30 V98" opacity="0.45"></path>
+      <!-- Two fold lines per hemisphere. -->
+      <path d="M40 50 Q50 56 42 66" opacity="0.45"></path>
+      <path d="M80 50 Q70 56 78 66" opacity="0.45"></path>
+      <path d="M38 78 Q50 82 44 90" opacity="0.45"></path>
+      <path d="M82 78 Q70 82 76 90" opacity="0.45"></path>
+    </g>
+    <!-- Spark nodes inside the brain that flicker as skills land. -->
+    <g class="sparks" fill="currentColor">
+      <circle class="spark spark-1" cx="48" cy="55" r="2"></circle>
+      <circle class="spark spark-2" cx="72" cy="50" r="2"></circle>
+      <circle class="spark spark-3" cx="55" cy="75" r="2"></circle>
+      <circle class="spark spark-4" cx="68" cy="82" r="2"></circle>
+      <circle class="spark spark-5" cx="60" cy="62" r="2.5"></circle>
+    </g>
+  </svg>
+
+  <!-- Connector from brain to system. -->
+  <div class="connector" aria-hidden="true">
+    <span class="pulse-line"></span>
+  </div>
+
+  <!-- WORKING SYSTEM — 3 boxes + a dot cycling through them. -->
+  <svg class="system" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg">
+    <g fill="var(--bg-elev-2)" stroke="currentColor" stroke-width="1" opacity="0.9">
+      <rect x="10" y="20" width="50" height="30" rx="5"></rect>
+      <rect x="85" y="20" width="50" height="30" rx="5"></rect>
+      <rect x="160" y="20" width="50" height="30" rx="5"></rect>
+    </g>
+    <g stroke="currentColor" stroke-width="1" opacity="0.5" stroke-dasharray="3 3">
+      <line x1="60" y1="35" x2="85" y2="35"></line>
+      <line x1="135" y1="35" x2="160" y2="35"></line>
+    </g>
+    <g
+      font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+      font-size="9"
+      text-anchor="middle"
+      fill="currentColor"
+      opacity="0.75"
+    >
+      <text x="35" y="39">build</text>
+      <text x="110" y="39">test</text>
+      <text x="185" y="39">ship</text>
+    </g>
+    <circle class="sys-dot" cx="35" cy="35" r="3.5" fill="currentColor"></circle>
+  </svg>
+
+  <!-- COFFEE — cup with rising steam. -->
+  <svg class="coffee" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+    <!-- Steam (3 wavy lines that rise + fade on loop). -->
+    <g
+      class="steam"
+      stroke="currentColor"
+      stroke-width="1.3"
+      fill="none"
+      stroke-linecap="round"
+      opacity="0.55"
+    >
+      <path class="steam-1" d="M18 32 q-3 -5 0 -10 q3 -5 0 -10"></path>
+      <path class="steam-2" d="M30 32 q3 -5 0 -10 q-3 -5 0 -10"></path>
+      <path class="steam-3" d="M42 32 q-3 -5 0 -10 q3 -5 0 -10"></path>
+    </g>
+    <!-- Saucer. -->
+    <ellipse
+      cx="30"
+      cy="68"
+      rx="22"
+      ry="3"
+      fill="var(--bg-elev-2)"
+      stroke="currentColor"
+      stroke-width="1"
+    ></ellipse>
+    <!-- Cup body. -->
+    <path
+      d="M12 35 h30 v18 a8 8 0 0 1 -8 8 h-14 a8 8 0 0 1 -8 -8 z"
+      fill="var(--bg-elev-2)"
+      stroke="currentColor"
+      stroke-width="1.4"
+    ></path>
+    <!-- Coffee surface inside cup (ellipse). -->
+    <ellipse cx="27" cy="35" rx="15" ry="2" fill="currentColor" opacity="0.25"></ellipse>
+    <!-- Handle. -->
+    <path
+      d="M42 40 a5 5 0 0 1 0 10"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.4"
+    ></path>
+  </svg>
+</div>
+
+<style>
+  .hero-anim {
+    position: relative;
+    width: 100%;
+    max-width: 30rem;
+    aspect-ratio: 4 / 5;
+    min-height: 26rem;
+    margin: 0 auto;
+    color: var(--fg);
+    /* Cap text inside skill labels so absolute positioning is reliable. */
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 4%, var(--bg-elev-1)) 0%,
+      var(--bg-elev-1) 70%
+    );
+    border: 1px solid var(--border);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* BRAIN                                                              */
+  /* ------------------------------------------------------------------ */
+
+  .brain {
+    position: absolute;
+    top: 28%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44%;
+    height: auto;
+    color: var(--accent);
+    animation: brainPulse 4s ease-in-out infinite;
+  }
+  @keyframes brainPulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(1);
+      filter: drop-shadow(0 0 0 transparent);
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.03);
+      filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 40%, transparent));
+    }
+  }
+  .brain-aura {
+    animation: auraPulse 4s ease-in-out infinite;
+  }
+  @keyframes auraPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+
+  /* Inner sparks flicker out of sync with the pulse. */
+  .spark {
+    opacity: 0.4;
+    animation: sparkBlink 2.4s ease-in-out infinite;
+  }
+  .spark-1 { animation-delay: 0s; }
+  .spark-2 { animation-delay: 0.5s; }
+  .spark-3 { animation-delay: 1s; }
+  .spark-4 { animation-delay: 1.5s; }
+  .spark-5 { animation-delay: 0.25s; }
+  @keyframes sparkBlink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SKILL STREAM                                                       */
+  /* ------------------------------------------------------------------ */
+
+  .skill-stream {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .skill {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--fg-muted);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.22em 0.7em;
+    white-space: nowrap;
+    /* translate(-50%, -50%) keeps the label centered on its top/left
+       anchor; scale shrinks it as it "dissolves" into the brain. */
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+    animation: skillDrift 7s ease-in-out infinite;
+  }
+  .skill code {
+    font-size: 1em;
+    color: var(--accent);
+    background: transparent;
+    padding: 0;
+  }
+
+  /* Spawn positions + delays for each skill so the viewer always has
+     2–3 labels visible at any time, staggered around the brain. */
+  .skill-1 { top: 14%; left: 20%; animation-delay: 0s;   }
+  .skill-2 { top: 9%;  left: 74%; animation-delay: 0.9s; }
+  .skill-3 { top: 24%; left: 88%; animation-delay: 1.8s; }
+  .skill-4 { top: 44%; left: 14%; animation-delay: 2.6s; }
+  .skill-5 { top: 44%; left: 82%; animation-delay: 3.4s; }
+  .skill-6 { top: 20%; left: 8%;  animation-delay: 4.2s; }
+  .skill-7 { top: 32%; left: 92%; animation-delay: 5.0s; }
+  .skill-8 { top: 10%; left: 50%; animation-delay: 5.8s; }
+
+  @keyframes skillDrift {
+    0%, 6%   { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+    14%      { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    65%      { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    82%      { opacity: 0.35; transform: translate(-50%, -50%) scale(0.55); }
+    100%     { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* CONNECTOR (brain -> system)                                        */
+  /* ------------------------------------------------------------------ */
+
+  .connector {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: 2px;
+    height: 14%;
+    transform: translateX(-50%);
+    overflow: hidden;
+  }
+  .connector::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .pulse-line {
+    position: absolute;
+    top: -40%;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--accent) 50%,
+      transparent 100%
+    );
+    animation: pulseDown 1.8s linear infinite;
+  }
+  @keyframes pulseDown {
+    0%   { top: -50%; opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SYSTEM                                                             */
+  /* ------------------------------------------------------------------ */
+
+  .system {
+    position: absolute;
+    left: 50%;
+    bottom: 18%;
+    width: 70%;
+    transform: translateX(-50%);
+    color: var(--fg-muted);
+  }
+  .sys-dot {
+    color: var(--accent);
+    animation: sysDotCycle 3.6s ease-in-out infinite;
+  }
+  @keyframes sysDotCycle {
+    0%    { cx: 35px;  opacity: 1; }
+    28%   { cx: 35px;  opacity: 1; }
+    33%   { opacity: 0; }
+    34%   { cx: 110px; opacity: 0; }
+    38%   { opacity: 1; }
+    61%   { cx: 110px; opacity: 1; }
+    66%   { opacity: 0; }
+    67%   { cx: 185px; opacity: 0; }
+    71%   { opacity: 1; }
+    94%   { cx: 185px; opacity: 1; }
+    100%  { opacity: 0; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* COFFEE                                                             */
+  /* ------------------------------------------------------------------ */
+
+  .coffee {
+    position: absolute;
+    bottom: 4%;
+    right: 6%;
+    width: 22%;
+    max-width: 5.5rem;
+    color: var(--fg-muted);
+  }
+  .steam path {
+    transform-origin: bottom center;
+    animation: steamRise 3s ease-in-out infinite;
+  }
+  .steam-1 { animation-delay: 0s; }
+  .steam-2 { animation-delay: 0.6s; }
+  .steam-3 { animation-delay: 1.2s; }
+  @keyframes steamRise {
+    0%   { opacity: 0; transform: translateY(4px) scaleY(0.9); }
+    25%  { opacity: 0.7; }
+    70%  { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(-8px) scaleY(1.15); }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* RESPONSIVE + REDUCED MOTION                                        */
+  /* ------------------------------------------------------------------ */
+
+  /* Hide the whole scene below the breakpoint where we can show it
+     side-by-side with the hero copy. Mobile hero already tells the
+     story in text; we don't want to stack a decorative box below. */
+  @media (max-width: 63.99rem) {
+    .hero-anim {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brain,
+    .brain-aura,
+    .spark,
+    .skill,
+    .pulse-line,
+    .sys-dot,
+    .steam path {
+      animation: none !important;
+    }
+    .skill {
+      opacity: 1;
+    }
+    .brain {
+      transform: translate(-50%, -50%);
+    }
+  }
+</style>

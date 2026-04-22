@@ -2,6 +2,7 @@
 import Base from "@/layouts/Base.astro";
 import Terminal from "@/components/Terminal.astro";
 import CustomiseAnimation from "@/components/CustomiseAnimation.astro";
+import HeroAnimation from "@/components/HeroAnimation.astro";
 import {
   getManifest,
   departmentLabel,
@@ -23,52 +24,57 @@ const featured = featuredSlugs
 
 <Base title="skillskit.dev">
   <section class="hero">
-    <p class="eyebrow">Software Development Agent Stack · open source</p>
-    <h1>Automate your SDLC. And everything around it.<br /><span class="hero-accent">An elite expert for every department.</span></h1>
-    <p class="lede">
-      <strong>{totals.skills}</strong> industry-best-practice playbooks — code review, security audits,
-      deploy pipelines, proposals, release notes, outbound sequences — packaged as Claude Code skills
-      that trigger on plain-English requests. The exact procedure a senior engineer, security lead,
-      DevOps veteran, or marketing director would follow, shipped as a file your team can read and edit.
-      <strong>{totals.departments}</strong> departments. <strong>{totals.orchestrators}</strong>
-      end-to-end orchestrators. One install command.
-    </p>
+    <div class="hero-copy">
+      <p class="eyebrow">Software Development Agent Stack · open source</p>
+      <h1>Automate your SDLC. And everything around it.<br /><span class="hero-accent">An elite expert for every department.</span></h1>
+      <p class="lede">
+        <strong>{totals.skills}</strong> industry-best-practice playbooks — code review, security audits,
+        deploy pipelines, proposals, release notes, outbound sequences — packaged as Claude Code skills
+        that trigger on plain-English requests. The exact procedure a senior engineer, security lead,
+        DevOps veteran, or marketing director would follow, shipped as a file your team can read and edit.
+        <strong>{totals.departments}</strong> departments. <strong>{totals.orchestrators}</strong>
+        end-to-end orchestrators. One install command.
+      </p>
 
-    <div class="hero-install">
-      <div class="hero-install-copy">
-        <code>brew install skillskit &amp;&amp; skillskit install all</code>
-        <button class="hero-copy-btn" type="button" data-copy="brew tap tahirraufkeeyu/tap && brew install skillskit && skillskit install all" aria-label="Copy install command">
-          copy
-        </button>
+      <div class="hero-install">
+        <div class="hero-install-copy">
+          <code>brew install skillskit &amp;&amp; skillskit install all</code>
+          <button class="hero-copy-btn" type="button" data-copy="brew tap tahirraufkeeyu/tap && brew install skillskit && skillskit install all" aria-label="Copy install command">
+            copy
+          </button>
+        </div>
+        <p class="hero-install-note muted">
+          One line. macOS and Linux via Homebrew.
+          <a href="#install">Windows, curl, and manual install →</a>
+        </p>
       </div>
-      <p class="hero-install-note muted">
-        One line. macOS and Linux via Homebrew.
-        <a href="#install">Windows, curl, and manual install →</a>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#install">Install</a>
+        <a class="btn btn-secondary" href="/departments">Browse departments</a>
+        <a
+          class="btn btn-secondary"
+          href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas"
+          target="_blank"
+          rel="noopener">View on GitHub ↗</a
+        >
+      </div>
+      <p class="hero-custom muted">
+        Every skill ships a <strong>Customise for your organisation</strong> button — rewrite any
+        skill for your stack via an LLM, fully in your browser. <a href="/settings">Add your
+        OpenRouter key →</a>
+      </p>
+      <p class="stats subtle">
+        {totals.skills} skills
+        · {totals.bySafety.safe} safe
+        · {totals.bySafety["writes-local"]} writes-local
+        · {totals.bySafety["writes-shared"]} writes-shared
+        · {totals.bySafety.destructive} destructive
       </p>
     </div>
-
-    <div class="cta-row">
-      <a class="btn btn-primary" href="#install">Install</a>
-      <a class="btn btn-secondary" href="/departments">Browse departments</a>
-      <a
-        class="btn btn-secondary"
-        href="https://github.com/tahirraufkeeyu/software-development-agent-stack--sdas"
-        target="_blank"
-        rel="noopener">View on GitHub ↗</a
-      >
+    <div class="hero-visual">
+      <HeroAnimation />
     </div>
-    <p class="hero-custom muted">
-      Every skill ships a <strong>Customise for your organisation</strong> button — rewrite any
-      skill for your stack via an LLM, fully in your browser. <a href="/settings">Add your
-      OpenRouter key →</a>
-    </p>
-    <p class="stats subtle">
-      {totals.skills} skills
-      · {totals.bySafety.safe} safe
-      · {totals.bySafety["writes-local"]} writes-local
-      · {totals.bySafety["writes-shared"]} writes-shared
-      · {totals.bySafety.destructive} destructive
-    </p>
   </section>
 
   <section class="anim-pair" aria-label="How the kit runs and how skills get customised">
@@ -405,7 +411,28 @@ skillskit --help                 # full command list`}</code></pre>
 <style>
   .hero {
     padding: var(--space-8) 0 var(--space-12);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+  .hero-copy {
     max-width: 48rem;
+    min-width: 0;
+  }
+  .hero-visual {
+    display: none; /* shown at ≥64rem */
+  }
+  @media (min-width: 64rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(20rem, 32rem);
+      gap: var(--space-10);
+    }
+    .hero-visual {
+      display: block;
+      position: sticky;
+      top: 5rem; /* below sticky nav */
+    }
   }
   .eyebrow {
     font-family: var(--font-mono);
