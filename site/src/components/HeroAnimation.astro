@@ -81,30 +81,84 @@
     <span class="pulse-line"></span>
   </div>
 
-  <!-- WORKING SYSTEM — 3 boxes + a dot cycling through them. -->
-  <svg class="system" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg">
-    <g fill="var(--bg-elev-2)" stroke="currentColor" stroke-width="1" opacity="0.9">
-      <rect x="10" y="20" width="50" height="30" rx="5"></rect>
-      <rect x="85" y="20" width="50" height="30" rx="5"></rect>
-      <rect x="160" y="20" width="50" height="30" rx="5"></rect>
-    </g>
-    <g stroke="currentColor" stroke-width="1" opacity="0.5" stroke-dasharray="3 3">
-      <line x1="60" y1="35" x2="85" y2="35"></line>
-      <line x1="135" y1="35" x2="160" y2="35"></line>
-    </g>
-    <g
-      font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
-      font-size="9"
-      text-anchor="middle"
-      fill="currentColor"
-      opacity="0.75"
-    >
-      <text x="35" y="39">build</text>
-      <text x="110" y="39">test</text>
-      <text x="185" y="39">ship</text>
-    </g>
-    <circle class="sys-dot" cx="35" cy="35" r="3.5" fill="currentColor"></circle>
-  </svg>
+  <!-- ASSEMBLY BELT — shaped, colored packages travel left-to-right
+       and burst into confetti at the end. Each package has its own
+       shape, color, and short label (dev / sec / obs / qa / mob /
+       infra). The belt rail + roller ticks below sell the "conveyor"
+       read. -->
+  <div class="belt" aria-hidden="true">
+    <div class="belt-rail"></div>
+    <div class="belt-tick t1"></div>
+    <div class="belt-tick t2"></div>
+    <div class="belt-tick t3"></div>
+    <div class="belt-tick t4"></div>
+    <div class="belt-tick t5"></div>
+
+    <!-- DEVELOPMENT — rounded square in dept-developers blue. -->
+    <div class="package pkg-dev" style="--d: 0s;">
+      <svg class="pkg-shape" viewBox="0 0 28 22">
+        <rect x="1" y="1" width="26" height="20" rx="4" fill="currentColor" opacity="0.95"/>
+        <text x="14" y="15" text-anchor="middle" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700" fill="#0b0d10">dev</text>
+      </svg>
+      <span class="conf c1"></span><span class="conf c2"></span>
+      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    </div>
+
+    <!-- SECURITY — pentagonal shield in dept-security coral. -->
+    <div class="package pkg-sec" style="--d: 1.2s;">
+      <svg class="pkg-shape" viewBox="0 0 28 22">
+        <path d="M14 1 L27 5 V13 Q27 19 14 21 Q1 19 1 13 V5 Z" fill="currentColor" opacity="0.95"/>
+        <text x="14" y="15" text-anchor="middle" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700" fill="#0b0d10">sec</text>
+      </svg>
+      <span class="conf c1"></span><span class="conf c2"></span>
+      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    </div>
+
+    <!-- OBSERVABILITY — bar-chart shape in dept-internal-comms cyan. -->
+    <div class="package pkg-obs" style="--d: 2.4s;">
+      <svg class="pkg-shape" viewBox="0 0 28 22">
+        <rect x="1" y="1" width="26" height="20" rx="3" fill="currentColor" opacity="0.2"/>
+        <rect x="4"  y="13" width="4" height="7"  fill="currentColor"/>
+        <rect x="10" y="9"  width="4" height="11" fill="currentColor"/>
+        <rect x="16" y="5"  width="4" height="15" fill="currentColor"/>
+        <rect x="22" y="11" width="4" height="9"  fill="currentColor"/>
+      </svg>
+      <span class="conf c1"></span><span class="conf c2"></span>
+      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    </div>
+
+    <!-- QUALITY — diamond with checkmark in dept-devops mint. -->
+    <div class="package pkg-qa" style="--d: 3.6s;">
+      <svg class="pkg-shape" viewBox="0 0 28 22">
+        <path d="M14 1 L27 11 L14 21 L1 11 Z" fill="currentColor" opacity="0.95"/>
+        <path d="M9 11 L13 15 L19 8" stroke="#0b0d10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="conf c1"></span><span class="conf c2"></span>
+      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    </div>
+
+    <!-- MOBILE — tall phone outline in dept-qa lavender. -->
+    <div class="package pkg-mob" style="--d: 4.8s;">
+      <svg class="pkg-shape" viewBox="0 0 22 22">
+        <rect x="4" y="1" width="14" height="20" rx="3" fill="currentColor" opacity="0.95"/>
+        <rect x="9" y="3.5" width="4" height="0.8" rx="0.4" fill="#0b0d10" opacity="0.6"/>
+        <circle cx="11" cy="18.5" r="1" fill="#0b0d10" opacity="0.5"/>
+      </svg>
+      <span class="conf c1"></span><span class="conf c2"></span>
+      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    </div>
+
+    <!-- INFRASTRUCTURE — isometric cube in dept-infrastructure amber. -->
+    <div class="package pkg-infra" style="--d: 6s;">
+      <svg class="pkg-shape" viewBox="0 0 28 22">
+        <path d="M14 1 L26 6 L14 11 L2 6 Z"  fill="currentColor" opacity="0.95"/>
+        <path d="M2 6 L2 16 L14 21 L14 11 Z" fill="currentColor" opacity="0.75"/>
+        <path d="M14 11 L14 21 L26 16 L26 6 Z" fill="currentColor" opacity="0.55"/>
+      </svg>
+      <span class="conf c1"></span><span class="conf c2"></span>
+      <span class="conf c3"></span><span class="conf c4"></span><span class="conf c5"></span>
+    </div>
+  </div>
 
   <!-- COFFEE — cup with rising steam. -->
   <svg class="coffee" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
@@ -313,33 +367,130 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* SYSTEM                                                             */
+  /* ASSEMBLY BELT                                                      */
   /* ------------------------------------------------------------------ */
 
-  .system {
+  .belt {
     position: absolute;
+    left: 5%;
+    right: 5%;
+    bottom: 16%;
+    height: 3.5rem;
+  }
+  .belt-rail {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.35rem;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--fg-muted) 55%, transparent) 12%,
+      color-mix(in srgb, var(--fg-muted) 70%, transparent) 88%,
+      transparent 100%
+    );
+    border-radius: 2px;
+  }
+  /* Little notches under the rail to suggest rollers. */
+  .belt-tick {
+    position: absolute;
+    bottom: 0;
+    width: 3px;
+    height: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--fg-subtle) 70%, transparent);
+    animation: tickShift 1.4s linear infinite;
+  }
+  .belt-tick.t1 { left: 15%; }
+  .belt-tick.t2 { left: 30%; animation-delay: -0.3s; }
+  .belt-tick.t3 { left: 45%; animation-delay: -0.6s; }
+  .belt-tick.t4 { left: 60%; animation-delay: -0.9s; }
+  .belt-tick.t5 { left: 75%; animation-delay: -1.2s; }
+  @keyframes tickShift {
+    0%   { opacity: 0.2; transform: translateY(0); }
+    50%  { opacity: 0.9; transform: translateY(-1px); }
+    100% { opacity: 0.2; transform: translateY(0); }
+  }
+
+  /* Each package travels from just off-left to ~92% right, then
+     scales + fades (the "pop"). Packages share one animation but get
+     their own --d delay so the belt is never empty. Total cycle 7.2s
+     spread across 6 packages = 1.2s gap between arrivals, well-paced
+     on the belt rail. */
+  .package {
+    position: absolute;
+    bottom: 0.6rem;
+    left: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pkgSlide 7.2s cubic-bezier(0.4, 0.1, 0.9, 0.6) infinite;
+    animation-delay: var(--d, 0s);
+  }
+  .pkg-shape {
+    width: 100%;
+    height: 100%;
+    animation: pkgBurstShape 7.2s cubic-bezier(0.4, 0.1, 0.9, 0.6) infinite;
+    animation-delay: var(--d, 0s);
+  }
+
+  /* Per-package colors read via currentColor on the SVG. */
+  .pkg-dev   { color: var(--dept-developers); }
+  .pkg-sec   { color: var(--dept-security); }
+  .pkg-obs   { color: var(--dept-internal-comms); }
+  .pkg-qa    { color: var(--dept-devops); }
+  .pkg-mob   { color: var(--dept-qa); }
+  .pkg-infra { color: var(--dept-infrastructure); }
+
+  @keyframes pkgSlide {
+    0%   { left: -10%; opacity: 0; }
+    6%   { opacity: 1; }
+    80%  { left: 92%; opacity: 1; }
+    83%  { left: 94%; opacity: 1; }
+    88%  { left: 95%; opacity: 0; }
+    100% { left: 95%; opacity: 0; }
+  }
+  @keyframes pkgBurstShape {
+    0%, 78%  { transform: scale(1); filter: none; }
+    81%      { transform: scale(1.18); filter: drop-shadow(0 0 6px currentColor); }
+    85%      { transform: scale(0.3); opacity: 0; }
+    100%     { transform: scale(0); opacity: 0; }
+  }
+
+  /* Confetti: 5 small colored squares sprayed outward at burst time.
+     Each piece has its own --dx / --dy direction vector so they fan
+     out rather than overlap. Color inherited via currentColor. */
+  .conf {
+    position: absolute;
+    top: 50%;
     left: 50%;
-    bottom: 18%;
-    width: 70%;
-    transform: translateX(-50%);
-    color: var(--fg-muted);
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 1px;
+    opacity: 0;
+    animation: confettiBurst 7.2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+    animation-delay: var(--d, 0s);
   }
-  .sys-dot {
-    color: var(--accent);
-    animation: sysDotCycle 3.6s ease-in-out infinite;
-  }
-  @keyframes sysDotCycle {
-    0%    { cx: 35px;  opacity: 1; }
-    28%   { cx: 35px;  opacity: 1; }
-    33%   { opacity: 0; }
-    34%   { cx: 110px; opacity: 0; }
-    38%   { opacity: 1; }
-    61%   { cx: 110px; opacity: 1; }
-    66%   { opacity: 0; }
-    67%   { cx: 185px; opacity: 0; }
-    71%   { opacity: 1; }
-    94%   { cx: 185px; opacity: 1; }
-    100%  { opacity: 0; }
+  .conf.c1 { --dx: -18px; --dy: -22px; --rot: 140deg; }
+  .conf.c2 { --dx:  16px; --dy: -26px; --rot: -120deg; }
+  .conf.c3 { --dx:  24px; --dy: -10px; --rot: 200deg; }
+  .conf.c4 { --dx: -22px; --dy:  -6px; --rot: -80deg; }
+  .conf.c5 { --dx:   4px; --dy: -30px; --rot: 60deg; }
+
+  @keyframes confettiBurst {
+    0%, 78%  { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+    82%      { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    100%     {
+      opacity: 0;
+      transform:
+        translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px)))
+        scale(0.6)
+        rotate(var(--rot, 180deg));
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -387,7 +538,10 @@
     .spark,
     .skill,
     .pulse-line,
-    .sys-dot,
+    .belt-tick,
+    .package,
+    .pkg-shape,
+    .conf,
     .steam path {
       animation: none !important;
     }
@@ -397,5 +551,11 @@
     .brain {
       transform: translate(-50%, -50%);
     }
+    /* Freeze 3 packages along the belt so the scene reads statically. */
+    .pkg-dev   { left: 15%; opacity: 1; }
+    .pkg-sec   { left: 40%; opacity: 1; }
+    .pkg-obs   { left: 65%; opacity: 1; }
+    .pkg-qa, .pkg-mob, .pkg-infra { opacity: 0; }
+    .conf { opacity: 0; }
   }
 </style>
