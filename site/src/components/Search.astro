@@ -7,23 +7,46 @@
  * directory doesn't exist, so the search input shows a hint that search
  * only works in production builds.
  *
- * Purely static — no server, no API, no analytics hook unless the site
- * wires one in Phase B.
+ * Two variants:
+ *   inline (default) — full-width, hint line below, used on standalone
+ *                      pages if we ever want a big search target.
+ *   nav              — compact version designed to live inside the
+ *                      primary nav bar. No hint line, narrower default
+ *                      width, results render as an absolute dropdown.
+ *
+ * Either way, only one instance can live on a page because the script
+ * looks up its elements by fixed IDs (#skillskit-search-input /
+ * #skillskit-search-results). The inline section on the homepage was
+ * removed in favour of the nav instance, so every page now uses the
+ * nav variant via Nav.astro.
  */
+
+interface Props {
+  variant?: "inline" | "nav";
+}
+
+const { variant = "inline" } = Astro.props;
+const isNav = variant === "nav";
 ---
 
-<div class="search" id="skillskit-search">
+<div class:list={["search", isNav && "search-nav"]} id="skillskit-search">
   <label class="sr-only" for="skillskit-search-input">Search skills</label>
   <input
     type="search"
     id="skillskit-search-input"
-    placeholder="Search skills... (try 'code review' or 'prometheus')"
+    placeholder={isNav ? "Search 64 skills…" : "Search skills... (try 'code review' or 'prometheus')"}
     autocomplete="off"
     spellcheck="false"
   />
-  <div class="hint subtle" id="skillskit-search-hint">
-    Powered by Pagefind · ctrl+/ to focus
-  </div>
+  {
+    !isNav ? (
+      <div class="hint subtle" id="skillskit-search-hint">
+        Powered by Pagefind · ctrl+/ to focus
+      </div>
+    ) : (
+      <div class="hint sr-only" id="skillskit-search-hint" aria-live="polite"></div>
+    )
+  }
   <ul class="results" id="skillskit-search-results" role="listbox" hidden></ul>
 </div>
 
@@ -32,6 +55,12 @@
     position: relative;
     max-width: 40rem;
     margin: 0 0 var(--space-8);
+  }
+  /* Nav variant: narrower, no bottom margin, results pop as a dropdown. */
+  .search.search-nav {
+    max-width: none;
+    margin: 0;
+    width: 100%;
   }
   input[type="search"] {
     width: 100%;
@@ -43,6 +72,16 @@
     border-radius: var(--radius-md);
     color: var(--fg);
     transition: border-color 120ms ease, background 120ms ease;
+  }
+  .search-nav input[type="search"] {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.85rem 0.5rem 2.2rem;
+    background: var(--bg-elev-2);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");
+    background-repeat: no-repeat;
+    background-position: 0.65rem center;
+    background-size: 0.95rem 0.95rem;
+    border-radius: 999px;
   }
   input[type="search"]:focus {
     outline: none;
@@ -56,12 +95,39 @@
     margin-top: var(--space-2);
     font-size: 0.8rem;
   }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
   .results {
     list-style: none;
     padding: 0;
     margin: var(--space-3) 0 0;
     display: grid;
     gap: var(--space-2);
+  }
+  /* Nav variant: float results below the input as a dropdown. */
+  .search-nav .results {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    right: 0;
+    margin: 0;
+    z-index: 20;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.45);
+    padding: var(--space-2);
+    max-height: 70vh;
+    overflow-y: auto;
   }
   .results[hidden] {
     display: none;
@@ -71,6 +137,16 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-4);
+  }
+  .search-nav .results :global(li) {
+    border: 0;
+    border-radius: var(--radius-sm, 6px);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+  }
+  .search-nav .results :global(li:hover),
+  .search-nav .results :global(li:focus-within) {
+    background: var(--bg-elev-2);
   }
   .results :global(a) {
     display: block;
@@ -83,6 +159,9 @@
     font-size: 0.95rem;
     margin-bottom: var(--space-1);
   }
+  .search-nav .results :global(.r-title) {
+    font-size: 0.88rem;
+  }
   .results :global(.r-meta) {
     font-size: 0.75rem;
     color: var(--fg-muted);
@@ -93,6 +172,10 @@
     color: var(--fg-muted);
     font-size: 0.9rem;
     line-height: 1.45;
+  }
+  .search-nav .results :global(.r-excerpt) {
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
   .results :global(.r-excerpt mark) {
     background: color-mix(in srgb, var(--accent) 25%, transparent);
@@ -125,6 +208,21 @@
         e.preventDefault();
         input.focus();
         input.select();
+      }
+    });
+
+    // Close the nav dropdown when clicking outside of it.
+    document.addEventListener("click", (e) => {
+      const wrap = document.getElementById("skillskit-search");
+      if (!wrap) return;
+      if (wrap.contains(e.target as Node)) return;
+      results.hidden = true;
+    });
+
+    // Re-show the dropdown when focusing the input if there are cached results.
+    input.addEventListener("focus", () => {
+      if (input.value.trim().length >= 2 && results.children.length > 0) {
+        results.hidden = false;
       }
     });
 

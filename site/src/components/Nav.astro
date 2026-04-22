@@ -1,4 +1,6 @@
 ---
+import Search from "@/components/Search.astro";
+
 const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -12,6 +14,11 @@ const isActive = (href: string) =>
       </span>
       <span class="brand-text">skillskit<span class="brand-dim">.dev</span></span>
     </a>
+
+    <div class="nav-search">
+      <Search variant="nav" />
+    </div>
+
     <ul class="nav-links">
       <li>
         <a href="/" class:list={{ active: isActive("/") }}>Catalog</a>
@@ -46,14 +53,16 @@ const isActive = (href: string) =>
     max-width: var(--container);
     margin: 0 auto;
     padding: var(--space-3) var(--space-4);
-    display: flex;
+    display: grid;
+    /* brand | centered search | links */
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-6);
+    gap: var(--space-4);
   }
   @media (min-width: 48rem) {
     .nav-inner {
       padding: var(--space-3) var(--space-6);
+      gap: var(--space-6);
     }
   }
   .brand {
@@ -64,6 +73,7 @@ const isActive = (href: string) =>
     gap: var(--space-2);
     font-weight: 700;
     letter-spacing: -0.01em;
+    white-space: nowrap;
   }
   .brand-mark {
     display: inline-flex;
@@ -81,6 +91,14 @@ const isActive = (href: string) =>
     color: var(--fg-muted);
     font-weight: 500;
   }
+
+  .nav-search {
+    justify-self: center;
+    width: 100%;
+    max-width: 28rem;
+    min-width: 0;
+  }
+
   .nav-links {
     list-style: none;
     padding: 0;
@@ -88,6 +106,7 @@ const isActive = (href: string) =>
     display: flex;
     gap: var(--space-6);
     font-size: 0.95rem;
+    white-space: nowrap;
   }
   .nav-links a {
     color: var(--fg-muted);
@@ -97,5 +116,31 @@ const isActive = (href: string) =>
   .nav-links a:hover,
   .nav-links a.active {
     color: var(--fg);
+  }
+
+  /* Narrow viewports: the 3-column grid gets cramped. Collapse to two
+     rows — brand+links on top, search bar full-width below — so the
+     search is still visible without a hamburger. */
+  @media (max-width: 47.99rem) {
+    .nav-inner {
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        "brand links"
+        "search search";
+      row-gap: var(--space-3);
+    }
+    .brand {
+      grid-area: brand;
+    }
+    .nav-links {
+      grid-area: links;
+      justify-self: end;
+      gap: var(--space-4);
+      font-size: 0.9rem;
+    }
+    .nav-search {
+      grid-area: search;
+      max-width: none;
+    }
   }
 </style>
