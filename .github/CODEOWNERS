@@ -1,0 +1,26 @@
+# GitHub CODEOWNERS — auto-request reviews from the listed owners when
+# matching paths change. Patterns follow gitignore syntax; later
+# patterns override earlier ones.
+#
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+
+# Default owner for everything not matched below.
+* @tahirraufkeeyu
+
+# CLI / release infrastructure
+/*.go                       @tahirraufkeeyu
+/.goreleaser.yaml           @tahirraufkeeyu
+/.github/workflows/         @tahirraufkeeyu
+/scripts/                   @tahirraufkeeyu
+/install.sh                 @tahirraufkeeyu
+
+# Site
+/site/                      @tahirraufkeeyu
+/amplify.yml                @tahirraufkeeyu
+
+# Top-level docs and policy
+/README.md                  @tahirraufkeeyu
+/CONTRIBUTING.md            @tahirraufkeeyu
+/SECURITY.md                @tahirraufkeeyu
+/CODE_OF_CONDUCT.md         @tahirraufkeeyu
+/LICENSE                    @tahirraufkeeyu

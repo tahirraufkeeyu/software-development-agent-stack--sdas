@@ -59,7 +59,7 @@ A one-table summary of what this repo is and isn't, for readers who want the ess
 | **Skill count** | 64 skills across 8 departments — 55 task skills plus 9 workflow orchestrators. Security ships scan/report and paired remediation halves (secrets, dependencies, code, containers, compliance) with two orchestrators for the scan pass and the close-out pass. |
 | **Skill format** | `SKILL.md` files with YAML frontmatter (`name`, `description`). Claude auto-triggers the right skill by matching the `description` against your natural-language request — you don't have to memorise commands. |
 | **Workflow** | Loose library plus one *workflow orchestrator* skill per department (e.g. `full-security-audit`, `release-to-prod`). Orchestrators chain the underlying skills and pass artifacts between them via `produces:` / `consumes:` frontmatter fields. Individual skills still work standalone. |
-| **Install** | One command via the `skillskit` CLI — `brew install skillskit` on macOS/Linux, `scoop install skillskit` on Windows, or `curl \| sh`. Then `skillskit install all` copies skills into `~/.claude/skills/`. `skillskit update` re-syncs later; `--host cursor\|codex\|gemini` targets other AI tools. No daemons, no runtime, no background processes. Legacy `git clone + ./install.sh` path still works. |
+| **Install** | One command via the `skillskit` CLI — `brew install skillskit` on macOS/Linux, `scoop install skillskit` on Windows, or `curl ... \| sh`. Then `skillskit install all` copies skills into `~/.claude/skills/`. `skillskit update` re-syncs later; `--host cursor\|codex\|gemini` targets other AI tools. No daemons, no runtime, no background processes. Legacy `git clone + ./install.sh` path still works. |
 | **Tooling** | Pure Markdown + a few helper shell scripts (security scans). No Node/Bun/Python runtime required. No custom browser. No server. No telemetry. |
 | **Model & tool support** | Format-agnostic. First-class fit for Claude Code (auto-discovery from `~/.claude/skills/`). Also usable in Cursor, Gemini CLI, Codex CLI, ChatGPT, or any LLM interface that can read a Markdown file. |
 | **Safety model** | Every skill declares a `safety:` level in its frontmatter — `safe`, `writes-local`, `writes-shared`, or `destructive` — so tools reading the file can prompt before risky actions. Also relies on Claude Code's permission system (`allow` / `ask` / `deny` in `.claude/settings.json`). Skills encode boundaries in their `Constraints` section. |
@@ -176,10 +176,24 @@ scoop install skillskit
 curl -fsSL https://skillskit.dev/install | sh
 ```
 
+If `skillskit.dev` is unreachable (DNS, corporate firewall, or first-launch lag), the same script lives in the repo and can be run directly from raw GitHub:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tahirraufkeeyu/software-development-agent-stack--sdas/main/scripts/install-remote.sh | sh
+```
+
+Either path resolves the latest GitHub Release, downloads the matching archive for your OS/arch, verifies its SHA256 against `checksums.txt`, and drops the binary on `PATH`.
+
 ### One-line install (Windows)
 
 ```powershell
 iwr https://skillskit.dev/install.ps1 -useb | iex
+```
+
+Fallback (raw GitHub):
+
+```powershell
+iwr https://raw.githubusercontent.com/tahirraufkeeyu/software-development-agent-stack--sdas/main/scripts/install-remote.ps1 -useb | iex
 ```
 
 ### Then install the skills
@@ -474,7 +488,7 @@ Or use the PowerShell one-liner: `iwr https://skillskit.dev/install.ps1 -useb | 
 
 ### Why are the security scripts not executable?
 
-The four helper scripts under `departments/security/.../scripts/` ship without the executable bit. `skillskit install security` sets the bit automatically on macOS/Linux. If you're installing manually, either run them with `bash run-dast.sh`, or run once:
+`skillskit install` sets the executable bit on `.sh` and `.py` helpers automatically on macOS/Linux. If you copied skills into `~/.claude/skills/` manually (e.g. `git clone` + `cp -r`), Go's `embed` strips the executable bit on `go install`-style copies — run them with `bash run-dast.sh`, or restore the bit once:
 
 ```bash
 chmod +x ~/.claude/skills/security-audit/scripts/*.sh \
@@ -483,13 +497,13 @@ chmod +x ~/.claude/skills/security-audit/scripts/*.sh \
 
 ### What if I want to uninstall?
 
-Just delete the folder:
-
 ```bash
-rm -rf ~/.claude/skills
+skillskit remove all          # remove every SDAS-installed skill
+skillskit remove <name>       # remove a specific skill
+skillskit remove developers   # remove a whole department
 ```
 
-Or remove only specific skills. Nothing else on your system is touched.
+`skillskit remove` only touches skills it installed — your other skills, custom files, and tool settings are left alone. (To wipe `~/.claude/skills/` entirely you can `rm -rf` the folder, but that also removes any non-SDAS skills you have.)
 
 ### A skill isn't triggering when I ask for it
 
@@ -519,6 +533,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - The skill template.
 - Style rules (no emojis in skills, no unexplained jargon, examples must be runnable).
 - How to add a whole new department.
+
+By participating you agree to our [Code of Conduct](CODE_OF_CONDUCT.md). Please report security issues privately per the [Security Policy](SECURITY.md) — not as a public issue.
 
 ---
 

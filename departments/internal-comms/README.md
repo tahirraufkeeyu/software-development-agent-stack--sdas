@@ -17,12 +17,12 @@ These skills are designed to:
 
 | Skill | Description | Complexity |
 |---|---|---|
-| `status-update` | Weekly team status in shipped / in flight / next / risks / asks format, sourced from PRs, commits, and the project board | Medium |
-| `incident-report` | Blameless postmortem with timeline, 5-whys, and action items, sourced from Slack, logs, and PagerDuty | High |
-| `meeting-notes` | Extract decisions, action items, and open questions from a transcript | Low |
-| `changelog` | User-facing changelog from git history in Keep a Changelog format | Medium |
-| `onboarding-guide` | Day 1 / Week 1 / Month 1 onboarding doc generated from repo metadata | Medium |
-| `announcement` | Drafts for product launches, milestones, and policy changes in configurable tone | Low |
+| [status-update](skills/status-update/SKILL.md) | Weekly team status in shipped / in flight / next / risks / asks format, sourced from PRs, commits, and the project board | Medium |
+| [incident-report](skills/incident-report/SKILL.md) | Blameless postmortem with timeline, 5-whys, and action items, sourced from Slack, logs, and PagerDuty | High |
+| [meeting-notes](skills/meeting-notes/SKILL.md) | Extract decisions, action items, and open questions from a transcript | Low |
+| [changelog](skills/changelog/SKILL.md) | User-facing changelog from git history in Keep a Changelog format | Medium |
+| [onboarding-guide](skills/onboarding-guide/SKILL.md) | Day 1 / Week 1 / Month 1 onboarding doc generated from repo metadata | Medium |
+| [announcement](skills/announcement/SKILL.md) | Drafts for product launches, milestones, and policy changes in configurable tone | Low |
 
 ## Workflow orchestrator
 

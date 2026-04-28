@@ -45,6 +45,16 @@ jobs:
           go-version: "1.22"
           cache: true
 
+      - name: Check tap token availability
+        id: tap_token
+        run: |
+          if [ -n "${{ secrets.TAP_GITHUB_TOKEN }}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::TAP_GITHUB_TOKEN secret is not set — running with --skip=publish for brew tap and scoop bucket. Binaries will still be produced and (if this is a tag run) uploaded to the GitHub Release; the brew/scoop bucket repos will not be updated. Forks and contributor-run releases typically don't have this secret. See docs/RELEASING.md."
+          fi
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -53,6 +63,7 @@ jobs:
           args: >-
             release --clean
             ${{ github.event_name == 'workflow_dispatch' && inputs.snapshot && '--snapshot' || '' }}
+            ${{ steps.tap_token.outputs.available == 'false' && '--skip=homebrew,scoop' || '' }}
         env:
           # GitHub token for creating the Release + uploading assets on
           # this repo. Automatically provided by Actions.
@@ -64,8 +75,9 @@ jobs:
           # scope scoped to those two repos; add as a repo secret named
           # TAP_GITHUB_TOKEN. Required for `brews:` and `scoops:`
           # entries in .goreleaser.yaml to succeed. If this token is
-          # missing the release will still produce binaries but won't
-          # update the brew/scoop repos; the failure is clearly logged.
+          # missing the workflow skips publishing to brew/scoop (see
+          # the "Check tap token availability" step above) — useful
+          # for forks and contributor-run releases.
           TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
 
       # Upload the dist/ directory (binaries + checksums) as a workflow

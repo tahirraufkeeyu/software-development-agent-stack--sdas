@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest a CLI feature, site feature, or workflow improvement (NOT a new skill — use the "Skill proposal" template for that).
+title: "[feat] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For requests to add a new skill (or substantially expand an existing one), please use the **Skill proposal** template instead — it asks for the right context.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that the kit doesn't help with today?
+      placeholder: |
+        I run skillskit install on a fleet of dev machines via Ansible. The interactive overwrite prompt blocks on stdin, so I have to pass `--force` every time, which silently overwrites local edits.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like the kit to do? It's fine if you don't have a fully formed design.
+      placeholder: |
+        A `--no-overwrite` flag that skips existing files instead of overwriting, so non-interactive runs are idempotent without losing local edits.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: |
+        Wrapping `skillskit install` in a script that diffs first. Works but is fragile.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing issues and didn't find a duplicate.
+          required: true

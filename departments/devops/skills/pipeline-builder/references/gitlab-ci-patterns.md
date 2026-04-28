@@ -166,7 +166,7 @@ deploy:review:
   stage: deploy
   environment:
     name: review/$CI_COMMIT_REF_SLUG
-    url: https://$CI_COMMIT_REF_SLUG.review.acme.com
+    url: https://$CI_COMMIT_REF_SLUG.review.acme.example
     on_stop: stop:review
     auto_stop_in: 1 day
   rules:
@@ -193,7 +193,7 @@ deploy:prod:
   stage: deploy
   environment:
     name: production
-    url: https://checkout.acme.com
+    url: https://checkout.acme.example
   rules:
     - if: $CI_COMMIT_TAG
       when: manual

@@ -43,7 +43,7 @@ scoop install skillskit
 skillskit install developers
 ```
 
-That copies the 8 developer skills into `~/.claude/skills/`. No package manager? Use `curl -fsSL https://skillskit.dev/install | sh` instead.
+That copies the 9 developer skills into `~/.claude/skills/`. No package manager? Use `curl -fsSL https://skillskit.dev/install | sh` instead.
 
 Clone the target repo and open Claude Code in it:
 

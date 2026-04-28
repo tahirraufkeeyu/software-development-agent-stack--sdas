@@ -593,7 +593,7 @@ const { skillSlug, skillName, skillDescription, skillSafety, skillMdPath, depart
       }
 
       // Model summary + cost
-      const model = getModelById(s.modelId) ?? getModelById("anthropic/claude-3.5-sonnet")!;
+      const model = getModelById(s.modelId) ?? getModelById("anthropic/claude-sonnet-4.5")!;
       if (modelSummary) {
         modelSummary.innerHTML = `model: <code>${model.label}</code> · <a href="/settings">change</a>`;
       }

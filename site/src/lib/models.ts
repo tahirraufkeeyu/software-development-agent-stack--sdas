@@ -35,16 +35,16 @@ export interface Model {
 }
 
 /**
- * Models available in the customizer. Claude 3.5 Sonnet is marked as the
- * recommended default — in practice it produces the most consistent
- * structured-rewrite output for this kind of task (preserving all H2
- * sections, respecting frontmatter constraints, not inventing new
- * headings). GPT-4o Mini and Llama 3.1 70B are cheaper alternatives.
+ * Models available in the customizer. Claude Sonnet 4.5 is marked as the
+ * recommended default — it produces the most consistent structured-rewrite
+ * output for this kind of task (preserving all H2 sections, respecting
+ * frontmatter constraints, not inventing new headings). Claude Haiku 4.5
+ * and Gemini 2.0 Flash are cheaper alternatives.
  */
 export const MODELS: readonly Model[] = [
   {
-    id: "anthropic/claude-3.5-sonnet",
-    label: "Claude 3.5 Sonnet",
+    id: "anthropic/claude-sonnet-4.5",
+    label: "Claude Sonnet 4.5",
     vendor: "anthropic",
     blurb: "Best structural fidelity on SKILL.md rewrites",
     inputUsdPerM: 3.0,
@@ -53,12 +53,12 @@ export const MODELS: readonly Model[] = [
     recommended: true,
   },
   {
-    id: "anthropic/claude-3.5-haiku",
-    label: "Claude 3.5 Haiku",
+    id: "anthropic/claude-haiku-4.5",
+    label: "Claude Haiku 4.5",
     vendor: "anthropic",
     blurb: "Fast, cheap; quality still solid on short skills",
-    inputUsdPerM: 0.8,
-    outputUsdPerM: 4.0,
+    inputUsdPerM: 1.0,
+    outputUsdPerM: 5.0,
     contextWindow: 200_000,
   },
   {
@@ -100,7 +100,7 @@ export const MODELS: readonly Model[] = [
 ] as const;
 
 /** The default model when a user hasn't picked one. */
-export const DEFAULT_MODEL_ID = "anthropic/claude-3.5-sonnet";
+export const DEFAULT_MODEL_ID = "anthropic/claude-sonnet-4.5";
 
 export function getModelById(id: string): Model | undefined {
   return MODELS.find((m) => m.id === id);

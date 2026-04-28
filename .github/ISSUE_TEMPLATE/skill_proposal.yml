@@ -1,0 +1,85 @@
+name: Skill proposal
+description: Propose a new skill (or a substantial rewrite of an existing one).
+title: "[skill] "
+labels: ["skill-proposal", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Skills are how the kit grows. Before filing, skim [`CONTRIBUTING.md`](../../CONTRIBUTING.md) — especially the "What makes a good skill" section. The bar is "would a senior practitioner in this role recognise this as their procedure?"
+
+  - type: dropdown
+    id: department
+    attributes:
+      label: Department
+      options:
+        - developers
+        - devops
+        - infrastructure
+        - internal-comms
+        - marketing
+        - qa
+        - sales
+        - security
+        - new department (explain in the description)
+    validations:
+      required: true
+
+  - type: input
+    id: name
+    attributes:
+      label: Skill slug
+      description: kebab-case, matches the folder name. Should read as a noun phrase or imperative.
+      placeholder: "container-rebase"
+    validations:
+      required: true
+
+  - type: textarea
+    id: trigger
+    attributes:
+      label: Trigger description
+      description: The "Use when …" sentence that goes in the skill's YAML frontmatter. This is what Claude matches on, so be specific.
+      placeholder: |
+        Use when a Docker image needs to be rebased onto a newer patched base image without changing the application layer. Rebases the image, runs the test suite, re-scans with Trivy, and produces a diff report of CVEs closed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: when_to_use
+    attributes:
+      label: When to use / when NOT to use
+      description: Two short bulleted lists. The "NOT to use" list is the more important one.
+
+  - type: textarea
+    id: procedure
+    attributes:
+      label: Outline of the procedure
+      description: 5–10 numbered steps. Doesn't have to be final — we'll iterate in the PR. Reference the actual tools and commands you'd run.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tools
+    attributes:
+      label: Required tools / MCP servers
+      placeholder: |
+        - `docker buildx`, `trivy`
+        - Filesystem MCP for reading the Dockerfile
+
+  - type: textarea
+    id: overlap
+    attributes:
+      label: Overlap with existing skills
+      description: Which existing skill is closest? Why is this a separate skill instead of an extension of the existing one?
+      placeholder: |
+        Closest: container-remediation (security). That skill closes specific CVE findings; this one is the routine "freshen the base image quarterly" cadence and runs without an originating finding.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing skills and this isn't a duplicate.
+          required: true
+        - label: I'm willing to draft the SKILL.md (or pair with a maintainer who will).
+          required: false

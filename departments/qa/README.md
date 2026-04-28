@@ -17,12 +17,12 @@ Benefits:
 
 | Skill | Description | Complexity |
 | --- | --- | --- |
-| `e2e-test-generator` | Generate Playwright/Cypress end-to-end tests from a user story using page object model and data-testid selectors. | Medium |
-| `api-test-generator` | Generate property-based API tests from OpenAPI 3.x using Schemathesis, REST-assured, or supertest. | Medium |
-| `performance-test` | Core Web Vitals and Lighthouse audit via Chrome DevTools MCP with prioritized fix suggestions. | High |
-| `accessibility-audit` | WCAG 2.1 AA audit via Chrome DevTools accessibility tree and axe-core. | High |
-| `test-data-generator` | Generate realistic, seeded test data from JSON Schema or DB schema as SQL/JSON/CSV. | Low |
-| `bug-report` | Produce a structured, reproducible bug report with enforced fields. | Low |
+| [e2e-test-generator](skills/e2e-test-generator/SKILL.md) | Generate Playwright/Cypress end-to-end tests from a user story using page object model and data-testid selectors. | Medium |
+| [api-test-generator](skills/api-test-generator/SKILL.md) | Generate property-based API tests from OpenAPI 3.x using Schemathesis, REST-assured, or supertest. | Medium |
+| [performance-test](skills/performance-test/SKILL.md) | Core Web Vitals and Lighthouse audit via Chrome DevTools MCP with prioritized fix suggestions. | High |
+| [accessibility-audit](skills/accessibility-audit/SKILL.md) | WCAG 2.1 AA audit via Chrome DevTools accessibility tree and axe-core. | High |
+| [test-data-generator](skills/test-data-generator/SKILL.md) | Generate realistic, seeded test data from JSON Schema or DB schema as SQL/JSON/CSV. | Low |
+| [bug-report](skills/bug-report/SKILL.md) | Produce a structured, reproducible bug report with enforced fields. | Low |
 
 ## Workflow orchestrator
 

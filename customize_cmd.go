@@ -26,8 +26,8 @@ environment (tech stack, scale, constraints) via an LLM. Your API key
 and form inputs stay in your browser — nothing transits our servers.
 
 Once you're done customizing, download the zip or copy the one-line
-install command — then use `+"`skillskit install` or drop the file into\n"+
-		"~/.claude/skills/<slug>/SKILL.md manually."+`
+install command — then use `+"`skillskit install`"+` or drop the file
+into ~/.claude/skills/<slug>/SKILL.md manually.
 
 This command requires a working default browser and network access;
 the customizer itself requires an OpenRouter API key (the customizer

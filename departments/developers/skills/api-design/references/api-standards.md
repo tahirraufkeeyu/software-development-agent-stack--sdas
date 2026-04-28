@@ -83,7 +83,7 @@ Every error response uses `Content-Type: application/problem+json` and this shap
 
 ```json
 {
-  "type": "https://api.acme.com/problems/insufficient-funds",
+  "type": "https://api.acme.example/problems/insufficient-funds",
   "title": "Insufficient funds",
   "status": 402,
   "detail": "The customer's default source has a balance of $0.00 against a charge of $1200.00.",

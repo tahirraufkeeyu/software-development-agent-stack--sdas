@@ -28,18 +28,18 @@ const featured = featuredSlugs
       <p class="eyebrow">Software Development Agent Stack · open source</p>
       <h1>Automate your SDLC. And everything around it.<br /><span class="hero-accent">An elite expert for every department.</span></h1>
       <p class="lede">
-        <strong>{totals.skills}</strong> industry-best-practice playbooks — code review, security audits,
-        deploy pipelines, proposals, release notes, outbound sequences — packaged as Claude Code skills
-        that trigger on plain-English requests. The exact procedure a senior engineer, security lead,
-        DevOps veteran, or marketing director would follow, shipped as a file your team can read and edit.
-        <strong>{totals.departments}</strong> departments. <strong>{totals.orchestrators}</strong>
-        end-to-end orchestrators. One install command.
+        <strong>{totals.skills}</strong> opinionated playbooks — code review, security audits,
+        deploy pipelines, proposals, release notes, outbound sequences — packaged as Claude Code
+        skills that trigger on plain-English requests. Each one captures a procedure a senior
+        practitioner in that role would follow, shipped as a Markdown file your team can read,
+        edit, and override. <strong>{totals.departments}</strong> departments.
+        <strong>{totals.orchestrators}</strong> end-to-end orchestrators. One install command.
       </p>
 
       <div class="hero-install">
         <div class="hero-install-copy">
-          <code>brew install skillskit &amp;&amp; skillskit install all</code>
-          <button class="hero-copy-btn" type="button" data-copy="brew tap tahirraufkeeyu/tap && brew install skillskit && skillskit install all" aria-label="Copy install command">
+          <code>brew install tahirraufkeeyu/tap/skillskit &amp;&amp; skillskit install all</code>
+          <button class="hero-copy-btn" type="button" data-copy="brew install tahirraufkeeyu/tap/skillskit && skillskit install all" aria-label="Copy install command">
             copy
           </button>
         </div>
@@ -157,6 +157,9 @@ skillskit install all`}</code><button class="install-copy" type="button" data-co
 skillskit install all`}</code><button class="install-copy" type="button" data-copy="curl -fsSL https://skillskit.dev/install | sh && skillskit install all" aria-label="Copy">copy</button></pre>
         <p class="install-foot subtle">
           CI runners, containers, any Unix without a package manager.
+          If <code>skillskit.dev</code> is unreachable, swap the URL for
+          <code>raw.githubusercontent.com/tahirraufkeeyu/software-development-agent-stack--sdas/main/scripts/install-remote.sh</code>
+          — same script.
         </p>
       </div>
 
@@ -175,6 +178,8 @@ skillskit install all`}</code><button class="install-copy" type="button" data-co
 skillskit install all`}</code><button class="install-copy" type="button" data-copy="iwr https://skillskit.dev/install.ps1 -useb | iex; skillskit install all" aria-label="Copy">copy</button></pre>
         <p class="install-foot subtle">
           Open a new terminal after install so <code>PATH</code> picks up.
+          Behind a firewall? Use <code>raw.githubusercontent.com/tahirraufkeeyu/software-development-agent-stack--sdas/main/scripts/install-remote.ps1</code>
+          — same script, served from GitHub.
         </p>
       </div>
     </div>
@@ -217,8 +222,8 @@ skillskit --help                 # full command list`}</code></pre>
           <li>
             <strong>go install</strong> (requires Go 1.22+) —
             <code>go install github.com/tahirraufkeeyu/software-development-agent-stack--sdas@latest</code>
-            produces a binary without the embedded skills; you'll need to install skills from
-            source. Use this only if you're contributing to the CLI.
+            builds and installs the same binary GoReleaser ships, with all skills embedded.
+            Use this if you want the latest <code>main</code> rather than a tagged release.
           </li>
           <li>
             <strong>Git clone + install.sh</strong> (legacy) — the shell-script installer from the

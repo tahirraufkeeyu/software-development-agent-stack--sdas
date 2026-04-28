@@ -129,7 +129,7 @@ jobs:
   deploy:
     environment:
       name: production
-      url: https://checkout.acme.com
+      url: https://checkout.acme.example
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -284,7 +284,7 @@ jobs:
   deploy-prod:
     environment:
       name: production
-      url: https://checkout.acme.com
+      url: https://checkout.acme.example
 ```
 
 Prod deploys now require approval from the SRE team and can only run from protected branches.

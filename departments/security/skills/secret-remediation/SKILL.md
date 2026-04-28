@@ -257,7 +257,7 @@ Report excerpt:
 ```markdown
 ### sec-007 — false positive: SRI hash
 - Classification: false-positive (Subresource Integrity hash).
-- Evidence: value appears only in `integrity="…"` attribute of a `<link>` tag referencing `https://cdn.acme.com/vendor.css`. No auth-related usage.
+- Evidence: value appears only in `integrity="…"` attribute of a `<link>` tag referencing `https://cdn.acme.example/vendor.css`. No auth-related usage.
 - Action: path+value-scoped allowlist entry added to `.gitleaksignore`. No rotation required.
 - Decision by: @tahir, 2026-04-20.
 ```
