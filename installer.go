@@ -101,14 +101,11 @@ func removeInstalledSkill(slug, targetDir string, dryRun bool, stdout io.Writer)
 }
 
 // copyEmbedTree walks srcDir inside embeddedDepartments and recreates
-// it verbatim at destDir on the real filesystem. Files keep their
-// content and default 0644 permissions; directories get 0755.
-//
-// Embed preserves neither file modes nor executable bits (Go's embed
-// doesn't have the concept), so any .sh helper scripts come out
-// non-executable. Callers that need execute bits set — `skillskit
-// install` doesn't; the user runs them via `bash script.sh` if
-// needed — would chmod explicitly.
+// it verbatim at destDir on the real filesystem. Directories get 0755.
+// Files get 0644, except known executable script extensions (.sh, .py)
+// which get 0755 — Go's embed strips the executable bit, so we restore
+// it here so users can invoke helper scripts directly without a manual
+// chmod step.
 func copyEmbedTree(embedDir, destDir string) error {
 	return fs.WalkDir(embeddedDepartments, embedDir, func(p string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -134,7 +131,12 @@ func copyEmbedFile(embedPath, destPath string) error {
 	if err := os.MkdirAll(filepath.Dir(destPath), 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(destPath, data, 0o644)
+	mode := os.FileMode(0o644)
+	switch strings.ToLower(filepath.Ext(destPath)) {
+	case ".sh", ".py":
+		mode = 0o755
+	}
+	return os.WriteFile(destPath, data, mode)
 }
 
 // promptYesNo asks the user a yes/no question on the interactive

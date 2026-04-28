@@ -8,12 +8,12 @@ These skills are designed to be chained. The output of `lead-research` is the in
 
 | Skill | Description | Complexity |
 |---|---|---|
-| `lead-research` | One-page account brief: firmographics, tech stack, trigger events, 3 outreach angles | Medium |
-| `competitive-analysis` | Competitor battlecard with positioning, pricing, objection handling, landmines | Medium |
-| `proposal-writer` | Tailored proposal tied to discovery notes, with scope, pricing, case studies | High |
-| `email-outreach` | 3-step cold and 4-step warm sequences grounded in the research brief | Low |
-| `rfp-responder` | RFP requirement tree, gap analysis, section-by-section compliant response | High |
-| `meeting-prep` | Pre-meeting brief with attendee research, agenda, talking points, objections | Medium |
+| [lead-research](skills/lead-research/SKILL.md) | One-page account brief: firmographics, tech stack, trigger events, 3 outreach angles | Medium |
+| [competitive-analysis](skills/competitive-analysis/SKILL.md) | Competitor battlecard with positioning, pricing, objection handling, landmines | Medium |
+| [proposal-writer](skills/proposal-writer/SKILL.md) | Tailored proposal tied to discovery notes, with scope, pricing, case studies | High |
+| [email-outreach](skills/email-outreach/SKILL.md) | 3-step cold and 4-step warm sequences grounded in the research brief | Low |
+| [rfp-responder](skills/rfp-responder/SKILL.md) | RFP requirement tree, gap analysis, section-by-section compliant response | High |
+| [meeting-prep](skills/meeting-prep/SKILL.md) | Pre-meeting brief with attendee research, agenda, talking points, objections | Medium |
 
 ## Workflow orchestrator
 

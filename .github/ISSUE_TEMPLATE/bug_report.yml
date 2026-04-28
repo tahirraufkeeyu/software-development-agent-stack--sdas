@@ -1,0 +1,80 @@
+name: Bug report
+description: Something in the kit, the CLI, or the site is broken.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please don't include credentials, customer data, or anything else sensitive.
+
+  - type: input
+    id: skillskit_version
+    attributes:
+      label: skillskit version
+      description: Output of `skillskit version`. If the bug is in the website only, write "site".
+      placeholder: "v0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / shell
+      placeholder: "macOS 14.4, zsh 5.9 — or Ubuntu 22.04, bash 5.2 — or Windows 11, PowerShell 7.4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI (skillskit install / remove / update / search / list / customize)
+        - Skill content (something a SKILL.md says is wrong, contradictory, or out of date)
+        - Install script (curl|sh / iwr|iex)
+        - Website (skillskit.dev)
+        - Repo build / release pipeline
+        - Other / unsure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: What did you run or click, and what did you expect to happen?
+      placeholder: |
+        I ran `skillskit install developers --host cursor` and expected the skills to land in `./.cursor/rules/`. Instead the command exited 0 but the directory is empty.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Numbered list, please. Include the exact commands.
+      placeholder: |
+        1. `brew install tahirraufkeeyu/tap/skillskit`
+        2. `cd /tmp && mkdir test && cd test`
+        3. `skillskit install developers --host cursor`
+        4. `ls .cursor/rules/`  ← empty
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / output
+      description: Paste the full output. Use a code block. Redact anything sensitive.
+      render: shell
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing issues and didn't find a duplicate.
+          required: true
+        - label: I'm running the latest release (`skillskit version` matches the latest release tag).
+          required: false

@@ -101,6 +101,8 @@ Skipped if the chart deployment uses digest pinning and the caller does not want
 
 Invoke `deploy` with `strategy: canary` and the caller-supplied SLO and steps. Each step runs the SLO query configured inside `deploy`; a breach triggers `abort + undo` locally, and the orchestrator catches the non-zero exit.
 
+> `./scripts/check-slo.sh` is a project-side script (not shipped by this skill); see [`deploy`](../deploy/SKILL.md) section 7 for the query contract it must satisfy.
+
 ```bash
 for step in "${CANARY_STEPS[@]}"; do
   START=$(date -u +%FT%TZ)

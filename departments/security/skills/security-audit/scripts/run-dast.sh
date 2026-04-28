@@ -70,7 +70,7 @@ CRIT=0
 # ---------------------------------------------------------------------------
 if have docker; then
     log "ZAP baseline -> $TARGET_URL"
-    ZAP_CMD=(docker run --rm -v "$OUT_DIR":/zap/wrk/:rw -t owasp/zap2docker-stable
+    ZAP_CMD=(docker run --rm -v "$OUT_DIR":/zap/wrk/:rw -t zaproxy/zap-stable
              zap-baseline.py -t "$TARGET_URL"
              -J "$(basename "$ZAP_OUT")"
              -r "$(basename "$ZAP_HTML")"

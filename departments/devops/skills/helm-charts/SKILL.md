@@ -20,7 +20,7 @@ Do not use this skill when the answer is Kustomize + overlays (simpler for small
 - `app_version` — app semver (`1.4.2`). Chart version (`0.x.y`) is independent and tracks chart changes.
 - `image` — default repository, e.g. `ghcr.io/acme/checkout-api`.
 - `port` — container port and service port (e.g. `8080`).
-- `ingress_host` — optional, e.g. `checkout.staging.acme.com`.
+- `ingress_host` — optional, e.g. `checkout.staging.acme.example`.
 - `enable_hpa` — bool, default `true` for anything that handles user traffic.
 - `secrets` — list of keys the app reads from env; the chart emits `ExternalSecret` or reads from a named `Secret`.
 - `configmap` — map of non-secret config keys.
@@ -80,7 +80,7 @@ kubeVersion: ">=1.28.0-0"
 home: https://github.com/acme/checkout-api
 maintainers:
   - name: platform-team
-    email: platform@acme.com
+    email: platform@acme.example
 ```
 
 ### 3. `values.yaml` with defaults that pass prod review
@@ -363,7 +363,7 @@ ct install --chart-dirs charts --target-branch main
 
 ### Example 1 — Stateless HTTP service
 
-Input: `chart_name=checkout-api`, `image=ghcr.io/acme/checkout-api`, `port=8080`, `ingress_host=checkout.acme.com`, `enable_hpa=true`, `secrets=["db", "stripe"]`, `configmap={LOG_LEVEL: info}`.
+Input: `chart_name=checkout-api`, `image=ghcr.io/acme/checkout-api`, `port=8080`, `ingress_host=checkout.acme.example`, `enable_hpa=true`, `secrets=["db", "stripe"]`, `configmap={LOG_LEVEL: info}`.
 
 Generates the full chart above; `values-prod.yaml` overrides: `replicaCount: 3`, HPA `min=3, max=20`, `ingress.enabled=true` with the given host and cert-manager annotations, `resources.requests.cpu: 500m`.
 

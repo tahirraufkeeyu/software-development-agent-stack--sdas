@@ -47,6 +47,13 @@ Do not use for local `kubectl apply` against a dev cluster or for one-off hotfix
 - GitHub CLI (`gh`) when the deploy is gated by a protected environment.
 - Optional: Argo Rollouts (`kubectl argo rollouts`) if the project uses it.
 
+## Project scripts you supply
+
+The procedure below shells out to two project-side scripts. They're not shipped by this skill — drop them in your repo at `./scripts/` (or adjust the paths). Section 7 below documents the exact query contract `check-slo.sh` must satisfy; `smoke.sh` is a thin wrapper around your service's existing health/smoke endpoint.
+
+- `./scripts/smoke.sh <base-url>` — exits 0 when the service is healthy at that URL, non-zero otherwise.
+- `./scripts/check-slo.sh <service> <step-percent>` — exits 0 when error-rate and p95 latency are within SLO for the configured window, non-zero otherwise.
+
 ## Procedure
 
 ### 0. Detect the stack
@@ -121,7 +128,7 @@ helm -n staging upgrade --install "$SERVICE" "$CHART_PATH" \
   --atomic --timeout 5m --wait
 
 kubectl -n staging rollout status deploy/"$SERVICE" --timeout=5m
-./scripts/smoke.sh https://staging.${SERVICE}.internal
+./scripts/smoke.sh "https://staging.${SERVICE}.example.com"
 ```
 
 ### 5. Request prod approval

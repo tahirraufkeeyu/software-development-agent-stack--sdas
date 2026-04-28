@@ -17,12 +17,12 @@ Platform engineers sit between application teams and cloud infrastructure. The w
 
 | Skill | Description | Complexity |
 |-------|-------------|------------|
-| `deploy` | Canary/blue-green rollout with health gates and automatic rollback on SLO breach. | High |
-| `pipeline-builder` | Generate CI/CD YAML for GitHub Actions, Azure DevOps, or GitLab CI based on stack. | Medium |
-| `iac-generator` | Produce Terraform HCL, Bicep, or Pulumi for AKS/EKS, RDS, S3, VNet/VPC, IAM. | High |
-| `helm-charts` | Scaffold and validate a Helm chart (Chart.yaml, values, templates, lint, diff). | Medium |
-| `incident-response` | Triage, communicate, mitigate, and draft a blameless postmortem. | High |
-| `cost-optimizer` | Analyze billing exports, flag idle/over-provisioned resources, quantify savings. | Medium |
+| [deploy](skills/deploy/SKILL.md) | Canary/blue-green rollout with health gates and automatic rollback on SLO breach. | High |
+| [pipeline-builder](skills/pipeline-builder/SKILL.md) | Generate CI/CD YAML for GitHub Actions, Azure DevOps, or GitLab CI based on stack. | Medium |
+| [iac-generator](skills/iac-generator/SKILL.md) | Produce Terraform HCL, Bicep, or Pulumi for AKS/EKS, RDS, S3, VNet/VPC, IAM. | High |
+| [helm-charts](skills/helm-charts/SKILL.md) | Scaffold and validate a Helm chart (Chart.yaml, values, templates, lint, diff). | Medium |
+| [incident-response](skills/incident-response/SKILL.md) | Triage, communicate, mitigate, and draft a blameless postmortem. | High |
+| [cost-optimizer](skills/cost-optimizer/SKILL.md) | Analyze billing exports, flag idle/over-provisioned resources, quantify savings. | Medium |
 
 ## Workflow orchestrator
 

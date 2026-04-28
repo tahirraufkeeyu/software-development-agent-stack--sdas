@@ -37,7 +37,7 @@ Do not use this for a single-file review (use `code-review`) or for runtime inci
 
 - Repository root (the working directory; default cwd).
 - Optional: a released/candidate image reference (`ghcr.io/acme/api:1.4.0`) to scan instead of building from `Dockerfile`.
-- Optional: a target environment URL if DAST should hit a staging deploy (`https://staging.acme.io`).
+- Optional: a target environment URL if DAST should hit a staging deploy (`https://staging.acme.example`).
 - Optional: a severity floor for the final report (defaults to `medium`; findings below are listed but not counted toward overall risk).
 
 ## Outputs
@@ -82,7 +82,7 @@ Do not use this for a single-file review (use `code-review`) or for runtime inci
 
 ### Example 1 — clean sweep (Node.js/Express API)
 
-Repo: `acme-api` (Express + TypeScript, Dockerfile present, staging at `https://staging.acme.io`).
+Repo: `acme-api` (Express + TypeScript, Dockerfile present, staging at `https://staging.acme.example`).
 
 Step 2 — secret-scanner:
 
@@ -164,7 +164,7 @@ WARN leaks found: 1
     "Severity": "HIGH",
     "File": "scripts/bootstrap.sh",
     "Commit": "9f2c1ab",
-    "Author": "alice@acme.io",
+    "Author": "alice@acme.example",
     "Date": "2025-11-03T14:12:55Z",
     "Match": "AKIA****************",
     "Entropy": 4.2
@@ -182,7 +182,7 @@ Overall Risk: Critical — scan halted at step 1.
 
 A live AWS access token was found in git history:
   File:   scripts/bootstrap.sh
-  Commit: 9f2c1ab (alice@acme.io, 2025-11-03)
+  Commit: 9f2c1ab (alice@acme.example, 2025-11-03)
   Prefix: AKIA****************
 
 ## Required Remediation (in order)

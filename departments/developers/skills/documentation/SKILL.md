@@ -183,7 +183,7 @@ pnpm exec inv-cli invoices list --limit 5
 
 | Variable | Purpose | Default | Required |
 | --- | --- | --- | --- |
-| `INV_API_URL` | Base URL of the Invoices API | `https://api.acme.com` | no |
+| `INV_API_URL` | Base URL of the Invoices API | `https://api.acme.example` | no |
 | `INV_API_TOKEN` | Bearer token | — | yes |
 | `INV_TIMEOUT_MS` | Per-request timeout | `10000` | no |
 

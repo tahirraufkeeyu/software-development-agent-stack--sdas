@@ -322,7 +322,8 @@ You installed SDAS, triggered one skill, and shipped a working endpoint. Everyth
 - If you keep hitting the same wrong skill, the description of the intended skill may need tightening. Edit it and restart Claude Code.
 
 **"I want to uninstall."**
-- `rm -rf ~/.claude/skills/` — removes all skills. SDAS does not touch anything else on your machine.
+- `skillskit remove all` — removes only the skills SDAS installed; leaves your other skills, settings, and tools alone.
+- Or remove a single skill: `skillskit remove <name>`.
 
 ---
 

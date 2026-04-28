@@ -48,7 +48,7 @@ All paths relative to `$OUT_DIR`:
 
 - `bash` >= 4, `jq` >= 1.6, `docker` (for ZAP baseline), `python3`.
 - Scanners invoked by the scripts: `semgrep`, `sonar-scanner` (optional),
-  `owasp/zap2docker-stable` image, `nuclei`, `wapiti` (optional),
+  `zaproxy/zap-stable` image, `nuclei`, `wapiti` (optional),
   `osv-scanner`, `npm`, `pip-audit`, `govulncheck`, `cargo-audit`.
 - See `references/severity-thresholds.md` for SLA mapping and
   `references/owasp-top10-checks.md` for the OWASP A01-A10 check set.
